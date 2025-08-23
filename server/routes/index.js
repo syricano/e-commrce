@@ -33,6 +33,7 @@ import authRouter from './authRouter.js';
 
 
 export const routeMap = [
+  { path: '/api/profiles', handler: profileRouter },
   { path: '/api/auth', handler: authRouter },
   { path: '/api/users', handler: userRouter },
   { path: '/api/addresses', handler: addressRouter },
@@ -66,3 +67,5 @@ export const routeMap = [
   { path: '/api/review-votes', handler: reviewVoteRouter },
   { path: '/api/audit-logs', handler: auditLogRouter }
 ];
+
+import profileRouter from './profileRouter.js';

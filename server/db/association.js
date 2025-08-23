@@ -2,6 +2,7 @@
 // Wire up all Sequelize model associations. Call `applyAssociations()` after all models are initialized.
 // ESM imports
 import User from '../models/User.js';
+import Profile from '../models/Profile.js';
 import Address from '../models/Address.js';
 import Store from '../models/Store.js';
 import StoreUser from '../models/StoreUser.js';
@@ -34,6 +35,10 @@ import ReviewVote from '../models/ReviewVote.js';
 import AuditLog from '../models/AuditLog.js';
 
 export function applyAssociations() {
+  // User ↔ Profile (1:1)
+  User.hasOne(Profile, { foreignKey: 'userId', as: 'profile' });
+  Profile.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
   // User ↔ Address
   User.hasMany(Address, { foreignKey: 'user_id', as: 'addresses', onDelete: 'CASCADE' });
   Address.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
