@@ -33,7 +33,7 @@ const ImageSlider = () => {
     <section className="py-8 bg-[var(--main-bg-color)] text-[var(--main-text-color)]">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl font-serif text-center mb-6 text-[var(--bc)]">
-          A Glimpse of Our Atmosphere
+          Find the bes deals
         </h2>
 
         {loading ? (

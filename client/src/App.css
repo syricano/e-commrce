@@ -1,130 +1,58 @@
 /* ================================
-   UNIVERSAL RESET & BASE
-================================= */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-  height: 100vh;
-  width:100vw
-}
+   0) Base reset
+================================ */
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Inter',system-ui,Arial,sans-serif}
 
 /* ================================
-   LIGHT THEME COLORS
-================================= */
-[data-theme="light"] {
-  --p: #d97706;
-  --pc: #ffffff;
+   1) Dynamic theme tokens
+   Used by body and components
+================================ */
+:root{
+  --p:#d97706;  /* primary */
+  --pc:#ffffff;
 
-  --b1: #FFF9E5;          /* Main background */
-  --bc: #004030;          /* Main text */
+  --b1:#FFF9E5; /* bg */
+  --bc:#004030; /* text */
 
-  --n: #DCD0A8;           /* Navbar background */
-  --nc: #004030;          /* Navbar text */
+  --n:#DCD0A8;  /* navbar bg */
+  --nc:#004030; /* navbar text */
 
-  --a: #004030;           /* Footer background */
-  --ac: #FFF9E5;          /* Footer text */
+  --a:#004030;  /* footer bg */
+  --ac:#FFF9E5; /* footer text */
 }
+[data-theme="dark"]{
+  --p:#d97706;
+  --pc:#ffffff;
+
+  --b1:#000000;
+  --bc:#FFF9E5;
+
+  --n:#004030;
+  --nc:#FFF9E5;
+
+  --a:#DCD0A8;
+  --ac:#004030;
+}
+
+/* Apply dynamic colors */
+body{background:var(--b1);color:var(--bc)}
+main{min-height:60vh}
+
 /* ================================
-   DARK THEME COLORS
-================================= */
-[data-theme="dark"] {
-  --p: #d97706;           /* Button primary */
-  --pc: #ffffff;
+   2) Navbar sizing and cleanup
+================================ */
+.navbar{min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;border-bottom:1px solid #e5e7eb;background-color:var(--b1);color:var(--bc)}
+.navbar-start,.navbar-end{display:flex;align-items:center;gap:.75rem}
+.menu.menu-horizontal>li>a{padding:.5rem .75rem;border-radius:.375rem}
+.menu.menu-horizontal>li>a:hover{background-color:rgba(0,0,0,.05)}
 
-  --b1: #000000;          /* Main gray background */
-  --bc: #FFF9E5;          /* Main text */
+/* Controls sizing to prevent huge icons */
+.btn-circle,.theme-toggle-shell{width:40px;height:40px;min-width:40px;min-height:40px;display:flex;align-items:center;justify-content:center;padding:0}
+.navbar .btn svg,.theme-toggle-shell svg{width:18px!important;height:18px!important}
 
-  --n: #004030;           /* Navbar */
-  --nc: #FFF9E5;
-
-  --a: #DCD0A8;           /* Footer */
-  --ac: #004030;
-}
-
-/* ================================
-   SECTION HELPERS (Optional)
-================================= */
-/* ===== Navbar Styling Fix ===== */
-.navbar {
-  background-color: var(--b1, #ffffff); /* DaisyUI base background */
-  color: var(--bc, #111827); /* text color */
-  min-height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1rem;
-  border-bottom: 1px solid #e5e7eb; /* subtle border */
-}
-
-.navbar-start,
-.navbar-end {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.navbar a,
-.navbar button {
-  font-weight: 500;
-  font-size: 0.95rem;
-}
-
-.menu.menu-horizontal > li > a {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  transition: background-color 0.2s;
-}
-
-.menu.menu-horizontal > li > a:hover {
-  background-color: rgba(0,0,0,0.05);
-}
-
-/* ThemeToggle, Cart, Profile sizing */
-.navbar .btn-circle,
-.theme-toggle-shell {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-
-.navbar .btn svg,
-.theme-toggle-shell svg {
-  width: 18px !important;
-  height: 18px !important;
-}
-
-/* Categories row (mobile) */
-.navbar-categories {
-  background-color: var(--b1, #ffffff);
-  border-top: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0.5rem;
-  overflow-x: auto;
-}
-
-.navbar-categories a {
-  white-space: nowrap;
-  font-size: 0.9rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.375rem;
-}
-.navbar-categories a:hover {
-  background-color: rgba(0,0,0,0.05);
-}
+/* Mobile categories strip */
+.navbar-categories{background:var(--b1);border-top:1px solid #e5e7eb;display:flex;justify-content:center;gap:.5rem;padding:.25rem .5rem;overflow-x:auto}
+.navbar-categories a{white-space:nowrap;font-size:.9rem;padding:.25rem .5rem;border-radius:.375rem}
+.navbar-categories a:hover{background-color:rgba(0,0,0,.05)}

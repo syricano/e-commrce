@@ -1,14 +1,10 @@
-import { createContext, useContext, useMemo } from 'react';
-import { useAuth } from './AuthProvider.jsx';
+import { createContext, useContext, useMemo, useState } from "react";
 
-const AdminContext = createContext(null);
+const AdminContext = createContext({});
 
-export function AdminProvider({ children }) {
-  const { role, isAuthenticated } = useAuth();
-  const isAdmin = isAuthenticated && role === 'admin';
-
-  const value = useMemo(() => ({ isAdmin }), [isAdmin]);
-
+export default function AdminProvider({ children }) {
+  const [state] = useState({});
+  const value = useMemo(() => state, [state]);
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
 }
 

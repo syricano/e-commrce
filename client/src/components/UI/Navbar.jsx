@@ -1,72 +1,129 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router";
-import ThemeToggle from "./ThemeToggle.jsx";
-import LangSwitcher from "./LangSwitcher.jsx";
+import { Link } from "react-router";
+import LangSwitcher from "@/components/UI/LangSwitcher.jsx";
+import CartButton from "@/components/UI/CartButton.jsx";
+import ProfileButton from "@/components/UI/ProfileButton.jsx";
+import ThemeToggle from "@/components/UI/ThemeToggle.jsx";
+import useIsMobile from "@/hooks/useIsMobile";
+import { useLang } from "@/context/LangProvider";
+import { useAuth } from "@/context";
 
-const labels = {
-  ar: { home: "الرئيسية", offers: "العروض", stores: "المتاجر", categories: "الأقسام", search: "بحث..." },
-  en: { home: "Home", offers: "Offers", stores: "Stores", categories: "Categories", search: "Search..." },
-};
-const items = [
-  { to: "/", key: "home" },
-  { to: "/offers", key: "offers" },
-  { to: "/stores", key: "stores" },
-  { to: "/categories", key: "categories" },
-];
-
-export default function Navbar() {
-  const { pathname } = useLocation();
-  const [open, setOpen] = useState(false);
-  const [lang, setLang] = useState(() => localStorage.getItem("lang") || "ar");
-  useEffect(() => {
-    const onChange = () => setLang(localStorage.getItem("lang") || "ar");
-    window.addEventListener("langchange", onChange);
-    return () => window.removeEventListener("langchange", onChange);
-  }, []);
-  const Menu = useMemo(() => (
-    <ul className="menu menu-sm lg:menu-horizontal gap-1 lg:gap-2">
-      {items.map((it) => (
-        <li key={it.to} onClick={() => setOpen(false)}>
-          <NavLink to={it.to} className={({ isActive }) => (isActive || pathname === it.to ? "nav-item nav-item-active" : "nav-item")}>
-            {labels[lang][it.key]}
-          </NavLink>
-        </li>
-      ))}
-    </ul>
-  ), [pathname, lang]);
-
-  const rtl = lang === "ar";
+const NavbarLinks = () => {
+  const { t } = useLang();
   return (
-    <div className="nav-shell">
-      <nav className="nav-row" dir={rtl ? "rtl" : "ltr"} lang={lang}>
-        <div className="flex items-center gap-2">
-          <button aria-label="menu" className="btn btn-ghost btn-square lg:hidden" onClick={() => setOpen(v => !v)}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-          </button>
-          <Link to="/" className="flex items-center gap-2 px-1">
-            <span className="inline-grid place-items-center size-9 rounded-2xl bg-primary text-primary-content font-bold">س</span>
-            <div className="font-extrabold text-lg leading-tight">السوق الحر</div>
-          </Link>
+    <ul className="menu menu-horizontal px-2">
+      <li><Link to="/">{t("home")}</Link></li>
+      <li><Link to="/offers">{t("offers")}</Link></li>
+      <li><Link to="/shops">{t("stores")}</Link></li>
+      <li tabIndex={0}>
+        <details>
+          <summary>{t("categories")}</summary>
+          <ul className="p-2 bg-base-100">
+            <li><Link to="/c/electronics">{t("electronics")}</Link></li>
+            <li><Link to="/c/computers">{t("computers")}</Link></li>
+            <li><Link to="/c/books">{t("books")}</Link></li>
+            <li><Link to="/c/games">{t("games")}</Link></li>
+            <li><Link to="/c/fashion">{t("fashion")}</Link></li>
+          </ul>
+        </details>
+      </li>
+    </ul>
+  );
+};
+
+const AuthButtons = () => {
+  const { isAuthenticated, logout } = useAuth?.() || {};
+  const { t, lang } = useLang();
+
+  if (isAuthenticated) {
+    return (
+      <button onClick={logout} className="btn btn-sm">
+        {t("logout")}
+      </button>
+    );
+  }
+  // keep RTL/LTR spacing correct
+  return (
+    <div className="flex items-center gap-1">
+      <Link to="/signin" className="btn btn-sm">{t("signin")}</Link>
+      <Link to="/signup" className="btn btn-sm btn-primary">{t("signup")}</Link>
+    </div>
+  );
+};
+
+const DesktopBar = () => {
+  const { t } = useLang();
+  return (
+    <div className="border-b">
+      <div className="navbar max-w-screen-2xl mx-auto px-4">
+        <div className="navbar-start gap-2">
+          <Link to="/" className="btn btn-ghost text-xl">{t("brand")}</Link>
+          <NavbarLinks />
         </div>
-        <div className="hidden lg:block">{Menu}</div>
-        <div className="flex items-center gap-1 lg:gap-2">
-          <form className="hidden md:flex items-center gap-2" role="search" onSubmit={(e) => e.preventDefault()}>
-            <label className="input input-bordered input-sm rounded-xl flex items-center gap-2 w-56" dir="ltr">
-              <input type="search" placeholder={labels[lang].search} className="grow" />
-              <svg xmlns="http://www.w3.org/2000/svg" className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeWidth="2" d="m21 21-4.3-4.3M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
-              </svg>
-            </label>
-          </form>
+        <div className="navbar-end gap-2">
           <LangSwitcher />
           <ThemeToggle />
+          <CartButton />
+          <ProfileButton />
+          <AuthButtons />
         </div>
-      </nav>
-      {open && (
-        <div className="lg:hidden border-t border-base-200 bg-base-100" dir={rtl ? "rtl" : "ltr"}>
-          <div className="px-4 py-2 max-w-7xl mx-auto">{Menu}</div>
-        </div>
-      )}
+      </div>
     </div>
+  );
+};
+
+const MobileBar = () => {
+  const { t } = useLang();
+  return (
+    <div className="border-b">
+      {/* Row 1 */}
+      <div className="navbar max-w-screen-2xl mx-auto px-4">
+        <div className="navbar-start">
+          <Link to="/" className="btn btn-ghost text-lg p-0">{t("brand")}</Link>
+        </div>
+        <div className="navbar-end gap-2">
+          <CartButton />
+          <ProfileButton />
+        </div>
+      </div>
+      {/* Row 2 */}
+      <div className="max-w-screen-2xl mx-auto px-4 pb-2">
+        <div className="flex items-center justify-between">
+          <div className="dropdown">
+            <button tabIndex={0} className="btn btn-ghost btn-sm" aria-label="menu">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              {t("menu")}
+            </button>
+            <ul tabIndex={0} className="menu dropdown-content mt-2 w-64 bg-base-100 p-2 shadow rounded-box z-50">
+              <li><Link to="/">{t("home")}</Link></li>
+              <li><Link to="/offers">{t("offers")}</Link></li>
+              <li><Link to="/shops">{t("stores")}</Link></li>
+            </ul>
+          </div>
+          <div className="flex items-center gap-2">
+            <LangSwitcher />
+            <ThemeToggle />
+          </div>
+        </div>
+        {/* Row 3 */}
+        <div className="mt-2 overflow-x-auto">
+          <ul className="menu menu-horizontal w-max mx-auto gap-1">
+            <li><Link className="btn btn-sm btn-ghost" to="/c/electronics">{t("electronics")}</Link></li>
+            <li><Link className="btn btn-sm btn-ghost" to="/c/computers">{t("computers")}</Link></li>
+            <li><Link className="btn btn-sm btn-ghost" to="/c/books">{t("books")}</Link></li>
+            <li><Link className="btn btn-sm btn-ghost" to="/c/games">{t("games")}</Link></li>
+            <li><Link className="btn btn-sm btn-ghost" to="/c/fashion">{t("fashion")}</Link></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default function Navbar() {
+  const isMobile = useIsMobile(1024);
+  return (
+    <nav className="w-full bg-base-100 sticky top-0 z-40">
+      {isMobile ? <MobileBar /> : <DesktopBar />}
+    </nav>
   );
 }

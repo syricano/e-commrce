@@ -1,12 +1,10 @@
-import { createContext, useContext, useMemo } from 'react';
-import { useAuth } from './AuthProvider.jsx';
+import { createContext, useContext, useMemo, useState } from "react";
 
-const SellerContext = createContext(null);
+const SellerContext = createContext({});
 
-export function SellerProvider({ children }) {
-  const { role, isAuthenticated } = useAuth();
-  const isSeller = isAuthenticated && role === 'seller';
-  const value = useMemo(() => ({ isSeller }), [isSeller]);
+export default function SellerProvider({ children }) {
+  const [state] = useState({});
+  const value = useMemo(() => state, [state]);
   return <SellerContext.Provider value={value}>{children}</SellerContext.Provider>;
 }
 

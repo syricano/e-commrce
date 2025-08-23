@@ -1,22 +1,19 @@
-import { useEffect, useState } from "react";
-const apply = (lng) => {
-  const isAr = lng === "ar";
-  document.documentElement.setAttribute("lang", lng);
-  document.documentElement.setAttribute("dir", isAr ? "rtl" : "ltr");
-  localStorage.setItem("lang", lng);
-  window.dispatchEvent(new Event("langchange"));
-};
+import { useLang } from "@/context/LangProvider";
+
 export default function LangSwitcher() {
-  const [lang, setLang] = useState("ar");
-  useEffect(() => {
-    const saved = localStorage.getItem("lang") || "ar";
-    setLang(saved); apply(saved);
-  }, []);
-  const toggle = () => { const next = lang === "ar" ? "en" : "ar"; setLang(next); apply(next); };
+  const { lang, setLang } = useLang();
+  const next = lang === "ar" ? "en" : "ar";
+  const label = next === "ar" ? "ع" : "EN";
+
   return (
-    <button type="button" onClick={toggle} className="btn btn-ghost btn-square" aria-label="language"
-      title={lang === "ar" ? "Switch to English" : "التبديل إلى العربية"}>
-      <span className="text-sm font-semibold">{lang === "ar" ? "EN" : "AR"}</span>
+    <button
+      type="button"
+      onClick={() => setLang(next)}
+      className="btn btn-ghost btn-circle btn-sm"
+      aria-label="toggle language"
+      title={lang === "ar" ? "English" : "العربية"}
+    >
+      <span className="text-xs font-semibold">{label}</span>
     </button>
   );
 }
