@@ -29,8 +29,11 @@ import collectionRuleRouter from './collectionRuleRouter.js';
 import placementRouter from './placementRouter.js';
 import reviewVoteRouter from './reviewVoteRouter.js';
 import auditLogRouter from './auditLogRouter.js';
+import authRouter from './authRouter.js';
+
 
 export const routeMap = [
+  { path: '/api/auth', handler: authRouter },
   { path: '/api/users', handler: userRouter },
   { path: '/api/addresses', handler: addressRouter },
   { path: '/api/stores', handler: storeRouter },

@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
+import passport from './config/passport.js';
 import sequelize from './db/index.js';
 import applyAssociations from './db/association.js';
 import { routeMap } from './routes/index.js';
@@ -18,6 +18,8 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true }));
+app.use(passport.initialize());
+
 
 // optional: static files (if you want to serve uploads or frontend build)
 const __filename = fileURLToPath(import.meta.url);
