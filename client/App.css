@@ -1,0 +1,10 @@
+.nav-shell{position:sticky;top:0;z-index:40;border-bottom:1px solid rgba(0,0,0,.06);background-color:rgba(255,255,255,.7);backdrop-filter:saturate(120%) blur(6px)}
+@media (prefers-color-scheme: dark){.nav-shell{background-color:rgba(31,31,31,.6);border-bottom-color:rgba(255,255,255,.08)}}
+.nav-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding-block:.5rem;max-width:80rem;margin-inline:auto;padding-inline:1rem}
+@media (min-width:1024px){.nav-row{padding-block:.75rem}}
+nav ul,.menu{list-style:none;margin:0;padding:0} nav li::marker{content:none}
+.nav-item{padding:.5rem .75rem;border-radius:.75rem;font-weight:600}
+.nav-item:hover{background:color-mix(in oklab,currentColor 10%,transparent)}
+.nav-item-active{background:color-mix(in oklab,currentColor 12%,transparent)}
+.btn,.btn-square,.input{min-height:2.5rem;height:2.5rem}
+:focus-visible{outline:2px solid oklch(65% .2 70);outline-offset:2px}

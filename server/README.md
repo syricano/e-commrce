@@ -1,4 +1,4 @@
-# 🛒 E-Commerce Marketplace (Node.js + Express + Sequelize + PostgreSQL)
+# 🛒 E-Commerce Marketplace/ Backend (Node.js + Express + Sequelize + PostgreSQL)
 
 This project is a **multi-vendor e-commerce platform** built with:
 
