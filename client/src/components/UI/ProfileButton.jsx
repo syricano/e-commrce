@@ -32,8 +32,9 @@ function ProfileButton() {
       {open && (
         <ul className="menu dropdown-content mt-2 w-56 bg-base-100 p-2 shadow rounded-box z-50">
           <li className="px-3 py-2 text-sm opacity-70">{user?.email || t("profile")}</li>
-          <li><Link to="/profile">{t("profile")}</Link></li>
-          <li><button onClick={logout}>{t("logout")}</button></li>
+          <li><Link to="/profile">{t("profile") || "Profile"}</Link></li>
+          <li><Link to="/partner/apply">{t("becomeSeller") || "Become a seller?"}</Link></li>
+          <li><button onClick={logout}>{t("logout") || "Logout"}</button></li>
         </ul>
       )}
     </div>

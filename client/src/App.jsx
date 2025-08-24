@@ -1,38 +1,31 @@
 import { BrowserRouter, Routes, Route } from 'react-router';
 import { RootLayout, ProtectedLayout } from '@/layouts';
-
-import {
-  HomePage,
-  NotFound,
-  About,
-  Signin,
-  Signup,
-} from '@/pages'
-
+import { HomePage, NotFound, About, Signin, Signup, Profile, BecomeSeller } from '@/pages';
 import './App.css';
 
-const App = () => {
+function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Root Layout wraps everything */}
         <Route path="/" element={<RootLayout />}>
-          {/* Public Pages */}
+          {/* Public */}
           <Route index element={<HomePage />} />
           <Route path="signin" element={<Signin />} />
           <Route path="signup" element={<Signup />} />
           <Route path="about" element={<About />} />
 
-          {/* Protected Pages nested inside RootLayout */}
+          {/* Protected */}
           <Route element={<ProtectedLayout />}>
+            <Route path="profile" element={<Profile />} />
+            <Route path="partner/apply" element={<BecomeSeller />} />
           </Route>
 
-          {/* Catch-all for 404 (inside RootLayout to show Navbar/Footer) */}
+          {/* 404 */}
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

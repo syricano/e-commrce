@@ -20,21 +20,36 @@ router.post('/change-password', auth, changePassword);
 router.post('/reset/request', requestPasswordReset);
 router.post('/reset/confirm', confirmPasswordReset);
 
-// Google OAuth
-router.get('/google', passport.authenticate('google', { scope: ['profile','email'] }));
-router.get(
-  '/google/callback',
-  passport.authenticate('google', { session: false, failureRedirect: (process.env.CLIENT_URL || '/') + '/login?error=oauth' }),
+// 🟢 Google OAuth Login
+
+router.get('/google', passport.authenticate('google', {
+  scope: ['profile', 'email'],
+}));
+
+router.get('/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: '/signin',
+    session: true,
+  }),
   (req, res) => {
-    const token = jwt.sign({ id: req.user.id, role: req.user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    if (!req.user) {
+      console.log('❌ req.user is missing');
+      return res.redirect('/signin');
+    }
+
+    const token = jwt.sign({ id: req.user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    const redirectTo = process.env.CLIENT_URL || '/';
-    res.redirect(redirectTo);
+
+    console.log('✅ Google user authenticated:', req.user.email);
+    console.log('✅ Redirecting to frontend:', `${process.env.CLIENT_URL}/profile`);
+
+    res.redirect(`${process.env.CLIENT_URL}/profile`);
   }
 );
 

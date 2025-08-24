@@ -46,7 +46,7 @@ Configure environment variables (.env):
 
 env
 
-PORT=3000
+PORT=8080
 DATABASE_URL=postgres://user:pass@localhost:5432/ecomm
 JWT_SECRET=your-secret-key
 CLIENT_URL=http://localhost:5173

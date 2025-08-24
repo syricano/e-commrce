@@ -1,7 +1,19 @@
-import HomePage from "./HomePage";
-import NotFound from "./NotFound";
-import About from "./About";
-import Signin from "./auth/Signin";
-import Signup from "./auth/Signup";
+import HomePage from './HomePage.jsx';
+import About from './About.jsx';
+import NotFound from './NotFound.jsx';
 
-export { HomePage, NotFound, About, Signin, Signup };
+import Signin from './auth/Signin.jsx';
+import Signup from './auth/Signup.jsx';
+import Profile from './auth/Profile.jsx';
+
+import BecomeSeller from './partner/BecomeSeller.jsx';
+
+export {
+  HomePage,
+  About,
+  NotFound,
+  Signin,
+  Signup,
+  Profile,
+  BecomeSeller,
+};
