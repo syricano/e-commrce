@@ -1,4 +1,8 @@
+import express from 'express';
+import authRouter from './authRouter.js';
+
 import userRouter from './userRouter.js';
+import profileRouter from './profileRouter.js';
 import addressRouter from './addressRouter.js';
 import storeRouter from './storeRouter.js';
 import storeUserRouter from './storeUserRouter.js';
@@ -21,21 +25,35 @@ import paymentRouter from './paymentRouter.js';
 import refundRouter from './refundRouter.js';
 import returnRequestRouter from './returnRequestRouter.js';
 import reviewRouter from './reviewRouter.js';
+import reviewVoteRouter from './reviewVoteRouter.js';
 import commissionSchemeRouter from './commissionSchemeRouter.js';
 import payoutRouter from './payoutRouter.js';
 import collectionRouter from './collectionRouter.js';
 import collectionTranslationRouter from './collectionTranslationRouter.js';
 import collectionRuleRouter from './collectionRuleRouter.js';
 import placementRouter from './placementRouter.js';
-import reviewVoteRouter from './reviewVoteRouter.js';
 import auditLogRouter from './auditLogRouter.js';
-import authRouter from './authRouter.js';
+import passwordResetRouter from './passwordResetRouter.js';
 
+import listingRouter from './listingRouter.js';
+import threadRouter from './threadRouter.js';
+import listingOfferRouter from './listingOfferRouter.js';
+import reportRouter from './reportRouter.js';
+import searchRouter from './searchRouter.js';
+
+import transactionRouter from './transactionRouter.js';
+import ratingRouter from './ratingRouter.js';
+import promotionRouter from './promotionRouter.js';
+import savedSearchRouter from './savedSearchRouter.js';
+import notificationRouter from './notificationRouter.js';
+import blockRouter from './blockRouter.js';
+import geoSearchRouter from './geoSearchRouter.js';
 
 export const routeMap = [
-  { path: '/api/profiles', handler: profileRouter },
   { path: '/api/auth', handler: authRouter },
+
   { path: '/api/users', handler: userRouter },
+  { path: '/api/profiles', handler: profileRouter },
   { path: '/api/addresses', handler: addressRouter },
   { path: '/api/stores', handler: storeRouter },
   { path: '/api/store-users', handler: storeUserRouter },
@@ -58,14 +76,33 @@ export const routeMap = [
   { path: '/api/refunds', handler: refundRouter },
   { path: '/api/return-requests', handler: returnRequestRouter },
   { path: '/api/reviews', handler: reviewRouter },
+  { path: '/api/review-votes', handler: reviewVoteRouter },
   { path: '/api/commission-schemes', handler: commissionSchemeRouter },
   { path: '/api/payouts', handler: payoutRouter },
   { path: '/api/collections', handler: collectionRouter },
   { path: '/api/collection-translations', handler: collectionTranslationRouter },
   { path: '/api/collection-rules', handler: collectionRuleRouter },
   { path: '/api/placements', handler: placementRouter },
-  { path: '/api/review-votes', handler: reviewVoteRouter },
-  { path: '/api/audit-logs', handler: auditLogRouter }
+  { path: '/api/audit-logs', handler: auditLogRouter },
+  { path: '/api/password-resets', handler: passwordResetRouter },
+
+  { path: '/api/listings', handler: listingRouter },
+  { path: '/api/threads', handler: threadRouter },
+  { path: '/api/listing-offers', handler: listingOfferRouter },
+  { path: '/api/reports', handler: reportRouter },
+  { path: '/api/search', handler: searchRouter },
+
+  { path: '/api/transactions', handler: transactionRouter },
+  { path: '/api/ratings', handler: ratingRouter },
+  { path: '/api/promotions', handler: promotionRouter },
+  { path: '/api/saved-searches', handler: savedSearchRouter },
+  { path: '/api/notifications', handler: notificationRouter },
+  { path: '/api/blocks', handler: blockRouter },
+  { path: '/api/geo', handler: geoSearchRouter },
 ];
 
-import profileRouter from './profileRouter.js';
+export default function mountAll(app) {
+  const router = express.Router();
+  for (const { path, handler } of routeMap) router.use(path, handler);
+  app.use(router);
+}

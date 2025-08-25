@@ -1,20 +1,17 @@
 import axios from 'axios';
-const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const axiosInstance = axios.create({
-  baseURL,
-  withCredentials: true,
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  withCredentials: true, // send/receive cookies
 });
 
+// attach bearer from localStorage on every request
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  const t = localStorage.getItem('token');
+  if (t && !config.headers?.Authorization) {
+    config.headers = { ...(config.headers || {}), Authorization: `Bearer ${t}` };
+  }
   return config;
 });
-
-axiosInstance.interceptors.response.use(
-  (res) => res,
-  (err) => Promise.reject(err)   // ✅ no global redirect
-);
 
 export default axiosInstance;

@@ -1,3 +1,4 @@
+// client/src/components/Navbar.jsx
 import { useState } from "react";
 import { Link } from "react-router";
 import LangSwitcher from "@/components/UI/LangSwitcher.jsx";
@@ -16,8 +17,6 @@ const CATS = [
   { to: '/c/games',       en: 'Games',       ar: 'الألعاب'      },
 ];
 
-
-
 function DesktopBar() {
   const { t, lang } = useLang();
   const label = (c) => (lang === 'en' ? c.en : c.ar);
@@ -25,11 +24,11 @@ function DesktopBar() {
   return (
     <div className="navbar max-w-screen-2xl mx-auto px-4">
       <div className="navbar-start gap-2">
-        <Link to="/" className="btn btn-ghost text-xl">Free Market</Link>
+        <Link to="/" className="btn btn-ghost text-xl">{t("Free Market")}</Link>
         <ul className="menu menu-horizontal px-2">
           <li><Link to="/">{t("home")}</Link></li>
-          <li><Link to="/offers">{t("offers")}</Link></li>
-          <li><Link to="/shops">{t("stores")}</Link></li>
+          <li><Link to="/collections">{t("offers")}</Link></li>
+          <li><Link to="/stores">{t("stores")}</Link></li>
           <li tabIndex={0}>
             <details>
               <summary>{t("categories")}</summary>
@@ -40,6 +39,9 @@ function DesktopBar() {
               </ul>
             </details>
           </li>
+          {/* C2C */}
+          <li><Link to="/listings">{t("listings")}</Link></li>
+          <li><Link to="/listings/new">{t("sell")}</Link></li>
         </ul>
       </div>
 
@@ -101,8 +103,8 @@ function MobileBar() {
             className="menu dropdown-content mt-2 w-64 bg-base-100 p-2 shadow rounded-box z-50"
           >
             <li><Link to="/">{t("home")}</Link></li>
-            <li><Link to="/offers">{t("offers")}</Link></li>
-            <li><Link to="/shops">{t("stores")}</Link></li>
+            <li><Link to="/collections">{t("offers")}</Link></li>
+            <li><Link to="/stores">{t("stores")}</Link></li>
             <li>
               <button type="button" onClick={(e)=>{e.stopPropagation(); setCatsOpen(v=>!v);}}>
                 {t("categories")} ▾
@@ -115,6 +117,9 @@ function MobileBar() {
                 </ul>
               )}
             </li>
+            {/* C2C */}
+            <li><Link to="/listings">{t("listings")}</Link></li>
+            <li><Link to="/listings/new">{t("sell")}</Link></li>
           </ul>
         </div>
 

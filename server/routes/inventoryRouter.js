@@ -1,13 +1,17 @@
 import express from 'express';
-import { getAllInventory, getInventoryById, createInventory, updateInventory, deleteInventory } from '../controllers/inventory.controller.js';
-import auth from '../middleware/auth.js';
-import { requireAdmin, requireSeller } from '../middleware/roleAuth.js';
+import { auth } from '../middleware/auth.js';
+import { requireAdmin } from '../middleware/roleAuth.js';
+import { listInventorys, getInventory, createInventory, updateInventory, deleteInventory } from '../controllers/inventoryController.js';
 
-const router = express.Router();
-// Sellers manage their inventory; admins manage all
-router.get('/', getAllInventory);
-router.get('/:id', getInventoryById);
-router.post('/', auth, requireSeller, createInventory);
-router.put('/:id', auth, requireSeller, updateInventory);
-router.delete('/:id', auth, requireSeller, deleteInventory);
-export default router;
+const inventoryRouter = express.Router();
+
+// Public reads
+inventoryRouter.get('/', listInventorys);
+inventoryRouter.get('/:id', getInventory);
+
+// Protected writes
+inventoryRouter.post('/', auth, requireAdmin, createInventory);
+inventoryRouter.put('/:id', auth, requireAdmin, updateInventory);
+inventoryRouter.delete('/:id', auth, requireAdmin, deleteInventory);
+
+export default inventoryRouter;

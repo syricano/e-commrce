@@ -1,12 +1,17 @@
 import express from 'express';
-import { getAllCarts, getCartById, createCart, updateCart, deleteCart } from '../controllers/cart.controller.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
+import { requireAdmin } from '../middleware/roleAuth.js';
+import { listCarts, getCart, createCart, updateCart, deleteCart } from '../controllers/cartController.js';
 
-const router = express.Router();
-// Typically only the owner should access their cart; keep simple for now
-router.get('/', auth, getAllCarts);
-router.get('/:id', auth, getCartById);
-router.post('/', auth, createCart);
-router.put('/:id', auth, updateCart);
-router.delete('/:id', auth, deleteCart);
-export default router;
+const cartRouter = express.Router();
+
+// Public reads
+cartRouter.get('/', listCarts);
+cartRouter.get('/:id', getCart);
+
+// Protected writes
+cartRouter.post('/', auth, requireAdmin, createCart);
+cartRouter.put('/:id', auth, requireAdmin, updateCart);
+cartRouter.delete('/:id', auth, requireAdmin, deleteCart);
+
+export default cartRouter;

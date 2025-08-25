@@ -1,12 +1,12 @@
 // server/zod/Schemas.js
 import { z } from 'zod';
 
+// ===== Primitives / helpers =====
 export const id = z.number().int().positive();
-export const bigId = id; // Sequelize uses BIGINT but you receive it as number/string. Adjust if needed.
-export const locale = z.enum(['ar', 'en']);
-export const currency = z.enum(['EUR', 'USD', 'SAR', 'AED', 'GBP']); // extend as needed
+export const bigId = id;
+export const locale = z.enum(['ar','en','de']);
+export const currency = z.enum(['EUR', 'USD', 'SAR', 'AED', 'GBP']);
 
-// Common helpers
 const stringOpt = (max = 255) => z.string().min(1).max(max);
 const stringNullable = (max = 255) => z.string().max(max).nullable().optional();
 const jsonb = z.record(z.any()).optional();
@@ -24,7 +24,7 @@ export const userSchema = z.object({
   phone: z.string().max(32).optional(),
   firstName: z.string().max(120).optional(),
   lastName: z.string().max(120).optional(),
-  password: z.string().min(6).max(255).optional(), // for create; server should hash → passwordHash
+  password: z.string().min(6).max(255).optional(),
   oauthProvider: z.string().max(32).optional(),
   oauthSubject: z.string().max(191).optional(),
   role: userRole.default('customer'),
@@ -129,7 +129,7 @@ export const productVariantSchema = z.object({
   productId: bigId,
   variantSku: stringOpt(64),
   barcode: z.string().max(64).optional(),
-  options: jsonb, // { size:'M', color:'Black' }
+  options: jsonb,
   weightGrams: intPos.optional(),
   lengthMm: intPos.optional(),
   widthMm: intPos.optional(),
@@ -145,7 +145,7 @@ export const mediaSchema = z.object({
   url: z.string().url().max(1024),
   type: mediaType.default('image'),
   position: intPos.default(0),
-  altText: z.record(z.string()).optional(), // { ar, en }
+  altText: z.record(z.string()).optional(),
   metadata: jsonb
 }).refine(d => d.productId || d.variantId, { message: 'productId or variantId required' });
 
@@ -328,7 +328,7 @@ export const collectionTranslationSchema = z.object({
 
 export const collectionRuleSchema = z.object({
   collectionId: bigId,
-  query: z.record(z.any()) // rule config; validate per your rule engine
+  query: z.record(z.any())
 });
 
 export const placementSchema = z.object({
@@ -346,4 +346,77 @@ export const auditLogSchema = z.object({
   action: stringOpt(80),
   before: jsonb,
   after: jsonb
+});
+
+// ========= C2C ADDITIONS =========
+
+// Listings
+export const listingCreateSchema = z.object({
+  categoryId: bigId.optional(),
+  priceAmount: int.nonnegative(),
+  currency: currency.default('EUR'),
+  negotiable: bool.default(false),
+  condition: z.enum(['new','used','refurbished']),
+  locationCity: z.string().max(120).optional(),
+  locationLat: z.number().min(-90).max(90).optional(),
+  locationLng: z.number().min(-180).max(180).optional(),
+  translations: z.array(z.object({
+    locale,
+    title: stringOpt(255),
+    slug: stringOpt(255),
+    description: z.string().optional()
+  })).min(1)
+});
+
+export const listingUpdateSchema = listingCreateSchema.partial();
+
+export const listingSearchSchema = z.object({
+  q: z.string().optional(),
+  categoryId: z.string().optional(),
+  minPrice: z.string().optional(),
+  maxPrice: z.string().optional(),
+  condition: z.enum(['new','used','refurbished']).optional(),
+  city: z.string().optional(),
+  page: z.string().optional(),
+  limit: z.string().optional(),
+  sort: z.enum(['new','price_asc','price_desc']).optional()
+});
+
+// Threads
+export const threadCreateSchema = z.object({
+  listingId: bigId,
+  buyerUserId: bigId.optional(), // server will override from auth
+  message: z.string().min(1).max(5000).optional()
+});
+
+export const messageCreateSchema = z.object({
+  body: z.string().min(1).max(5000),
+  attachments: z.any().optional()
+});
+
+// Listing offers
+export const listingOfferCreateSchema = z.object({
+  listingId: bigId,
+  amount: int.nonnegative(),
+  message: z.string().max(2000).optional()
+});
+
+export const listingOfferPatchSchema = z.object({
+  action: z.enum(['accept','decline','withdraw'])
+});
+
+// Reports
+export const reportCreateSchema = z.object({
+  listingId: bigId,
+  reason: z.enum(['spam','prohibited','fraud','other']),
+  details: z.string().max(2000).optional()
+});
+
+// Unified search
+export const unifiedSearchSchema = z.object({
+  q: z.string().optional(),
+  categoryId: z.string().optional(),
+  type: z.enum(['all','listing','product']).optional().default('all'),
+  page: z.string().optional(),
+  limit: z.string().optional()
 });

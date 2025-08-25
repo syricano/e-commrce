@@ -1,12 +1,17 @@
 import express from 'express';
-import { getAllBrands, getBrandById, createBrand, updateBrand, deleteBrand } from '../controllers/brand.controller.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/roleAuth.js';
+import { listBrands, getBrand, createBrand, updateBrand, deleteBrand } from '../controllers/brandController.js';
 
-const router = express.Router();
-router.get('/', getAllBrands);
-router.get('/:id', getBrandById);
-router.post('/', auth, requireAdmin, createBrand);
-router.put('/:id', auth, requireAdmin, updateBrand);
-router.delete('/:id', auth, requireAdmin, deleteBrand);
-export default router;
+const brandRouter = express.Router();
+
+// Public reads
+brandRouter.get('/', listBrands);
+brandRouter.get('/:id', getBrand);
+
+// Protected writes
+brandRouter.post('/', auth, requireAdmin, createBrand);
+brandRouter.put('/:id', auth, requireAdmin, updateBrand);
+brandRouter.delete('/:id', auth, requireAdmin, deleteBrand);
+
+export default brandRouter;

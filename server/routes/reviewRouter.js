@@ -1,12 +1,17 @@
 import express from 'express';
-import { getAllReviews, getReviewById, createReview, updateReview, deleteReview } from '../controllers/review.controller.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/roleAuth.js';
+import { listReviews, getReview, createReview, updateReview, deleteReview } from '../controllers/reviewController.js';
 
-const router = express.Router();
-router.get('/', getAllReviews);
-router.get('/:id', getReviewById);
-router.post('/', auth, createReview);
-router.put('/:id', auth, updateReview);
-router.delete('/:id', auth, requireAdmin, deleteReview);
-export default router;
+const reviewRouter = express.Router();
+
+// Public reads
+reviewRouter.get('/', listReviews);
+reviewRouter.get('/:id', getReview);
+
+// Protected writes
+reviewRouter.post('/', auth, requireAdmin, createReview);
+reviewRouter.put('/:id', auth, requireAdmin, updateReview);
+reviewRouter.delete('/:id', auth, requireAdmin, deleteReview);
+
+export default reviewRouter;

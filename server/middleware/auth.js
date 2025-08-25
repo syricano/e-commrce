@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-const auth = async (req, res, next) => {
+export const auth = async (req, res, next) => {
   const cookieToken = req.cookies?.token;
   const header = req.headers.authorization;
   const headerToken = header?.startsWith('Bearer ') ? header.split(' ')[1] : undefined;

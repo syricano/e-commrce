@@ -1,24 +1,23 @@
-import { useNavigate } from 'react-router';
-import { useState } from 'react';
-import { createUser } from '@/data';
-import { errorHandler } from '@/utils';
-import { toast } from 'react-hot-toast';
+// client/src/pages/auth/useSignup.js
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { register as apiRegister } from "@/services";
+import { errorHandler } from "@/utils";
+import { toast } from "react-hot-toast";
 
 export default function useSignup() {
   const nav = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const submit = async (payload) => {
-    try {
-      setLoading(true);
-      await createUser(payload);
-      toast.success('Account created');
-      nav('/', { replace: true });
-    } catch (e) {
-      errorHandler(e, 'Signup failed');
-    } finally {
-      setLoading(false);
-    }
+  const submit = (payload) => {
+    setLoading(true);
+    return apiRegister(payload)
+      .then(() => {
+        toast.success("Account created");
+        nav("/", { replace: true });
+      })
+      .catch((e) => errorHandler(e, "Signup failed"))
+      .finally(() => setLoading(false));
   };
 
   return { submit, loading };

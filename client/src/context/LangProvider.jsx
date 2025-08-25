@@ -21,6 +21,8 @@ const DICT = {
     books: "الكتب",
     games: "الألعاب",
     fashion: "الأزياء",
+    listings: "الإعلانات",
+    sell: "بيع",
   },
   en: {
     brand: "Free Market",
@@ -40,10 +42,12 @@ const DICT = {
     books: "Books",
     games: "Games",
     fashion: "Fashion",
+    listings: "Listings",
+    sell: "Sell",
   },
 };
 
-export function LangProvider({ children }) {
+function LangProvider({ children }) {
   const [lang, setLang] = useState(() => localStorage.getItem("lang") || "ar");
 
   useEffect(() => {
@@ -65,3 +69,4 @@ export function LangProvider({ children }) {
 }
 
 export const useLang = () => useContext(LangContext);
+export default LangProvider;

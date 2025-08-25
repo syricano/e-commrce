@@ -1,15 +1,24 @@
 import express from 'express';
-import { getAllProfiles, getProfileById, createProfile, updateProfile, deleteProfile } from '../controllers/profile.controller.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/roleAuth.js';
+import validate from '../middleware/validateZod.js';
+import { id, /* add a specific schema if you want to validate body */ } from '../zod/index.js';
+import {
+  listProfiles, getProfile, createProfile, updateProfile, deleteProfile,
+  getMyProfile, upsertMyProfile
+} from '../controllers/profileController.js';
 
-const router = express.Router();
+const profileRouter = express.Router();
 
-// Admin-only CRUD for now
-router.get('/', auth, requireAdmin, getAllProfiles);
-router.get('/:id', auth, requireAdmin, getProfileById);
-router.post('/', auth, requireAdmin, createProfile);
-router.put('/:id', auth, requireAdmin, updateProfile);
-router.delete('/:id', auth, requireAdmin, deleteProfile);
+// Self-service
+profileRouter.get('/me', auth, getMyProfile);
+profileRouter.put('/me', auth, upsertMyProfile);
 
-export default router;
+// Admin over everything
+profileRouter.get('/', auth, requireAdmin, listProfiles);
+profileRouter.get('/:id', auth, requireAdmin, getProfile);
+profileRouter.post('/', auth, requireAdmin, createProfile);
+profileRouter.put('/:id', auth, requireAdmin, updateProfile);
+profileRouter.delete('/:id', auth, requireAdmin, deleteProfile);
+
+export default profileRouter;

@@ -1,6 +1,7 @@
 // client/src/context/AuthProvider.jsx
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { login as apiLogin, logout as apiLogout, getMe } from "@/data";
+import axiosInstance from "@/config/axiosConfig";
+import { login as apiLogin, logout as apiLogout, getMe } from "@/services";
 import { toast } from "react-hot-toast";
 import { errorHandler } from "@/utils";
 
@@ -9,7 +10,7 @@ const AuthContext = createContext({
   token: null,
   loading: true,
   isAuthenticated: false,
-  role: "guest",
+  role: "customer",
   loginWithCredentials: async () => false,
   logout: async () => {},
 });
@@ -19,7 +20,7 @@ function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
 
-  // Pick up ?token=... once (e.g., after OAuth redirect)
+  // Accept ?token=... from /api/auth/google/callback redirect
   useEffect(() => {
     const usp = new URLSearchParams(window.location.search);
     const t = usp.get("token");
@@ -27,61 +28,63 @@ function AuthProvider({ children }) {
       localStorage.setItem("token", t);
       setToken(t);
       usp.delete("token");
-      const clean = `${window.location.pathname}${
-        usp.toString() ? `?${usp}` : ""
-      }${window.location.hash}`;
+      const clean = `${window.location.pathname}${usp.toString() ? `?${usp}` : ""}${window.location.hash}`;
       window.history.replaceState({}, "", clean);
     }
   }, []);
 
-  // Bootstrap session from API (cookie or bearer on axios)
+  // Reflect token to axios header; backend also accepts cookie
+  useEffect(() => {
+    if (token) {
+      axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`;
+    } else {
+      delete axiosInstance.defaults.headers.common.Authorization;
+    }
+  }, [token]);
+
+  // Bootstrap session from /api/auth/me (returns the user object directly)
   useEffect(() => {
     let live = true;
-    (async () => {
-      try {
-        const me = await getMe();
-        if (live && me) setUser(me);
-      } catch {
-        // not logged in or token invalid
-        if (live) {
-          setUser(null);
-        }
-      } finally {
+    getMe()
+      .then((me) => {
+        if (live) setUser(me ?? null);
+      })
+      .catch(() => {
+        if (live) setUser(null);
+      })
+      .finally(() => {
         if (live) setLoading(false);
-      }
-    })();
+      });
     return () => {
       live = false;
     };
   }, [token]);
 
-  const loginWithCredentials = async ({ email, password }) => {
-    try {
-      const { token: t, user: u } = await apiLogin({ email, password });
-      if (t) {
-        localStorage.setItem("token", t);
-        setToken(t);
-      }
-      if (u) setUser(u);
-      toast.success("Signed in");
-      return true;
-    } catch (e) {
-      errorHandler(e, "Login failed");
-      return false;
-    }
-  };
+  const loginWithCredentials = ({ email, password }) =>
+    apiLogin({ email, password })
+      .then(({ token: t, user: u }) => {
+        if (t) {
+          localStorage.setItem("token", t);
+          setToken(t);
+        }
+        setUser(u ?? null);
+        toast.success("Signed in");
+        return true;
+      })
+      .catch((e) => {
+        errorHandler(e, "Login failed");
+        return false;
+      });
 
-  const logout = async () => {
-    try {
-      await apiLogout();
-    } catch {
-      // ignore API logout errors
-    }
-    localStorage.removeItem("token");
-    setToken(null);
-    setUser(null);
-    toast.success("Logged out");
-  };
+  const logout = () =>
+    apiLogout()
+      .catch(() => {})
+      .finally(() => {
+        localStorage.removeItem("token");
+        setToken(null);
+        setUser(null);
+        toast.success("Logged out");
+      });
 
   const value = useMemo(
     () => ({

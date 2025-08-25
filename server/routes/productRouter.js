@@ -1,12 +1,17 @@
 import express from 'express';
-import { getAllProducts, getProductById, createProduct, updateProduct, deleteProduct } from '../controllers/product.controller.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/roleAuth.js';
+import { listProducts, getProduct, createProduct, updateProduct, deleteProduct } from '../controllers/productController.js';
 
-const router = express.Router();
-router.get('/', getAllProducts);
-router.get('/:id', getProductById);
-router.post('/', auth, requireAdmin, createProduct);
-router.put('/:id', auth, requireAdmin, updateProduct);
-router.delete('/:id', auth, requireAdmin, deleteProduct);
-export default router;
+const productRouter = express.Router();
+
+// Public reads
+productRouter.get('/', listProducts);
+productRouter.get('/:id', getProduct);
+
+// Protected writes
+productRouter.post('/', auth, requireAdmin, createProduct);
+productRouter.put('/:id', auth, requireAdmin, updateProduct);
+productRouter.delete('/:id', auth, requireAdmin, deleteProduct);
+
+export default productRouter;

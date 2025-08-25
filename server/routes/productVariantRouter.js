@@ -1,12 +1,17 @@
 import express from 'express';
-import { getAllProductVariants, getProductVariantById, createProductVariant, updateProductVariant, deleteProductVariant } from '../controllers/productVariant.controller.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/roleAuth.js';
+import { listProductVariants, getProductVariant, createProductVariant, updateProductVariant, deleteProductVariant } from '../controllers/productVariantController.js';
 
-const router = express.Router();
-router.get('/', getAllProductVariants);
-router.get('/:id', getProductVariantById);
-router.post('/', auth, requireAdmin, createProductVariant);
-router.put('/:id', auth, requireAdmin, updateProductVariant);
-router.delete('/:id', auth, requireAdmin, deleteProductVariant);
-export default router;
+const productVariantRouter = express.Router();
+
+// Public reads
+productVariantRouter.get('/', listProductVariants);
+productVariantRouter.get('/:id', getProductVariant);
+
+// Protected writes
+productVariantRouter.post('/', auth, requireAdmin, createProductVariant);
+productVariantRouter.put('/:id', auth, requireAdmin, updateProductVariant);
+productVariantRouter.delete('/:id', auth, requireAdmin, deleteProductVariant);
+
+export default productVariantRouter;

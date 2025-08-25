@@ -1,4 +1,3 @@
-// server/zod/index.js
 export {
   id,
   bigId,
@@ -53,5 +52,16 @@ export {
   collectionTranslationSchema,
   collectionRuleSchema,
   placementSchema,
-  auditLogSchema
+  auditLogSchema,
+
+  // C2C exports
+  listingCreateSchema,
+  listingUpdateSchema,
+  listingSearchSchema,
+  threadCreateSchema,
+  messageCreateSchema,
+  listingOfferCreateSchema,
+  listingOfferPatchSchema,
+  reportCreateSchema,
+  unifiedSearchSchema,
 } from './Schemas.js';

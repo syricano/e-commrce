@@ -1,13 +1,17 @@
 import express from 'express';
-import { getAllOffers, getOfferById, createOffer, updateOffer, deleteOffer } from '../controllers/offer.controller.js';
-import auth from '../middleware/auth.js';
-import { requireAdmin, requireSeller } from '../middleware/roleAuth.js';
+import { auth } from '../middleware/auth.js';
+import { requireAdmin } from '../middleware/roleAuth.js';
+import { listOffers, getOffer, createOffer, updateOffer, deleteOffer } from '../controllers/offerController.js';
 
-const router = express.Router();
-// Sellers can manage their offers; admins can manage all
-router.get('/', getAllOffers);
-router.get('/:id', getOfferById);
-router.post('/', auth, requireSeller, createOffer);
-router.put('/:id', auth, requireSeller, updateOffer);
-router.delete('/:id', auth, requireSeller, deleteOffer);
-export default router;
+const offerRouter = express.Router();
+
+// Public reads
+offerRouter.get('/', listOffers);
+offerRouter.get('/:id', getOffer);
+
+// Protected writes
+offerRouter.post('/', auth, requireAdmin, createOffer);
+offerRouter.put('/:id', auth, requireAdmin, updateOffer);
+offerRouter.delete('/:id', auth, requireAdmin, deleteOffer);
+
+export default offerRouter;

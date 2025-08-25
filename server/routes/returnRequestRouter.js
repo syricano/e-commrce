@@ -1,11 +1,17 @@
 import express from 'express';
-import { getAllReturnRequests, getReturnRequestById, createReturnRequest, updateReturnRequest, deleteReturnRequest } from '../controllers/returnRequest.controller.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
+import { requireAdmin } from '../middleware/roleAuth.js';
+import { listReturnRequests, getReturnRequest, createReturnRequest, updateReturnRequest, deleteReturnRequest } from '../controllers/returnRequestController.js';
 
-const router = express.Router();
-router.get('/', auth, getAllReturnRequests);
-router.get('/:id', auth, getReturnRequestById);
-router.post('/', auth, createReturnRequest);
-router.put('/:id', auth, updateReturnRequest);
-router.delete('/:id', auth, deleteReturnRequest);
-export default router;
+const returnRequestRouter = express.Router();
+
+// Public reads
+returnRequestRouter.get('/', listReturnRequests);
+returnRequestRouter.get('/:id', getReturnRequest);
+
+// Protected writes
+returnRequestRouter.post('/', auth, requireAdmin, createReturnRequest);
+returnRequestRouter.put('/:id', auth, requireAdmin, updateReturnRequest);
+returnRequestRouter.delete('/:id', auth, requireAdmin, deleteReturnRequest);
+
+export default returnRequestRouter;

@@ -1,13 +1,21 @@
 import express from 'express';
-import { getAllOrders, getOrderById, createOrder, updateOrder, deleteOrder } from '../controllers/order.controller.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/roleAuth.js';
+import {
+  listOrders, getOrder, createOrder, updateOrder, deleteOrder,
+  listMyOrders, getMyOrder
+} from '../controllers/orderController.js';
 
-const router = express.Router();
-// Customers see their orders; admin gated endpoints can be added later
-router.get('/', auth, getAllOrders);
-router.get('/:id', auth, getOrderById);
-router.post('/', auth, createOrder);
-router.put('/:id', auth, updateOrder);
-router.delete('/:id', auth, requireAdmin, deleteOrder);
-export default router;
+const orderRouter = express.Router();
+
+// User read-only purchases
+orderRouter.get('/mine', auth, listMyOrders);
+orderRouter.get('/:id', auth, getMyOrder);
+
+// Admin full control
+orderRouter.get('/', auth, requireAdmin, listOrders);
+orderRouter.post('/', auth, requireAdmin, createOrder);
+orderRouter.put('/:id', auth, requireAdmin, updateOrder);
+orderRouter.delete('/:id', auth, requireAdmin, deleteOrder);
+
+export default orderRouter;

@@ -1,12 +1,17 @@
 import express from 'express';
-import { getAllUsers, getUserById, createUser, updateUser, deleteUser } from '../controllers/user.controller.js';
-import auth from '../middleware/auth.js';
+import  auth  from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/roleAuth.js';
+import { listUsers, getUser, createUser, updateUser, deleteUser } from '../controllers/userController.js';
 
-const router = express.Router();
-router.get('/', auth, requireAdmin, getAllUsers);
-router.get('/:id', auth, requireAdmin, getUserById);
-router.post('/', auth, requireAdmin, createUser);
-router.put('/:id', auth, requireAdmin, updateUser);
-router.delete('/:id', auth, requireAdmin, deleteUser);
-export default router;
+const userRouter = express.Router();
+
+// Public reads
+userRouter.get('/', listUsers);
+userRouter.get('/:id', getUser);
+
+// Protected writes
+userRouter.post('/', auth, requireAdmin, createUser);
+userRouter.put('/:id', auth, requireAdmin, updateUser);
+userRouter.delete('/:id', auth, requireAdmin, deleteUser);
+
+export default userRouter;

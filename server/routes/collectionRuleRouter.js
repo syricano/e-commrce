@@ -1,12 +1,17 @@
 import express from 'express';
-import { getAllCollectionRules, getCollectionRuleById, createCollectionRule, updateCollectionRule, deleteCollectionRule } from '../controllers/collectionRule.controller.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/roleAuth.js';
+import { listCollectionRules, getCollectionRule, createCollectionRule, updateCollectionRule, deleteCollectionRule } from '../controllers/collectionRuleController.js';
 
-const router = express.Router();
-router.get('/', getAllCollectionRules);
-router.get('/:id', getCollectionRuleById);
-router.post('/', auth, requireAdmin, createCollectionRule);
-router.put('/:id', auth, requireAdmin, updateCollectionRule);
-router.delete('/:id', auth, requireAdmin, deleteCollectionRule);
-export default router;
+const collectionRuleRouter = express.Router();
+
+// Public reads
+collectionRuleRouter.get('/', listCollectionRules);
+collectionRuleRouter.get('/:id', getCollectionRule);
+
+// Protected writes
+collectionRuleRouter.post('/', auth, requireAdmin, createCollectionRule);
+collectionRuleRouter.put('/:id', auth, requireAdmin, updateCollectionRule);
+collectionRuleRouter.delete('/:id', auth, requireAdmin, deleteCollectionRule);
+
+export default collectionRuleRouter;

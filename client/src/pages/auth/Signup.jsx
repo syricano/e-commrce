@@ -1,28 +1,27 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
-import { register as apiRegister } from '@/data';
-import { toast } from 'react-hot-toast';
-import { errorHandler } from '@/utils';
+// client/src/pages/auth/Signup.jsx
+import { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { register as apiRegister } from "@/services";
+import { toast } from "react-hot-toast";
+import { errorHandler } from "@/utils";
 
 function Signup() {
   const nav = useNavigate();
-  const [form, setForm] = useState({ firstName:'', lastName:'', email:'', password:'' });
+  const [form, setForm] = useState({ firstName:"", lastName:"", email:"", password:"" });
   const [loading, setLoading] = useState(false);
 
   const onChange = (e) => setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
 
-  const onSubmit = async (e) => {
+  const onSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      await apiRegister(form);
-      toast.success('Account created');
-      nav('/', { replace: true });
-    } catch (err) {
-      errorHandler(err, 'Signup failed');
-    } finally {
-      setLoading(false);
-    }
+    apiRegister(form)
+      .then(() => {
+        toast.success("Account created");
+        nav("/", { replace: true });
+      })
+      .catch((err) => errorHandler(err, "Signup failed"))
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -45,7 +44,7 @@ function Signup() {
           <span className="label-text">Password</span>
           <input name="password" type="password" className="input input-bordered" value={form.password} onChange={onChange} required autoComplete="new-password" />
         </label>
-        <button disabled={loading} className="btn btn-primary w-full">{loading ? '...' : 'Create account'}</button>
+        <button disabled={loading} className="btn btn-primary w-full">{loading ? "..." : "Create account"}</button>
       </form>
       <p className="text-sm mt-3">Already have an account? <Link className="link" to="/signin">Sign in</Link></p>
     </section>

@@ -1,12 +1,17 @@
 import express from 'express';
-import { getAllCommissionSchemes, getCommissionSchemeById, createCommissionScheme, updateCommissionScheme, deleteCommissionScheme } from '../controllers/commissionScheme.controller.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/roleAuth.js';
+import { listCommissionSchemes, getCommissionScheme, createCommissionScheme, updateCommissionScheme, deleteCommissionScheme } from '../controllers/commissionSchemeController.js';
 
-const router = express.Router();
-router.get('/', auth, requireAdmin, getAllCommissionSchemes);
-router.get('/:id', auth, requireAdmin, getCommissionSchemeById);
-router.post('/', auth, requireAdmin, createCommissionScheme);
-router.put('/:id', auth, requireAdmin, updateCommissionScheme);
-router.delete('/:id', auth, requireAdmin, deleteCommissionScheme);
-export default router;
+const commissionSchemeRouter = express.Router();
+
+// Public reads
+commissionSchemeRouter.get('/', listCommissionSchemes);
+commissionSchemeRouter.get('/:id', getCommissionScheme);
+
+// Protected writes
+commissionSchemeRouter.post('/', auth, requireAdmin, createCommissionScheme);
+commissionSchemeRouter.put('/:id', auth, requireAdmin, updateCommissionScheme);
+commissionSchemeRouter.delete('/:id', auth, requireAdmin, deleteCommissionScheme);
+
+export default commissionSchemeRouter;

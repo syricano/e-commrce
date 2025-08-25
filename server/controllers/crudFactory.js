@@ -1,41 +1,46 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import ErrorResponse from '../utils/errorResponse.js';
 
-export default function buildCrudControllers(Model, { modelName = 'Record', listDefaultOrder = [['id','ASC']] } = {}) {
-  const getAll = asyncHandler(async (req, res) => {
-    const { limit, offset, order } = req.query;
-    const rows = await Model.findAll({
-      limit: limit ? Number(limit) : undefined,
-      offset: offset ? Number(offset) : undefined,
-      order: order ? JSON.parse(order) : listDefaultOrder
+export const list = (Model, defaultScope = {}) =>
+  asyncHandler(async (req, res) => {
+    const { page = '1', limit = '50', ...filters } = req.query;
+    const p = Math.max(parseInt(page, 10) || 1, 1);
+    const l = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 200);
+    const where = { ...defaultScope, ...filters };
+    const { count, rows } = await Model.findAndCountAll({
+      where,
+      limit: l,
+      offset: (p - 1) * l,
+      order: [['id', 'DESC']],
     });
-    res.json(rows);
+    res.json({ total: count, items: rows });
   });
 
-  const getById = asyncHandler(async (req, res) => {
-    const row = await Model.findByPk(req.params.id);
-    if (!row) throw new ErrorResponse(`${modelName} not found`, 404);
+export const getById = (Model, include = []) =>
+  asyncHandler(async (req, res) => {
+    const row = await Model.findByPk(req.params.id, { include });
+    if (!row) throw new ErrorResponse('Not found', 404);
     res.json(row);
   });
 
-  const createOne = asyncHandler(async (req, res) => {
-    const created = await Model.create(req.body);
-    res.status(201).json(created);
+export const createOne = (Model, preset = {}) =>
+  asyncHandler(async (req, res) => {
+    const row = await Model.create({ ...req.body, ...preset });
+    res.status(201).json(row);
   });
 
-  const updateOne = asyncHandler(async (req, res) => {
+export const updateById = (Model) =>
+  asyncHandler(async (req, res) => {
     const row = await Model.findByPk(req.params.id);
-    if (!row) throw new ErrorResponse(`${modelName} not found`, 404);
+    if (!row) throw new ErrorResponse('Not found', 404);
     await row.update(req.body);
     res.json(row);
   });
 
-  const deleteOne = asyncHandler(async (req, res) => {
+export const deleteById = (Model) =>
+  asyncHandler(async (req, res) => {
     const row = await Model.findByPk(req.params.id);
-    if (!row) throw new ErrorResponse(`${modelName} not found`, 404);
+    if (!row) throw new ErrorResponse('Not found', 404);
     await row.destroy();
-    res.json({ message: `${modelName} deleted successfully` });
+    res.status(204).end();
   });
-
-  return { getAll, getById, createOne, updateOne, deleteOne };
-}

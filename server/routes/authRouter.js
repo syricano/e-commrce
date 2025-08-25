@@ -1,56 +1,60 @@
+// server/routes/authRouter.js
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import passport from '../config/passport.js';
-import auth from '../middleware/auth.js';
-import {
-  register, login, logout, me, changePassword,
-  requestPasswordReset, confirmPasswordReset
-} from '../controllers/auth.controller.js';
+import { auth } from '../middleware/auth.js';
 
-const router = express.Router();
+const authRouter = express.Router();
 
-// Credentials
-router.post('/register', register);
-router.post('/login', login);
-router.post('/logout', logout);
-router.get('/me', auth, me);
-router.post('/change-password', auth, changePassword);
+const setJwtCookie = (res, userId) => {
+  const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+};
 
-// Reset password
-router.post('/reset/request', requestPasswordReset);
-router.post('/reset/confirm', confirmPasswordReset);
+// Start Google OAuth
+authRouter.get(
+  '/google',
+  passport.authenticate('google', { scope: ['profile', 'email'], prompt: 'select_account' })
+);
 
-// 🟢 Google OAuth Login
-
-router.get('/google', passport.authenticate('google', {
-  scope: ['profile', 'email'],
-}));
-
-router.get('/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: '/signin',
-    session: true,
-  }),
+// Google OAuth callback
+authRouter.get(
+  '/google/callback',
+  passport.authenticate('google', { failureRedirect: '/api/auth/failure', session: true }),
   (req, res) => {
-    if (!req.user) {
-      console.log('❌ req.user is missing');
-      return res.redirect('/signin');
-    }
-
-    const token = jwt.sign({ id: req.user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    console.log('✅ Google user authenticated:', req.user.email);
-    console.log('✅ Redirecting to frontend:', `${process.env.CLIENT_URL}/profile`);
-
-    res.redirect(`${process.env.CLIENT_URL}/profile`);
+    setJwtCookie(res, req.user.id);
+    const redirectTo = process.env.CLIENT_URL || 'http://localhost:5173';
+    res.redirect(redirectTo);
   }
 );
 
-export default router;
+// Current user
+authRouter.get('/me', auth, (req, res) => {
+  res.json({
+    id: req.user.id,
+    email: req.user.email,
+    role: req.user.role,
+    status: req.user.status,
+  });
+});
+
+// Logout
+authRouter.post('/logout', (req, res) => {
+  if (typeof req.logout === 'function') req.logout(() => {});
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  });
+  res.json({ ok: true });
+});
+
+// Failure
+authRouter.get('/failure', (_req, res) => res.status(401).json({ error: 'OAuth failed' }));
+
+export default authRouter;

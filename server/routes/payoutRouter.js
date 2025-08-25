@@ -1,12 +1,17 @@
 import express from 'express';
-import { getAllPayouts, getPayoutById, createPayout, updatePayout, deletePayout } from '../controllers/payout.controller.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/roleAuth.js';
+import { listPayouts, getPayout, createPayout, updatePayout, deletePayout } from '../controllers/payoutController.js';
 
-const router = express.Router();
-router.get('/', auth, requireAdmin, getAllPayouts);
-router.get('/:id', auth, requireAdmin, getPayoutById);
-router.post('/', auth, requireAdmin, createPayout);
-router.put('/:id', auth, requireAdmin, updatePayout);
-router.delete('/:id', auth, requireAdmin, deletePayout);
-export default router;
+const payoutRouter = express.Router();
+
+// Public reads
+payoutRouter.get('/', listPayouts);
+payoutRouter.get('/:id', getPayout);
+
+// Protected writes
+payoutRouter.post('/', auth, requireAdmin, createPayout);
+payoutRouter.put('/:id', auth, requireAdmin, updatePayout);
+payoutRouter.delete('/:id', auth, requireAdmin, deletePayout);
+
+export default payoutRouter;

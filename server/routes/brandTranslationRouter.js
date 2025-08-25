@@ -1,12 +1,17 @@
 import express from 'express';
-import { getAllBrandTranslations, getBrandTranslationById, createBrandTranslation, updateBrandTranslation, deleteBrandTranslation } from '../controllers/brandTranslation.controller.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/roleAuth.js';
+import { listBrandTranslations, getBrandTranslation, createBrandTranslation, updateBrandTranslation, deleteBrandTranslation } from '../controllers/brandTranslationController.js';
 
-const router = express.Router();
-router.get('/', getAllBrandTranslations);
-router.get('/:id', getBrandTranslationById);
-router.post('/', auth, requireAdmin, createBrandTranslation);
-router.put('/:id', auth, requireAdmin, updateBrandTranslation);
-router.delete('/:id', auth, requireAdmin, deleteBrandTranslation);
-export default router;
+const brandTranslationRouter = express.Router();
+
+// Public reads
+brandTranslationRouter.get('/', listBrandTranslations);
+brandTranslationRouter.get('/:id', getBrandTranslation);
+
+// Protected writes
+brandTranslationRouter.post('/', auth, requireAdmin, createBrandTranslation);
+brandTranslationRouter.put('/:id', auth, requireAdmin, updateBrandTranslation);
+brandTranslationRouter.delete('/:id', auth, requireAdmin, deleteBrandTranslation);
+
+export default brandTranslationRouter;
