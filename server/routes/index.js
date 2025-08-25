@@ -49,11 +49,15 @@ import notificationRouter from './notificationRouter.js';
 import blockRouter from './blockRouter.js';
 import geoSearchRouter from './geoSearchRouter.js';
 
+import adminRouter from './adminRouter.js';
+
+
 export const routeMap = [
   { path: '/api/auth', handler: authRouter },
-
+  { path: '/api/admin', handler: adminRouter },
   { path: '/api/users', handler: userRouter },
   { path: '/api/profiles', handler: profileRouter },
+  
   { path: '/api/addresses', handler: addressRouter },
   { path: '/api/stores', handler: storeRouter },
   { path: '/api/store-users', handler: storeUserRouter },

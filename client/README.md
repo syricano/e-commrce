@@ -52,7 +52,7 @@ root/
 │  ├─ src/
 │  │  ├─ context/        # AuthProvider, LangProvider, CartProvider
 │  │  ├─ services/       # API client + CRUD factories (secured endpoints)
-│  │  ├─ components/     # Navbar, ProfileButton, SearchBar, etc.
+│  │  ├─ components/     # Navbar, AccountMenu, SearchBar, etc.
 │  │  ├─ pages/          # Auth, Profile, Catalog, Listings (to add)
 │  │  └─ utils/          # asyncHandler, errorHandler
 │  └─ vite.config.ts     # dev setup

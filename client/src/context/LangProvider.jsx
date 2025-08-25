@@ -12,7 +12,7 @@ const DICT = {
     menu: "القائمة",
     search: "بحث…",
     cart: "السلة",
-    profile: "الملف",
+    profile: "الملف الشخصي",
     signin: "تسجيل الدخول",
     signup: "إنشاء حساب",
     logout: "تسجيل الخروج",

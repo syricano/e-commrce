@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import LangSwitcher from "@/components/UI/LangSwitcher.jsx";
 import CartButton from "@/components/UI/CartButton.jsx";
-import ProfileButton from "@/components/UI/ProfileButton.jsx";
+import AccountMenu from "@/components/UI/AccountMenu.jsx";
 import ThemeToggle from "@/components/UI/ThemeToggle.jsx";
 import useIsMobile from "@/hooks/useIsMobile";
 import { useLang } from "@/context/LangProvider";
@@ -53,7 +53,7 @@ function DesktopBar() {
         <LangSwitcher />
         <ThemeToggle />
         <CartButton />
-        <ProfileButton />
+        <AccountMenu />
       </div>
     </div>
   );
@@ -73,7 +73,7 @@ function MobileBar() {
         </div>
         <div className="navbar-end gap-2">
           <CartButton />
-          <ProfileButton />
+          <AccountMenu />
         </div>
       </div>
 

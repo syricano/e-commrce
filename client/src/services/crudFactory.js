@@ -1,4 +1,3 @@
-// client/services/crudFactory.js
 import axiosInstance from '@/config/axiosConfig';
 import { asyncHandler } from '@/utils';
 

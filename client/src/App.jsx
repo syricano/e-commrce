@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router';
 import { RootLayout, ProtectedLayout } from '@/layouts';
-import { HomePage, NotFound, About, Signin, Signup, Profile, BecomeSeller } from '@/pages';
+import { HomePage, NotFound, About, Signin, Signup, Profile } from '@/pages';
+// ⬇️ import your admin pages
+import { Dashboard , Users } from '@/pages';
+
 import './App.css';
 
 function App() {
@@ -17,7 +20,15 @@ function App() {
           {/* Protected */}
           <Route element={<ProtectedLayout />}>
             <Route path="profile" element={<Profile />} />
-            <Route path="partner/apply" element={<BecomeSeller />} />
+
+          </Route>
+
+           {/* Admin-only area */}
+          <Route element={<ProtectedLayout roles={['admin']} />}>
+            <Route path="admin" element={<Dashboard />} />
+            <Route path="admin/users" element={<Users />} />
+            {/* Later: <Route path="admin/moderation" element={<Moderation />} /> */}
+            {/* Later: <Route path="admin/reports" element={<AdminReports />} /> */}
           </Route>
 
           {/* 404 */}
