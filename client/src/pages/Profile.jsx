@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import axiosInstance from '@/config/axiosConfig';
 import { useAuth } from '@/context';
 import { getMyProfile, updateMyProfile } from '@/services';

@@ -1,4 +1,4 @@
-import { Outlet } from "react-router";
+import { Outlet } from "react-router-dom";
 import Navbar from "@/components/UI/Navbar.jsx";
 import Footer from "@/components/UI/Footer.jsx";
 import { Toaster } from "react-hot-toast";

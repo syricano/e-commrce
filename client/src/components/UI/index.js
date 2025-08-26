@@ -3,8 +3,8 @@ import Card from "./Card";
 import Footer from "./Footer";
 import ImageSlider from "./ImageSlider";
 import ImagePicker from "./ImagePicker";
-import NavBar from "./NavBar";
+import Navbar from "./Navbar";
 import ThemeToggle from "./ThemeToggle";
 
 
-export { ActionButton, Card, Footer, ImageSlider, ImagePicker, NavBar, ThemeToggle };
+export { ActionButton, Card, Footer, ImageSlider, ImagePicker, Navbar, ThemeToggle };

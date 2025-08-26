@@ -1,6 +1,6 @@
 // client/src/components/Navbar.jsx
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import LangSwitcher from "@/components/UI/LangSwitcher.jsx";
 import CartButton from "@/components/UI/CartButton.jsx";
 import AccountMenu from "@/components/UI/AccountMenu.jsx";
@@ -66,7 +66,7 @@ function MobileBar() {
   const label = (c) => (lang === 'en' ? c.en : c.ar);
 
   return (
-    <div className="border-b">
+    <>
       <div className="navbar max-w-screen-2xl mx-auto px-4">
         <div className="navbar-start">
           <Link to="/" className="btn btn-ghost text-lg p-0">Free Market</Link>
@@ -128,16 +128,16 @@ function MobileBar() {
           <ThemeToggle />
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
 function Navbar() {
   const isMobile = useIsMobile(1024);
   return (
-    <nav className="w-full bg-base-100 sticky top-0 z-40">
+    <>
       {isMobile ? <MobileBar /> : <DesktopBar />}
-    </nav>
+    </>
   );
 }
 

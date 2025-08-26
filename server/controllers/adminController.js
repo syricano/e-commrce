@@ -179,3 +179,30 @@ export const impersonate = asyncHandler(async (req, res) => {
   await audit(req, { entity: 'User', entityId: target.id, action: 'impersonate' });
   res.json({ token, user: { id: target.id, email: target.email, role: target.role } });
 });
+
+// === Admin: update/delete user (basic account fields) ===
+export const updateUserByAdmin = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const row = await User.findByPk(id);
+  if (!row) return res.status(404).json({ error: 'User not found' });
+
+  const before = row.toJSON();
+  const allowed = ['email','firstName','lastName','phone','role','status','metadata'];
+  const patch = {};
+  for (const k of allowed) if (Object.prototype.hasOwnProperty.call(req.body, k)) patch[k] = req.body[k];
+
+  await row.update(patch);
+  await audit(req, { entity: 'User', entityId: row.id, action: 'adminUpdate', before, after: row.toJSON() });
+  res.json(row);
+});
+
+export const deleteUserByAdmin = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const row = await User.findByPk(id);
+  if (!row) return res.status(404).json({ error: 'User not found' });
+
+  const before = row.toJSON();
+  await row.destroy(); // respects paranoid soft delete if enabled
+  await audit(req, { entity: 'User', entityId: id, action: 'adminDelete', before, after: null });
+  res.json({ ok: true });
+});

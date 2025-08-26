@@ -1,6 +1,6 @@
 // client/src/pages/auth/Signin.jsx
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context";
 import { googleLoginUrl } from "@/services";
 import { toast } from "react-hot-toast";

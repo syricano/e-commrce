@@ -1,6 +1,6 @@
 // client/src/pages/auth/Signup.jsx
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { register as apiRegister } from "@/services";
 import { toast } from "react-hot-toast";
 import { errorHandler } from "@/utils";

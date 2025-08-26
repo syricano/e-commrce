@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context";
 import { useLang } from "@/context/LangProvider";
 
@@ -11,14 +11,8 @@ function AccountMenu() {
 
   if (!isAuthenticated) {
     return (
-      <button
-        className="btn btn-ghost btn-circle btn-sm"
-        aria-label="profile"
-        onClick={() => nav("/signin")}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path strokeWidth="2" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm7 9a7 7 0 0 0-14 0Z"/>
-        </svg>
+      <button className="btn btn-ghost btn-circle btn-sm" aria-label="profile" onClick={() => nav("/signin")}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeWidth="2" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm7 9a7 7 0 0 0-14 0Z"/></svg>
       </button>
     );
   }
@@ -28,50 +22,30 @@ function AccountMenu() {
 
   return (
     <div className="dropdown dropdown-end">
-      <button
-        className="btn btn-ghost btn-circle btn-sm"
-        aria-label="profile"
-        onClick={() => setOpen(v => !v)}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path strokeWidth="2" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm7 9a7 7 0 0 0-14 0Z"/>
-        </svg>
+      <button className="btn btn-ghost btn-circle btn-sm" aria-label="profile" onClick={() => setOpen(v => !v)}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeWidth="2" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm7 9a7 7 0 0 0-14 0Z"/></svg>
       </button>
 
       {open && (
         <ul className="menu dropdown-content mt-2 w-60 bg-base-100 p-2 shadow rounded-box z-50">
-          <li className="px-3 py-2 text-sm opacity-70 truncate">
-            {user?.email || t("profile")}
-          </li>
+          <li className="px-3 py-2 text-sm opacity-70 truncate">{user?.email || t("profile")}</li>
 
-          <li><button onClick={() => go("/profile")}>{t("profile") || "Profile"}</button></li>
-
-          {/* C2C owner area */}
-          <li><button onClick={() => go("/account/listings")}>{t("myListings") || "My Listings"}</button></li>
-
-          {/* Orders */}
-          <li><button onClick={() => go("/orders")}>{t("myOrders") || "My Orders"}</button></li>
-
-          {/* Messages */}
-          <li><button onClick={() => go("/messages")}>{t("messages") || "Messages"}</button></li>
+          <li><button onClick={() => go("/account/profile")}>{t("profile") || "Profile"}</button></li>
+          <li><button onClick={() => go("/account/listings")}>{t("My Listings") || "My Listings"}</button></li>
+          <li><button onClick={() => go("/account/orders")}>{t("My Orders") || "My Orders"}</button></li>
+          <li><button onClick={() => go("/account/messages")}>{t("Messages") || "Messages"}</button></li>
 
           {isAdmin && (
             <>
               <li className="mt-1 border-t" />
-              <li className="px-3 pt-2 text-xs font-semibold opacity-70">
-                {t("admin") || "Admin"}
-              </li>
-              <li><button onClick={() => go("/admin")}>{t("dashboard") || "Dashboard"}</button></li>
-              <li><button onClick={() => go("/admin/users")}>{t("users") || "Users"}</button></li>
+              <li className="px-3 pt-2 text-xs font-semibold opacity-70">{t("admin") || "Admin"}</li>
+              <li><button onClick={() => go("/admin")}>{t("Dashboard") || "Dashboard"}</button></li>
+              {/* Users link removed from menu; accessible inside Dashboard */}
             </>
           )}
 
           <li className="mt-1 border-t" />
-          <li>
-            <button onClick={() => { setOpen(false); logout(); }}>
-              {t("logout") || "Logout"}
-            </button>
-          </li>
+          <li><button onClick={() => { setOpen(false); logout(); }}>{t("logout") || "Logout"}</button></li>
         </ul>
       )}
     </div>

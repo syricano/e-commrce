@@ -11,10 +11,10 @@ export const adminUpdateUserRoleStatus = (id, payload) =>
   asyncHandler(() => axiosInstance.put(`/admin/users/${id}/role-status`, payload), 'Failed to update user role/status')();
 
 export const adminUpdateUser = (id, payload) =>
-  asyncHandler(() => axiosInstance.put(`/users/${id}`, payload), 'Failed to update user')();
+  asyncHandler(() => axiosInstance.put(`/admin/users/${id}`, payload), 'Failed to update user')();
 
 export const adminSuspendUser = (id) =>
   asyncHandler(() => axiosInstance.post(`/admin/users/${id}/suspend`), 'Failed to suspend user')();
 
 export const adminDeleteUser = (id) =>
-  asyncHandler(() => axiosInstance.delete(`/users/${id}`), 'Failed to delete user')();
+  asyncHandler(() => axiosInstance.delete(`/admin/users/${id}`), 'Failed to delete user')();

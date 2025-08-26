@@ -1,11 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  adminSearchUsers,
-  adminUpdateUserRoleStatus,
-  adminUpdateUser,
-  adminSuspendUser,
-  adminDeleteUser,
-} from '@/services';
+import { adminSearchUsers, adminUpdateUserRoleStatus, adminUpdateUser, adminSuspendUser, adminDeleteUser } from '@/services';
 import { errorHandler } from '@/utils';
 import { toast } from 'react-hot-toast';
 
@@ -28,7 +22,6 @@ export default function Users() {
   };
 
   useEffect(() => { load(); }, []);
-
   const onSearch = (e) => { e?.preventDefault?.(); load(); };
   const patchRow = (id, patch) => setItems((rows) => rows.map(r => (r.id === id ? { ...r, ...patch } : r)));
 
@@ -40,24 +33,16 @@ export default function Users() {
       ]);
       toast.success('User updated');
       load();
-    } catch (e) {
-      errorHandler(e, 'Update failed');
-    }
+    } catch (e) { errorHandler(e, 'Update failed'); }
   };
 
   const onSuspend = (u) => {
-    adminSuspendUser(u.id)
-      .then(() => toast.success('User suspended'))
-      .then(() => load())
-      .catch((e) => errorHandler(e, 'Suspend failed'));
+    adminSuspendUser(u.id).then(()=>toast.success('User suspended')).then(()=>load()).catch((e)=>errorHandler(e,'Suspend failed'));
   };
 
   const onDelete = (u) => {
     if (!confirm(`Delete user ${u.email}? This cannot be undone.`)) return;
-    adminDeleteUser(u.id)
-      .then(() => toast.success('User deleted'))
-      .then(() => load())
-      .catch((e) => errorHandler(e, 'Delete failed'));
+    adminDeleteUser(u.id).then(()=>toast.success('User deleted')).then(()=>load()).catch((e)=>errorHandler(e,'Delete failed'));
   };
 
   const table = useMemo(() => (
@@ -65,14 +50,7 @@ export default function Users() {
       <table className="table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Email</th>
-            <th>First</th>
-            <th>Last</th>
-            <th>Phone</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th className="text-right">Actions</th>
+            <th>ID</th><th>Email</th><th>First</th><th>Last</th><th>Phone</th><th>Role</th><th>Status</th><th className="text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -100,9 +78,7 @@ export default function Users() {
               </td>
             </tr>
           ))}
-          {items.length === 0 && !loading && (
-            <tr><td colSpan={8} className="text-center opacity-60 py-6">No users</td></tr>
-          )}
+          {items.length === 0 && !loading && (<tr><td colSpan={8} className="text-center opacity-60 py-6">No users</td></tr>)}
         </tbody>
       </table>
     </div>
@@ -110,28 +86,23 @@ export default function Users() {
 
   return (
     <section className="p-4 space-y-4">
+      <h1 className="text-xl font-semibold">Users</h1>
       <form onSubmit={onSearch} className="flex flex-wrap gap-2 items-end">
-        <label className="form-control">
-          <span className="label-text">Search</span>
+        <label className="form-control"><span className="label-text">Search</span>
           <input className="input input-bordered" value={q} onChange={e=>setQ(e.target.value)} placeholder="name, email, phone…" />
         </label>
-        <label className="form-control">
-          <span className="label-text">Role</span>
+        <label className="form-control"><span className="label-text">Role</span>
           <select className="select select-bordered" value={roleFilter} onChange={e=>setRoleFilter(e.target.value)}>
-            <option value="">Any</option>
-            {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+            <option value="">Any</option>{ROLES.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </label>
-        <label className="form-control">
-          <span className="label-text">Status</span>
+        <label className="form-control"><span className="label-text">Status</span>
           <select className="select select-bordered" value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
-            <option value="">Any</option>
-            {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+            <option value="">Any</option>{STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </label>
         <button className="btn btn-primary" disabled={loading}>{loading ? '...' : 'Search'}</button>
       </form>
-
       {table}
     </section>
   );

@@ -7,17 +7,23 @@ import {
   updateUserRoleStatus,
   suspendUser,
 } from '../controllers/adminController.js';
+import {
+  updateUserByAdmin,
+  deleteUserByAdmin,
+} from '../controllers/adminController.js';
 
 const adminRouter = express.Router();
 
 adminRouter.use(auth, requireAdmin);
 
-// Dashboard summary
+// Dashboard
 adminRouter.get('/dashboard', getDashboardStats);
 
 // Users management
-adminRouter.get('/users', searchUsers);                          // ?q=&role=&status=&page=&limit=
-adminRouter.put('/users/:id/role-status', updateUserRoleStatus); // { role?, status? }
-adminRouter.post('/users/:id/suspend', suspendUser);             // quick suspend helper
+adminRouter.get('/users', searchUsers);
+adminRouter.put('/users/:id/role-status', updateUserRoleStatus);
+adminRouter.post('/users/:id/suspend', suspendUser);
+adminRouter.put('/users/:id', updateUserByAdmin);
+adminRouter.delete('/users/:id', deleteUserByAdmin);
 
 export default adminRouter;
