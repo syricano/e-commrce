@@ -66,6 +66,25 @@ export const getListing = asyncHandler(async (req, res) => {
   res.json(row);
 });
 
+export const getMyListings = asyncHandler(async (req, res) => {
+  const { page = '1', limit = '50', status } = req.query;
+  const where = { ownerUserId: req.user.id };
+  if (status) where.status = status;
+
+  const { rows, count } = await Listing.findAndCountAll({
+    where,
+    include: [
+      { model: ListingTranslation, as: 'translations', required: false },
+      { model: ListingMedia, as: 'media', required: false },
+    ],
+    order: [['publishedAt', 'DESC']],
+    limit: +limit,
+    offset: (+page - 1) * (+limit),
+  });
+
+  res.json({ total: count, items: rows });
+});
+
 export const updateListing = asyncHandler(async (req, res) => {
   const row = await Listing.findByPk(req.params.id);
   if (!row) throw new ErrorResponse('Not found', 404);

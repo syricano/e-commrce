@@ -1,10 +1,13 @@
+// client/src/pages/account/Profile.jsx
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import axiosInstance from '@/config/axiosConfig';
 import { useAuth } from '@/context';
 import { getMyProfile, updateMyProfile } from '@/services';
 import { errorHandler } from '@/utils';
 import { toast } from 'react-hot-toast';
+
+const ROLES = ['customer','seller','staff','admin'];
 
 function Field({ label, name, value, onChange, type = 'text', readOnly = false }) {
   return (
@@ -22,10 +25,11 @@ function Field({ label, name, value, onChange, type = 'text', readOnly = false }
   );
 }
 
-export default function Profile() {
-  const { user } = useAuth();
+function Profile() {
+  const { user, role } = useAuth();
+  const isAdmin = role === 'admin';
 
-  // Account (self) — /users/me
+  // ---------- Account (self: /users/me)
   const [acc, setAcc] = useState({
     email: user?.email ?? '',
     firstName: user?.firstName ?? '',
@@ -67,11 +71,17 @@ export default function Profile() {
       .finally(() => setAccBusy(false));
   };
 
-  // Profile (self) — /profiles/me
+  const onChangeRole = (e) => {
+    // visible but disabled here; admin role/status changes live in Admin → Users
+    setAcc((s) => ({ ...s, role: e.target.value }));
+  };
+
+  // ---------- Profile (self: /profiles/me)
   const [me, setMe] = useState({ displayName: '', avatarUrl: '', bio: '' });
   const [meLoading, setMeLoading] = useState(true);
   const [meEdit, setMeEdit] = useState(false);
   const [meBusy, setMeBusy] = useState(false);
+
   const onSelfChange = (e) => setMe((s) => ({ ...(s || {}), [e.target.name]: e.target.value }));
 
   useEffect(() => {
@@ -115,7 +125,19 @@ export default function Profile() {
 
           <div className="grid md:grid-cols-2 gap-3">
             <Field label="Email" name="email" value={acc.email} onChange={onAccChange} readOnly />
-            <Field label="Role" name="role" value={acc.role} onChange={onAccChange} readOnly />
+            <label className="form-control">
+              <span className="label-text">Role</span>
+              <select
+                className="select select-bordered"
+                value={acc.role}
+                onChange={onChangeRole}
+                disabled
+              >
+                {ROLES.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </label>
             <Field label="Status" name="status" value={acc.status} onChange={onAccChange} readOnly />
             <Field label="First name" name="firstName" value={acc.firstName} onChange={onAccChange} readOnly={!accEdit} />
             <Field label="Last name"  name="lastName"  value={acc.lastName}  onChange={onAccChange} readOnly={!accEdit} />
@@ -163,12 +185,14 @@ export default function Profile() {
       <h1 className="text-2xl font-bold">Profile</h1>
 
       <div className="flex gap-2 flex-wrap">
-        <Link className="btn btn-outline btn-sm" to="/account/orders">My Orders</Link>
-        <Link className="btn btn-outline btn-sm" to="/account/listings">My Listings</Link>
-        <Link className="btn btn-outline btn-sm" to="/account/listings/new">Create Listing</Link>
+        <Link className="btn btn-outline btn-sm" to="/orders">My Orders</Link>
+        <Link className="btn btn-outline btn-sm" to="/my/listings">My Listings</Link>
+        <Link className="btn btn-outline btn-sm" to="/listings/new">Create Listing</Link>
       </div>
 
       {meUserCard}
     </section>
   );
 }
+
+export default Profile;

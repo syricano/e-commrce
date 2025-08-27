@@ -1,92 +1,133 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createListing } from '@/services';
 import axiosInstance from '@/config/axiosConfig';
 import { useAuth } from '@/context';
+import { useLang } from '@/context/LangProvider';
 import { errorHandler } from '@/utils';
 import { toast } from 'react-hot-toast';
+import { COUNTRIES, CITIES_BY_COUNTRY } from '@/services/geo';
 
+const CURRENCIES = ['EUR','USD','GBP','AED','SAR'];
 const CONDITIONS = ['new','used','refurbished'];
-const STATUSES   = ['draft','active','reserved','sold','expired'];
 
-// Keep this list short if you like. Server accepts any ISO 4217 code.
-const CURRENCIES = [
-  'EUR','USD','GBP','JPY','CNY','INR','CAD','AUD','CHF','SEK','NOK','DKK','PLN','TRY',
-  'AED','SAR','QAR','KWD','BHD','OMR','EGP','MAD','ZAR','NGN','KES','BRL','MXN','ARS',
-  'CLP','COP','PEN','HKD','TWD','KRW','SGD','NZD','CZK','HUF','RON','UAH','PKR','BDT',
-];
+const slugify = (s) => {
+  const base = (s || '').toString().trim()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  return base || `listing-${Date.now()}`;
+};
 
 export default function ListingCreate() {
   const nav = useNavigate();
-  const { user } = useAuth();
+  const { user } = useAuth(); // kept if you need auth-guard
+  const { lang } = useLang();
 
   const [cats, setCats] = useState([]);
+  const [catTrs, setCatTrs] = useState([]);
   const [busy, setBusy] = useState(false);
 
   const [f, setF] = useState({
-    ownerUserId: user?.id ?? undefined,
     categoryId: '',
+    title: '',
+    description: '',
     priceAmount: '',
     currency: 'EUR',
     negotiable: false,
     condition: 'used',
-    status: 'draft',
-    locationCity: '',
+    country: COUNTRIES[0],
+    city: '',
+    setCoords: false,
     locationLat: '',
     locationLng: '',
-    views: 0,
-    favoritesCount: 0,
-    publishedAt: '',
+    expiryMode: 'never',
     expiresAt: '',
-    metadata: '{ }',
   });
 
   useEffect(() => {
-    setF(s => ({ ...s, ownerUserId: user?.id ?? undefined }));
-  }, [user?.id]);
-
-  useEffect(() => {
-    // load categories for select
-    axiosInstance.get('/categories', { params: { limit: 200 } })
-      .then(res => setCats(res?.data?.items || res?.data || []))
-      .catch(e => errorHandler(e, 'Failed to load categories'));
+    const run = async () => {
+      try {
+        const [cRes, tRes] = await Promise.all([
+          axiosInstance.get('/categories', { params: { limit: 500 } }),
+          axiosInstance.get('/category-translations', { params: { limit: 2000 } }).catch(() => ({ data: [] })),
+        ]);
+        setCats(cRes?.data?.items || cRes?.data || []);
+        const trs = tRes?.data?.items || tRes?.data || [];
+        setCatTrs(Array.isArray(trs) ? trs : []);
+      } catch (e) {
+        errorHandler(e, 'Failed to load categories');
+      }
+    };
+    run();
   }, []);
+
+  const catNameById = useMemo(() => {
+    const byId = new Map();
+    for (const t of catTrs) {
+      if (t?.categoryId && t?.locale === lang && t?.name) byId.set(Number(t.categoryId), t.name);
+    }
+    for (const t of catTrs) {
+      const id = Number(t?.categoryId);
+      if (id && !byId.has(id) && t?.name) byId.set(id, t.name);
+    }
+    return byId;
+  }, [catTrs, lang]);
+
+  const pickCatLabel = (c) =>
+    catNameById.get(Number(c?.id)) || c?.name || c?.slug || `#${c?.id}`;
+
+  const cities = useMemo(() => CITIES_BY_COUNTRY[f.country] || [], [f.country]);
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
     setF(s => ({ ...s, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  const parseMaybe = (v, fn) => (v === '' || v == null ? null : fn(v));
-  const parseJSON = (txt) => {
-    try { return txt && txt.trim() ? JSON.parse(txt) : null; } catch { return null; }
-  };
-
   const onSubmit = async (e) => {
     e.preventDefault();
+    const title = f.title.trim();
+    if (!title) return toast.error('Title is required');
+    if (f.priceAmount === '' || Number.isNaN(Number(f.priceAmount))) {
+      return toast.error('Valid price is required');
+    }
+
+    const body = {
+      priceAmount: Number(f.priceAmount),
+      currency: (f.currency || 'EUR').toUpperCase(),
+      negotiable: !!f.negotiable,
+      condition: f.condition,
+      status: 'active', // force active on create
+      translations: [
+        {
+          locale: lang || 'en',
+          title,
+          slug: slugify(title),
+          description: (f.description || '').trim(),
+        },
+      ],
+    };
+
+    if (f.categoryId) body.categoryId = Number(f.categoryId);
+    if (f.city)       body.locationCity = f.city;
+
+    if (f.setCoords) {
+      const lat = Number(f.locationLat);
+      const lng = Number(f.locationLng);
+      if (!Number.isNaN(lat)) body.locationLat = lat;
+      if (!Number.isNaN(lng)) body.locationLng = lng;
+    }
+
+    if (f.expiryMode === 'date' && f.expiresAt) {
+      body.expiresAt = new Date(f.expiresAt).toISOString();
+    }
+
     setBusy(true);
     try {
-      const body = {
-        ownerUserId: user?.id, // authoritative
-        categoryId: parseMaybe(f.categoryId, (x)=>Number(x)),
-        priceAmount: parseMaybe(f.priceAmount, (x)=>Number(x)),
-        currency: (f.currency || 'EUR').toUpperCase(),
-        negotiable: !!f.negotiable,
-        condition: f.condition,
-        status: f.status,
-        locationCity: f.locationCity || null,
-        locationLat: parseMaybe(f.locationLat, (x)=>Number(x)),
-        locationLng: parseMaybe(f.locationLng, (x)=>Number(x)),
-        views: parseMaybe(f.views, (x)=>Number(x)) ?? 0,
-        favoritesCount: parseMaybe(f.favoritesCount, (x)=>Number(x)) ?? 0,
-        publishedAt: f.publishedAt ? new Date(f.publishedAt) : null,
-        expiresAt:   f.expiresAt   ? new Date(f.expiresAt)   : null,
-        metadata: parseJSON(f.metadata),
-        // If your API still expects translations, add them here.
-        // translations: [{ locale: 'en', title: f.title || '', description: f.description || '' }]
-      };
-
-      await createListing(body);
+      await axiosInstance.post('/listings', body);
       toast.success('Listing created');
       nav('/account/listings');
     } catch (err) {
@@ -100,113 +141,219 @@ export default function ListingCreate() {
     <section className="max-w-3xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Create Listing</h1>
 
-      <form className="grid gap-3" onSubmit={onSubmit}>
-        <div className="grid md:grid-cols-2 gap-3">
+      <form className="grid gap-4" onSubmit={onSubmit}>
+        <div className="grid gap-3">
           <label className="form-control">
-            <span className="label-text">Owner</span>
-            <input className="input input-bordered" value={user?.id || ''} readOnly />
+            <span className="label-text">Title</span>
+            <input
+              name="title"
+              className="input input-bordered"
+              value={f.title}
+              onChange={onChange}
+              placeholder="e.g. iPhone 12 128GB"
+              required
+            />
           </label>
 
           <label className="form-control">
-            <span className="label-text">Category</span>
-            <select name="categoryId" className="select select-bordered" value={f.categoryId} onChange={onChange}>
-              <option value="">— none —</option>
-              {cats.map(c => (
-                <option key={c.id} value={c.id}>
-                  {c.name || c.slug || c.id}
-                </option>
-              ))}
-            </select>
+            <span className="label-text">Description</span>
+            <textarea
+              name="description"
+              className="textarea textarea-bordered"
+              rows={4}
+              value={f.description}
+              onChange={onChange}
+              placeholder="Condition, what’s included, pickup/shipping details…"
+            />
           </label>
         </div>
 
         <div className="grid md:grid-cols-3 gap-3">
           <label className="form-control">
-            <span className="label-text">Price amount</span>
-            <input name="priceAmount" type="number" className="input input-bordered" value={f.priceAmount} onChange={onChange} required />
-          </label>
-
-          <label className="form-control">
-            <span className="label-text">Currency</span>
-            <select name="currency" className="select select-bordered" value={f.currency} onChange={onChange}>
-              {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+            <span className="label-text">Category</span>
+            <select
+              name="categoryId"
+              className="select select-bordered"
+              value={f.categoryId}
+              onChange={onChange}
+            >
+              <option value="">— none —</option>
+              {cats
+                .slice()
+                .sort((a,b) => pickCatLabel(a).localeCompare(pickCatLabel(b)))
+                .map(c => (
+                  <option key={c.id} value={c.id}>
+                    {pickCatLabel(c)}
+                  </option>
+                ))}
             </select>
           </label>
 
           <label className="form-control">
-            <span className="label-text">Negotiable</span>
-            <input name="negotiable" type="checkbox" className="toggle" checked={f.negotiable} onChange={onChange} />
+            <span className="label-text">Price</span>
+            <input
+              name="priceAmount"
+              type="number"
+              className="input input-bordered"
+              value={f.priceAmount}
+              onChange={onChange}
+              required
+              min="0"
+            />
+          </label>
+
+          <label className="form-control">
+            <span className="label-text">Currency</span>
+            <select
+              name="currency"
+              className="select select-bordered"
+              value={f.currency}
+              onChange={onChange}
+            >
+              {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
           </label>
         </div>
 
         <div className="grid md:grid-cols-3 gap-3">
           <label className="form-control">
             <span className="label-text">Condition</span>
-            <select name="condition" className="select select-bordered" value={f.condition} onChange={onChange}>
+            <select
+              name="condition"
+              className="select select-bordered"
+              value={f.condition}
+              onChange={onChange}
+            >
               {CONDITIONS.map(v => <option key={v} value={v}>{v}</option>)}
             </select>
           </label>
 
           <label className="form-control">
-            <span className="label-text">Status</span>
-            <select name="status" className="select select-bordered" value={f.status} onChange={onChange}>
-              {STATUSES.map(v => <option key={v} value={v}>{v}</option>)}
+            <span className="label-text">Negotiable</span>
+            <input
+              name="negotiable"
+              type="checkbox"
+              className="toggle"
+              checked={f.negotiable}
+              onChange={onChange}
+            />
+          </label>
+
+          {/* no status selector on create */}
+          <div />
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-3">
+          <label className="form-control">
+            <span className="label-text">Country</span>
+            <select
+              name="country"
+              className="select select-bordered"
+              value={f.country}
+              onChange={(e) => {
+                const country = e.target.value;
+                const list = CITIES_BY_COUNTRY[country] || [];
+                setF(s => ({
+                  ...s,
+                  country,
+                  city: list.includes(s.city) ? s.city : (list[0] || '')
+                }));
+              }}
+            >
+              {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </label>
+
+          <label className="form-control">
+            <span className="label-text">City</span>
+            <select
+              name="city"
+              className="select select-bordered"
+              value={f.city}
+              onChange={onChange}
+            >
+              <option value="">— select —</option>
+              {(CITIES_BY_COUNTRY[f.country] || []).map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </label>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-3">
-          <label className="form-control">
-            <span className="label-text">City</span>
-            <input name="locationCity" className="input input-bordered" value={f.locationCity} onChange={onChange} />
+        <div className="grid gap-2">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="setCoords"
+              className="checkbox"
+              checked={f.setCoords}
+              onChange={onChange}
+            />
+            <span className="label-text">Set map coordinates (optional)</span>
           </label>
 
-          <label className="form-control">
-            <span className="label-text">Latitude</span>
-            <input name="locationLat" type="number" step="0.000001" className="input input-bordered" value={f.locationLat} onChange={onChange} />
-          </label>
-
-          <label className="form-control">
-            <span className="label-text">Longitude</span>
-            <input name="locationLng" type="number" step="0.000001" className="input input-bordered" value={f.locationLng} onChange={onChange} />
-          </label>
+          {f.setCoords && (
+            <div className="grid md:grid-cols-2 gap-3">
+              <label className="form-control">
+                <span className="label-text">Latitude</span>
+                <input
+                  name="locationLat"
+                  type="number"
+                  step="0.000001"
+                  className="input input-bordered"
+                  value={f.locationLat}
+                  onChange={onChange}
+                  placeholder="e.g. 33.513"
+                />
+              </label>
+              <label className="form-control">
+                <span className="label-text">Longitude</span>
+                <input
+                  name="locationLng"
+                  type="number"
+                  step="0.000001"
+                  className="input input-bordered"
+                  value={f.locationLng}
+                  onChange={onChange}
+                  placeholder="e.g. 36.292"
+                />
+              </label>
+            </div>
+          )}
         </div>
 
         <div className="grid md:grid-cols-2 gap-3">
           <label className="form-control">
-            <span className="label-text">Published at</span>
-            <input name="publishedAt" type="datetime-local" className="input input-bordered" value={f.publishedAt} onChange={onChange} />
+            <span className="label-text">Expiry</span>
+            <div className="join">
+              <button
+                type="button"
+                className={`btn join-item ${f.expiryMode === 'never' ? 'btn-active' : ''}`}
+                onClick={() => setF(s => ({ ...s, expiryMode: 'never' }))}
+              >
+                Never
+              </button>
+              <button
+                type="button"
+                className={`btn join-item ${f.expiryMode === 'date' ? 'btn-active' : ''}`}
+                onClick={() => setF(s => ({ ...s, expiryMode: 'date' }))}
+              >
+                Choose date
+              </button>
+            </div>
           </label>
 
-          <label className="form-control">
-            <span className="label-text">Expires at</span>
-            <input name="expiresAt" type="datetime-local" className="input input-bordered" value={f.expiresAt} onChange={onChange} />
-          </label>
+          {f.expiryMode === 'date' && (
+            <label className="form-control">
+              <span className="label-text">Expires at</span>
+              <input
+                name="expiresAt"
+                type="datetime-local"
+                className="input input-bordered"
+                value={f.expiresAt}
+                onChange={onChange}
+              />
+            </label>
+          )}
         </div>
-
-        <div className="grid md:grid-cols-2 gap-3">
-          <label className="form-control">
-            <span className="label-text">Views</span>
-            <input name="views" type="number" className="input input-bordered" value={f.views} onChange={onChange} />
-          </label>
-
-          <label className="form-control">
-            <span className="label-text">Favorites count</span>
-            <input name="favoritesCount" type="number" className="input input-bordered" value={f.favoritesCount} onChange={onChange} />
-          </label>
-        </div>
-
-        <label className="form-control">
-          <span className="label-text">Metadata (JSON)</span>
-          <textarea
-            name="metadata"
-            className="textarea textarea-bordered font-mono"
-            rows={4}
-            value={f.metadata}
-            onChange={onChange}
-            placeholder='{"color":"black","warranty":true}'
-          />
-        </label>
 
         <div className="card-actions justify-end mt-2">
           <button type="submit" className="btn btn-primary" disabled={busy}>

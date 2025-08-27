@@ -63,6 +63,8 @@ export const searchAll = (params) =>
 
 export const getAllListings = listings.list;
 export const getListingById = listings.get;
+export const getMyListings = (params) =>
+  asyncHandler(() => axiosInstance.get('/listings/mine', { params }), 'Failed to load my listings')();
 export const createListing  = listings.create;
 export const updateListing  = listings.update;
 export const deleteListing  = listings.remove;
