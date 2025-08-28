@@ -2,7 +2,8 @@
 import { Routes, Route } from 'react-router-dom'
 import {
   // Public
-  HomePage, About, NotFound, Signin, Signup, Listings, ListingDetail, CategoryBrowse, Stores, PartnerApply,
+  HomePage, About, NotFound, Signin, Signup, Listings, ListingDetail, CategoryBrowse, Stores, PartnerApply, Collections,
+  SearchResults,
   // User
   Profile, MyOrders, MyListings, ListingCreate, Messages,
   // Admin
@@ -26,6 +27,8 @@ function App() {
         <Route path="listings/:id" element={<ListingDetail />} />
         <Route path="c/:slug" element={<CategoryBrowse />} />
         <Route path="stores" element={<Stores />} />
+        <Route path="collections" element={<Collections />} />
+        <Route path="search" element={<SearchResults />} />
 
         {/* Auth */}
         <Route path="signin" element={<Signin />} />

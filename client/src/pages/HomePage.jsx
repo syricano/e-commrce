@@ -76,11 +76,11 @@ const HomePage = () => {
         <ImageSlider />
       </section>
 
-      <section className="max-w-screen-2xl mx-auto px-4">
+      <section className={`max-w-screen-2xl mx-auto px-4  ${lang === 'ar' ? 'md:flex-row-reverse' : 'md:flex-row'}`}>
         <h2 className="text-xl font-semibold mb-3">{t('Categories')}</h2>
         {!cats?.length && <Spinner size={24} />}
         {!!cats?.length && (
-          <div className={`flex gap-4 flex-col ${lang === 'ar' ? 'md:flex-row-reverse' : 'md:flex-row'}`}>
+          <div className="flex gap-4 flex-col">
             <ul className="w-full md:w-48 bg-base-200 rounded-box divide-y">
               {roots.map((r) => (
                 <li key={r.id}>
@@ -96,18 +96,20 @@ const HomePage = () => {
             </ul>
 
             <div className="flex-1">
-              <div className={`grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 ${lang==='ar'?'text-right':'text-left'}`}>
-                {(byParent.get(activeParentId) || []).map((c) => (
-                  <a key={c.id} href={`/c/${catSlugById.get(Number(c.id)) || c.id}`} className="card bg-base-100 border hover:shadow transition">
-                    <div className="card-body p-3">
-                      <div className="font-semibold truncate">{catNameById.get(Number(c.id)) || c.slug || `#${c.id}`}</div>
-                    </div>
-                  </a>
-                ))}
-                {(byParent.get(activeParentId)?.length===0) && (
-                  <div className="opacity-60">No subcategories</div>
-                )}
-              </div>
+              <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
+                <div dir={lang==='ar' ? 'rtl' : undefined} className={`grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 ${lang==='ar'?'text-right justify-items-end w-fit':'text-left w-full'}`}>
+                  {(byParent.get(activeParentId) || []).map((c) => (
+                    <a key={c.id} href={`/c/${catSlugById.get(Number(c.id)) || c.id}`} className="card bg-base-100 border hover:shadow transition">
+                      <div className="card-body p-3">
+                        <div className="font-semibold truncate">{catNameById.get(Number(c.id)) || c.slug || `#${c.id}`}</div>
+                      </div>
+                    </a>
+                  ))}
+                  {(byParent.get(activeParentId)?.length===0) && (
+                    <div className="opacity-60">No subcategories</div>
+                  )}
+                </div>
+            </div>
             </div>
           </div>
         )}

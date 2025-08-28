@@ -54,7 +54,7 @@ export default function CategoryBrowse() {
       <h1 className="text-2xl font-bold mb-4">{cat.name || t('Categories')}</h1>
       {loading && <Spinner size={32} />}
       <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 w-full">
+        <div dir={lang==='ar' ? 'rtl' : undefined} className={`grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 ${lang==='ar'?'text-right justify-items-end w-fit':'text-left w-full'}`}>
           {rows.map((l) => (
             <a key={l.id} href={`/listings/${l.id}`} className="card bg-base-100 border hover:shadow">
               <div className="card-body p-3">

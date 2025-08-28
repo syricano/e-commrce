@@ -11,6 +11,8 @@ import Listings from './outlet/Listings.jsx'
 import CategoryBrowse from './outlet/CategoryBrowse.jsx'
 import Stores from './outlet/Stores.jsx'
 import ListingDetail from './outlet/ListingDetail.jsx'
+import Collections from './outlet/Collections.jsx'
+import SearchResults from './outlet/SearchResults.jsx'
 
 
 import Dashboard from './admin/Dashboard.jsx';
@@ -45,6 +47,8 @@ export {
   CategoryBrowse,
   Stores,
   ListingDetail,
+  Collections,
+  SearchResults,
 
 
 
