@@ -8,6 +8,9 @@ import Signin from './auth/Signin.jsx';
 import Signup from './auth/Signup.jsx';
 
 import Listings from './outlet/Listings.jsx'
+import CategoryBrowse from './outlet/CategoryBrowse.jsx'
+import Stores from './outlet/Stores.jsx'
+import ListingDetail from './outlet/ListingDetail.jsx'
 
 
 import Dashboard from './admin/Dashboard.jsx';
@@ -39,6 +42,9 @@ export {
   Signup,
   
   Listings,
+  CategoryBrowse,
+  Stores,
+  ListingDetail,
 
 
 

@@ -27,6 +27,8 @@ Back end is production‑ready to keep evolving; front end(s) include a web clie
 - Context providers for Auth, Language, Cart
 - Axios with token injection
 - Tailwind/DaisyUI (as used in components)
+ - Admin management pages (users, products, categories, listings, media, reports)
+ - Public listing detail page rendering translations and media
 
 **Mobile App (New Plan)**
 - **React Native (Expo)** for iOS/Android
@@ -111,6 +113,12 @@ All associations are defined in `server/db/association.js` and are **in sync** w
 ## 🔎 Search
 - A unified `/api/search` endpoint is scaffolded (products/stores/listings).  
   **To do:** connect the Navbar `SearchBar` to the API and render result pages.
+
+---
+
+## ✅ Recent Additions
+- Public Listing Detail page at route `/listings/:id` displaying title/description (per language), price, condition, city, and media.
+- Admin pages continue expanding for marketplace management.
 
 ---
 

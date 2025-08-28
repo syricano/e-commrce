@@ -1,80 +1,70 @@
-import React, { useEffect, useState } from 'react';
-
-const imageModules = import.meta.glob('/src/assets/slider/*.{jpg,jpeg,png,webp}', {
-  eager: true,
-});
-const images = Object.values(imageModules).map((mod) => mod.default);
+import React, { useEffect, useMemo, useState } from 'react';
+import axiosInstance from '@/config/axiosConfig';
 
 const ImageSlider = () => {
   const [loading, setLoading] = useState(true);
-  const [loadedImages, setLoadedImages] = useState([]);
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
-    let loaded = [];
-
-    images.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-
-      const markLoaded = () => {
-        loaded.push(src);
-        if (loaded.length === images.length) {
-          setLoadedImages(loaded);
-          setLoading(false);
-        }
-      };
-
-      img.onload = markLoaded;
-      img.onerror = markLoaded;
-    });
+    const load = async () => {
+      setLoading(true);
+      try {
+        const res = await axiosInstance.get('/listings', { params: { limit: 6, sort: 'popular' } });
+        const rows = res?.data?.items || res?.data || [];
+        setItems(Array.isArray(rows) ? rows : []);
+      } catch {}
+      finally { setLoading(false); }
+    };
+    load();
   }, []);
 
+  const slides = useMemo(() => items.map((l) => {
+    const media = Array.isArray(l?.media) ? l.media : [];
+    const img = media[0]?.url || '';
+    return { id: l.id, img, price: l.priceAmount, currency: l.currency };
+  }), [items]);
+
   return (
-    <section className="py-8 bg-[var(--main-bg-color)] text-[var(--main-text-color)]">
+    <section className="py-2 bg-[var(--main-bg-color)] text-[var(--main-text-color)]">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl font-serif text-center mb-6 text-[var(--bc)]">
-          Find the bes deals
+          Find the best deals
         </h2>
 
         {loading ? (
           <div className="w-full flex justify-center py-10">
             <span className="loading loading-spinner text-[var(--bc)] w-10 h-10" />
           </div>
-        ) : (
-          <div className="carousel w-full rounded-3xl shadow-2xl overflow-hidden h-[50vh] sm:h-[70vh] md:h-[80vh]">
-            {loadedImages.map((src, index) => {
-              const prevIndex = (index - 1 + images.length) % images.length;
-              const nextIndex = (index + 1) % images.length;
-
+        ) : slides.length > 0 ? (
+          <div className="carousel mx-auto rounded-2xl shadow overflow-hidden w-[90vw] h-[22vh] sm:w-[80vw] sm:h-[26vh] md:w-[70vw] md:h-[30vh] lg:w-[60vw] lg:h-[35vh] xl:w-[50vw] xl:h-[38vh]">
+            {slides.map((s, index) => {
+              const prevIndex = (index - 1 + slides.length) % slides.length;
+              const nextIndex = (index + 1) % slides.length;
               return (
                 <div
                   id={`slide${index + 1}`}
-                  key={index}
+                  key={s.id}
                   className="carousel-item relative w-full"
                 >
-                  <img
-                    src={src}
-                    alt={`slide-${index}`}
-                    className="w-full h-full object-contain sm:object-cover transition-opacity duration-500"
-                  />
-                  <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-                    <a
-                      href={`#slide${prevIndex + 1}`}
-                      className="btn btn-circle bg-amber-800 text-white hover:bg-amber-600 border-none shadow-md"
-                    >
-                      ❮
-                    </a>
-                    <a
-                      href={`#slide${nextIndex + 1}`}
-                      className="btn btn-circle bg-amber-800 text-white hover:bg-amber-600 border-none shadow-md"
-                    >
-                      ❯
-                    </a>
+                  {s.img ? (
+                    <img src={s.img} alt={`listing-${s.id}`} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-base-200 flex items-center justify-center">No Image</div>
+                  )}
+                  <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2">
+                    <a className="btn btn-primary" href={`/listings/${s.id}`}>View Listing</a>
+                    <div className="badge badge-lg ml-auto">{s.price} {s.currency}</div>
+                  </div>
+                  <div className="absolute left-2 right-2 top-1/2 flex -translate-y-1/2 transform justify-between">
+                    <a href={`#slide${prevIndex + 1}`} className="btn btn-circle">❮</a>
+                    <a href={`#slide${nextIndex + 1}`} className="btn btn-circle">❯</a>
                   </div>
                 </div>
               );
             })}
           </div>
+        ) : (
+          <div className="w-full h-64 bg-base-200 rounded-2xl flex items-center justify-center">No listings</div>
         )}
       </div>
     </section>

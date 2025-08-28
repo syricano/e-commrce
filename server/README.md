@@ -197,12 +197,20 @@ Use validateZod on routes to ensure request payloads are safe.
 
 Admin frontend should consume the /api/* endpoints with JWT auth.
 
-✅ TODO
+## ✅ Recent Additions
+- Category Translations: robust slug generation and idempotent upsert to prevent 409 conflicts on duplicate `categoryId+locale` or `slug+locale`.
+- Listings API: detail endpoint now includes `translations` and `media` so clients can render full listing pages.
+
+## ✅ TODO
 Auth controllers: register, login, logout with bcrypt + jwt.
 
 Rate limiting / request logging.
 
-File uploads for media.
+File uploads for media (S3/local) with moderation hooks.
+
+Notifications (email/push/webhooks) for offers/messages/orders.
+
+Background jobs (listing expiry, payouts), unified search improvements.
 
 📜 License
 MIT

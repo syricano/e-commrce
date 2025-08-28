@@ -356,6 +356,7 @@ export const listingCreateSchema = z.object({
   priceAmount: int.nonnegative(),
   currency: currency.default('EUR'),
   negotiable: bool.default(false),
+  allowCheckout: bool.default(false).optional(),
   condition: z.enum(['new','used','refurbished']).default('used'),
   locationCity: z.string().max(120).optional(),
   locationLat: z.number().min(-90).max(90).optional().nullable(),
@@ -387,7 +388,7 @@ export const listingSearchSchema = z.object({
   city: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
-  sort: z.enum(['new','price_asc','price_desc']).optional(),
+  sort: z.enum(['new','price_asc','price_desc','popular']).optional(),
 });
 
 // Threads

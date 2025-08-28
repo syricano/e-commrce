@@ -10,7 +10,8 @@ import {
   updateListing,
   changeListingStatus,
   deleteListing,
-  toggleFavorite
+  toggleFavorite,
+  purchaseListing
 } from '../controllers/listingController.js';
 
 const listingRouter = express.Router();
@@ -36,5 +37,8 @@ listingRouter.delete('/:id', auth, deleteListing);
 
 // favorites
 listingRouter.post('/:id/favorite', auth, toggleFavorite);
+
+// buy now
+listingRouter.post('/:id/buy', auth, purchaseListing);
 
 export default listingRouter;

@@ -40,6 +40,7 @@ export default function ListingCreate() {
     priceAmount: '',
     currency: 'EUR',
     negotiable: false,
+    allowCheckout: false,
     condition: 'used',
     country: COUNTRIES[0],
     city: '',
@@ -101,6 +102,7 @@ export default function ListingCreate() {
       priceAmount: Number(f.priceAmount),
       currency: (f.currency || 'EUR').toUpperCase(),
       negotiable: !!f.negotiable,
+      allowCheckout: !!f.allowCheckout,
       condition: f.condition,
       status: 'active', // force active on create
       translations: [
@@ -241,8 +243,16 @@ export default function ListingCreate() {
             />
           </label>
 
-          {/* no status selector on create */}
-          <div />
+          <label className="form-control">
+            <span className="label-text">Allow online checkout</span>
+            <input
+              name="allowCheckout"
+              type="checkbox"
+              className="toggle"
+              checked={f.allowCheckout}
+              onChange={onChange}
+            />
+          </label>
         </div>
 
         <div className="grid md:grid-cols-2 gap-3">

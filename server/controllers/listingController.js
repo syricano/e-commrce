@@ -5,6 +5,8 @@ import ErrorResponse from '../utils/errorResponse.js';
 import Listing from '../models/Listing.js';
 import ListingTranslation from '../models/ListingTranslation.js';
 import ListingMedia from '../models/ListingMedia.js';
+import C2CTransaction from '../models/C2CTransaction.js';
+import BlockedUser from '../models/BlockedUser.js';
 
 // ---------- Helpers ----------
 const simpleSlug = (s) => {
@@ -66,7 +68,10 @@ export const createListing = asyncHandler(async (req, res) => {
 
 export const getListing = asyncHandler(async (req, res) => {
   const item = await Listing.findByPk(req.params.id, {
-    include: [{ model: ListingTranslation, as: 'translations', required: false }],
+    include: [
+      { model: ListingTranslation, as: 'translations', required: false },
+      { model: ListingMedia, as: 'media', required: false },
+    ],
   });
   if (!item) return res.status(404).json({ message: 'Not found' });
 
@@ -129,11 +134,16 @@ export const searchListings = asyncHandler(async (req, res) => {
       ? [['priceAmount', 'ASC']]
       : sort === 'price_desc'
       ? [['priceAmount', 'DESC']]
+      : sort === 'popular'
+      ? [['views', 'DESC']]
       : [['createdAt', 'DESC']];
 
   const rows = await Listing.findAndCountAll({
     where,
-    include: [{ model: ListingTranslation, as: 'translations', required: false }],
+    include: [
+      { model: ListingTranslation, as: 'translations', required: false },
+      { model: ListingMedia, as: 'media', required: false },
+    ],
     order,
     limit: Number(limit),
     offset: (Number(page) - 1) * Number(limit),
@@ -189,10 +199,53 @@ export const toggleFavorite = asyncHandler(async (_req, res) => {
   return res.json({ ok: true });
 });
 
+// Buy-now flow for listings that allow online checkout
+export const buyNow = asyncHandler(async (req, res) => {
+  if (!req.user?.id) throw new ErrorResponse('Unauthorized', 401);
+  const listing = await Listing.findByPk(req.params.id);
+  if (!listing) throw new ErrorResponse('Not found', 404);
+  if (listing.ownerUserId === req.user.id) throw new ErrorResponse('Cannot buy your own listing', 400);
+  if (listing.status !== 'active') throw new ErrorResponse('Listing not available', 400);
+  if (!listing.allowCheckout) throw new ErrorResponse('Checkout not enabled for this listing', 400);
+
+  // interaction block check
+  const blocked = await BlockedUser.findOne({
+    where: {
+      [Op.or]: [
+        { userId: listing.ownerUserId, blockedUserId: req.user.id },
+        { userId: req.user.id, blockedUserId: listing.ownerUserId },
+      ],
+    },
+  });
+  if (blocked) throw new ErrorResponse('Interaction blocked', 403);
+
+  const tx = await sequelize.transaction(async (t) => {
+    // reserve listing
+    await listing.update({ status: 'reserved' }, { transaction: t });
+    // create transaction awaiting payment
+    const created = await C2CTransaction.create(
+      {
+        listingId: listing.id,
+        buyerUserId: req.user.id,
+        sellerUserId: listing.ownerUserId,
+        amount: listing.priceAmount,
+        currency: listing.currency || 'EUR',
+        method: 'online',
+        status: 'awaiting_payment',
+      },
+      { transaction: t }
+    );
+    return created;
+  });
+
+  return res.status(201).json(tx);
+});
+
 export const getListingById = getListing;
 export const listListings = searchListings;
 export const changeListingStatus = patchListingStatus;
 export const deleteListing = destroyListing;
+export const purchaseListing = buyNow;
 
 export default {
   createListing,
@@ -202,4 +255,5 @@ export default {
   patchListingStatus: changeListingStatus,
   destroyListing: deleteListing,
   toggleFavorite,
+  buyNow: purchaseListing,
 };

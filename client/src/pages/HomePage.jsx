@@ -1,4 +1,5 @@
 import ImageSlider from '@/components/UI/ImageSlider';
+import Spinner from '@/components/UI/Spinner.jsx';
 import usePageTitle from '@/hooks/usePageTitle';
 import { useLang } from '@/context/LangProvider';
 import { useEffect, useMemo, useState } from 'react';
@@ -42,6 +43,33 @@ const HomePage = () => {
     return byId;
   }, [catTrs, lang]);
 
+  const catSlugById = useMemo(() => {
+    const by = new Map();
+    for (const t of catTrs) {
+      const id = Number(t?.categoryId);
+      if (!id) continue;
+      if (!by.has(id) || t?.locale === lang) by.set(id, t?.slug || '');
+    }
+    return by;
+  }, [catTrs, lang]);
+
+  const byParent = useMemo(() => {
+    const map = new Map();
+    for (const c of cats) {
+      const p = c.parentId || null;
+      if (!map.has(p)) map.set(p, []);
+      map.get(p).push(c);
+    }
+    for (const list of map.values()) list.sort((a,b)=> (a.position||0)-(b.position||0) || (a.id-b.id));
+    return map;
+  }, [cats]);
+
+  const roots = useMemo(() => byParent.get(null) || byParent.get(undefined) || byParent.get(0) || [], [byParent]);
+  const [activeParentId, setActiveParentId] = useState(null);
+  useEffect(() => {
+    if (!activeParentId && roots.length) setActiveParentId(roots[0].id);
+  }, [roots, activeParentId]);
+
   return (
     <div className="space-y-10">
       <section className="main-section flex flex-col items-center justify-center gap-6 py-8 px-4">
@@ -50,42 +78,72 @@ const HomePage = () => {
 
       <section className="max-w-screen-2xl mx-auto px-4">
         <h2 className="text-xl font-semibold mb-3">{t('Categories')}</h2>
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {cats.map(c => (
-            <a key={c.id} href={`/c/${c.slug || c.id}`} className="card bg-base-200 hover:shadow transition">
-              <div className="card-body p-3">
-                <div className="font-semibold truncate">{catNameById.get(Number(c.id)) || c.slug || `#${c.id}`}</div>
+        {!cats?.length && <Spinner size={24} />}
+        {!!cats?.length && (
+          <div className={`flex gap-4 flex-col ${lang === 'ar' ? 'md:flex-row-reverse' : 'md:flex-row'}`}>
+            <ul className="w-full md:w-48 bg-base-200 rounded-box divide-y">
+              {roots.map((r) => (
+                <li key={r.id}>
+                  <button
+                    className={`w-full text-start px-3 py-2 ${activeParentId===r.id?'bg-base-300 font-semibold':''}`}
+                    onMouseEnter={()=>setActiveParentId(r.id)}
+                    onClick={()=>setActiveParentId(r.id)}
+                  >
+                    {catNameById.get(Number(r.id)) || r.slug || `#${r.id}`}
+                  </button>
+                </li>
+              ))}
+            </ul>
+
+            <div className="flex-1">
+              <div className={`grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 ${lang==='ar'?'text-right':'text-left'}`}>
+                {(byParent.get(activeParentId) || []).map((c) => (
+                  <a key={c.id} href={`/c/${catSlugById.get(Number(c.id)) || c.id}`} className="card bg-base-100 border hover:shadow transition">
+                    <div className="card-body p-3">
+                      <div className="font-semibold truncate">{catNameById.get(Number(c.id)) || c.slug || `#${c.id}`}</div>
+                    </div>
+                  </a>
+                ))}
+                {(byParent.get(activeParentId)?.length===0) && (
+                  <div className="opacity-60">No subcategories</div>
+                )}
               </div>
-            </a>
-          ))}
-        </div>
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="max-w-screen-2xl mx-auto px-4">
         <h2 className="text-xl font-semibold mb-3">{t('Listings')}</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {listings.map(l => (
-            <a key={l.id} href={`/listings/${l.id}`} className="card bg-base-100 border hover:shadow">
-              <div className="card-body p-3">
-                <div className="font-semibold">#{l.id}</div>
-                <div className="opacity-70 text-sm">{l.priceAmount} {l.currency}</div>
-              </div>
-            </a>
-          ))}
+        {!listings?.length && <Spinner size={24} />}
+        <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 w-full">
+            {listings.map(l => (
+              <a key={l.id} href={`/listings/${l.id}`} className="card bg-base-100 border hover:shadow">
+                <div className="card-body p-3">
+                  <div className="font-semibold">#{l.id}</div>
+                  <div className="opacity-70 text-sm">{l.priceAmount} {l.currency}</div>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 
       <section className="max-w-screen-2xl mx-auto px-4">
         <h2 className="text-xl font-semibold mb-3">{t('Products')}</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {products.map(p => (
-            <a key={p.id} href={`/products/${p.id}`} className="card bg-base-100 border hover:shadow">
-              <div className="card-body p-3">
-                <div className="font-semibold">SKU {p.canonicalSku || p.id}</div>
-                <div className="opacity-70 text-sm">{String(p.moderationStatus || 'draft')}</div>
-              </div>
-            </a>
-          ))}
+        {!products?.length && <Spinner size={24} />}
+        <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 w-full">
+            {products.map(p => (
+              <a key={p.id} href={`/products/${p.id}`} className="card bg-base-100 border hover:shadow">
+                <div className="card-body p-3">
+                  <div className="font-semibold">SKU {p.canonicalSku || p.id}</div>
+                  <div className="opacity-70 text-sm">{String(p.moderationStatus || 'draft')}</div>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
     </div>

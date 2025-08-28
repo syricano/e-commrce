@@ -55,16 +55,42 @@ export default function ManageCategories() {
 
   useEffect(() => { load(); }, []);
 
+  // Build hierarchical ordering for categories
+  const hierOrdered = useMemo(() => {
+    const byParent = new Map();
+    const all = Array.isArray(cats) ? cats : [];
+    for (const c of all) {
+      const p = c.parentId || null;
+      if (!byParent.has(p)) byParent.set(p, []);
+      byParent.get(p).push(c);
+    }
+    // stable sort children by position then id
+    for (const list of byParent.values()) list.sort((a,b)=> (a.position||0)-(b.position||0) || (a.id-b.id));
+    const out = [];
+    const visit = (node, depth) => {
+      out.push({ ...node, __depth: depth });
+      const children = byParent.get(node.id) || [];
+      for (const ch of children) visit(ch, depth + 1);
+    };
+    const roots = byParent.get(null) || byParent.get(undefined) || byParent.get(0) || [];
+    // include nodes whose parent is missing as roots too
+    const rootSet = new Set(roots.map(r=>r.id));
+    for (const c of all) if (!rootSet.has(c.id) && !byParent.has(c.parentId||null)) roots.push(c);
+    for (const r of roots) visit(r, 0);
+    return out;
+  }, [cats]);
+
   const filtered = useMemo(() => {
-    if (!query.trim()) return cats;
+    const list = hierOrdered;
+    if (!query.trim()) return list;
     const q = query.trim().toLowerCase();
-    return cats.filter((c) => {
+    return list.filter((c) => {
       const en = trIndex[c.id]?.en?.name?.toLowerCase() || '';
       const ar = trIndex[c.id]?.ar?.name?.toLowerCase() || '';
       const slug = trIndex[c.id]?.en?.slug?.toLowerCase() || trIndex[c.id]?.ar?.slug?.toLowerCase() || '';
       return String(c.id).includes(q) || en.includes(q) || ar.includes(q) || slug.includes(q);
     });
-  }, [cats, trIndex, query]);
+  }, [hierOrdered, trIndex, query]);
 
   const nameOf = (cId, pref = 'en') =>
     trIndex[cId]?.[pref]?.name || trIndex[cId]?.en?.name || trIndex[cId]?.ar?.name || `#${cId}`;
@@ -176,8 +202,12 @@ export default function ManageCategories() {
             {filtered.map((c) => (
               <tr key={c.id}>
                 <td>{c.id}</td>
-                <td className="whitespace-nowrap">{trIndex[c.id]?.en?.name || '—'}</td>
-                <td className="whitespace-nowrap">{trIndex[c.id]?.ar?.name || '—'}</td>
+                <td className="whitespace-nowrap">
+                  <span style={{ paddingInlineStart: (c.__depth || 0) * 16 }}>{trIndex[c.id]?.en?.name || '—'}</span>
+                </td>
+                <td className="whitespace-nowrap">
+                  <span style={{ paddingInlineStart: (c.__depth || 0) * 16 }}>{trIndex[c.id]?.ar?.name || '—'}</span>
+                </td>
                 <td className="whitespace-nowrap">{c.parentId ? nameOf(c.parentId) : '—'}</td>
                 <td>{c.position ?? 0}</td>
                 <td>
