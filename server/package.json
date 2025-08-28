@@ -11,6 +11,12 @@
   "author": "",
   "license": "ISC",
   "type": "module",
+  "eslintConfig": {
+    "env": { "node": true, "es2022": true },
+    "extends": ["eslint:recommended"],
+    "parserOptions": { "ecmaVersion": 2022, "sourceType": "module" },
+    "ignorePatterns": ["node_modules/", "dist/", "build/"]
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",

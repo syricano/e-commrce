@@ -6,6 +6,7 @@ import { useLang } from '@/context/LangProvider';
 import { errorHandler } from '@/utils';
 import { toast } from 'react-hot-toast';
 import { COUNTRIES, CITIES_BY_COUNTRY } from '@/services/geo';
+import usePageTitle from '@/hooks/usePageTitle';
 
 const CURRENCIES = ['EUR','USD','GBP','AED','SAR'];
 const CONDITIONS = ['new','used','refurbished'];
@@ -25,7 +26,8 @@ const slugify = (s) => {
 export default function ListingCreate() {
   const nav = useNavigate();
   const { user } = useAuth(); // kept if you need auth-guard
-  const { lang } = useLang();
+  const { lang, t } = useLang();
+  usePageTitle('sell');
 
   const [cats, setCats] = useState([]);
   const [catTrs, setCatTrs] = useState([]);
@@ -139,7 +141,7 @@ export default function ListingCreate() {
 
   return (
     <section className="max-w-3xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Create Listing</h1>
+      <h1 className="text-2xl font-bold mb-4">{t('Create Listing') || 'Create Listing'}</h1>
 
       <form className="grid gap-4" onSubmit={onSubmit}>
         <div className="grid gap-3">

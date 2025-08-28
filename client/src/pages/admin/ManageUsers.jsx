@@ -2,11 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { adminSearchUsers, adminUpdateUserRoleStatus, adminUpdateUser, adminSuspendUser, adminDeleteUser } from '@/services';
 import { errorHandler } from '@/utils';
 import { toast } from 'react-hot-toast';
+import { useLang } from '@/context/LangProvider';
+import usePageTitle from '@/hooks/usePageTitle';
 
 const ROLES = ['customer','seller','staff','admin'];
 const STATUSES = ['active','suspended','pending'];
 
 export default function Users() {
+  const { t } = useLang();
+  usePageTitle('Users');
   const [q, setQ] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -50,7 +54,7 @@ export default function Users() {
       <table className="table">
         <thead>
           <tr>
-            <th>ID</th><th>Email</th><th>First</th><th>Last</th><th>Phone</th><th>Role</th><th>Status</th><th className="text-right">Actions</th>
+            <th>ID</th><th>Email</th><th>{t('First') || 'First'}</th><th>{t('Last') || 'Last'}</th><th>{t('Phone') || 'Phone'}</th><th>{t('Role') || 'Role'}</th><th>{t('Status') || 'Status'}</th><th className="text-right">{t('Actions') || 'Actions'}</th>
           </tr>
         </thead>
         <tbody>
@@ -72,13 +76,13 @@ export default function Users() {
                 </select>
               </td>
               <td className="text-right space-x-2">
-                <button className="btn btn-primary btn-xs" onClick={() => onSave(u)}>Save</button>
-                <button className="btn btn-warning btn-xs" onClick={() => onSuspend(u)}>Suspend</button>
-                <button className="btn btn-error btn-xs" onClick={() => onDelete(u)}>Delete</button>
+                <button className="btn btn-primary btn-xs" onClick={() => onSave(u)}>{t('save')}</button>
+                <button className="btn btn-warning btn-xs" onClick={() => onSuspend(u)}>{t('Suspend') || 'Suspend'}</button>
+                <button className="btn btn-error btn-xs" onClick={() => onDelete(u)}>{t('delete')}</button>
               </td>
             </tr>
           ))}
-          {items.length === 0 && !loading && (<tr><td colSpan={8} className="text-center opacity-60 py-6">No users</td></tr>)}
+          {items.length === 0 && !loading && (<tr><td colSpan={8} className="text-center opacity-60 py-6">{t('noItems')}</td></tr>)}
         </tbody>
       </table>
     </div>
@@ -86,10 +90,10 @@ export default function Users() {
 
   return (
     <section className="p-4 space-y-4">
-      <h1 className="text-xl font-semibold">Users</h1>
+      <h1 className="text-xl font-semibold">{t('Users')}</h1>
       <form onSubmit={onSearch} className="flex flex-wrap gap-2 items-end">
-        <label className="form-control"><span className="label-text">Search</span>
-          <input className="input input-bordered" value={q} onChange={e=>setQ(e.target.value)} placeholder="name, email, phone…" />
+        <label className="form-control"><span className="label-text">{t('search')}</span>
+          <input className="input input-bordered" value={q} onChange={e=>setQ(e.target.value)} placeholder={t('search')} />
         </label>
         <label className="form-control"><span className="label-text">Role</span>
           <select className="select select-bordered" value={roleFilter} onChange={e=>setRoleFilter(e.target.value)}>
@@ -101,7 +105,7 @@ export default function Users() {
             <option value="">Any</option>{STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </label>
-        <button className="btn btn-primary" disabled={loading}>{loading ? '...' : 'Search'}</button>
+        <button className="btn btn-primary" disabled={loading}>{loading ? '...' : t('search')}</button>
       </form>
       {table}
     </section>

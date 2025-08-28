@@ -81,7 +81,7 @@ export const categoryTranslationSchema = z.object({
   categoryId: bigId,
   locale,
   name: stringOpt(200),
-  slug: stringOpt(255),
+  slug: stringOpt(255).optional(),
   metaTitle: stringNullable(255),
   metaDescription: stringNullable(500)
 });
@@ -356,30 +356,38 @@ export const listingCreateSchema = z.object({
   priceAmount: int.nonnegative(),
   currency: currency.default('EUR'),
   negotiable: bool.default(false),
-  condition: z.enum(['new','used','refurbished']),
+  condition: z.enum(['new','used','refurbished']).default('used'),
   locationCity: z.string().max(120).optional(),
-  locationLat: z.number().min(-90).max(90).optional(),
-  locationLng: z.number().min(-180).max(180).optional(),
-  translations: z.array(z.object({
-    locale,
-    title: stringOpt(255),
-    slug: stringOpt(255),
-    description: z.string().optional()
-  })).min(1)
+  locationLat: z.number().min(-90).max(90).optional().nullable(),
+  locationLng: z.number().min(-180).max(180).optional().nullable(),
+  status: z.enum(['draft','active','reserved','sold','expired']).optional(),
+  translations: z
+    .array(
+      z.object({
+        locale,
+        title: stringOpt(255),
+        slug: stringOpt(255).optional(),
+        description: z.string().optional(),
+      })
+    )
+    .min(1),
 });
 
 export const listingUpdateSchema = listingCreateSchema.partial();
 
 export const listingSearchSchema = z.object({
   q: z.string().optional(),
-  categoryId: z.string().optional(),
-  minPrice: z.string().optional(),
-  maxPrice: z.string().optional(),
+  status: z.enum(['draft','active','reserved','sold','expired']).optional(),
+  mine: z.union([z.boolean(), z.string()]).optional(),
+  type: z.enum(['private','store']).optional(),
+  categoryId: z.coerce.number().int().optional(),
+  minPrice: z.coerce.number().int().optional(),
+  maxPrice: z.coerce.number().int().optional(),
   condition: z.enum(['new','used','refurbished']).optional(),
   city: z.string().optional(),
-  page: z.string().optional(),
-  limit: z.string().optional(),
-  sort: z.enum(['new','price_asc','price_desc']).optional()
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  sort: z.enum(['new','price_asc','price_desc']).optional(),
 });
 
 // Threads
@@ -403,6 +411,55 @@ export const listingOfferCreateSchema = z.object({
 
 export const listingOfferPatchSchema = z.object({
   action: z.enum(['accept','decline','withdraw'])
+});
+
+// Listing status patch
+export const listingStatusEnum = z.enum(['draft','active','reserved','sold','expired']);
+export const listingStatusPatchSchema = z.object({
+  status: listingStatusEnum
+});
+
+// ===== Admin payloads =====
+export const adminUserRoleStatusSchema = z.object({
+  role: userRole.optional(),
+  status: userStatus.optional(),
+});
+
+export const adminUserUpdateSchema = z.object({
+  email: z.string().email().max(320).optional(),
+  firstName: z.string().max(120).optional(),
+  lastName: z.string().max(120).optional(),
+  phone: z.string().max(32).optional(),
+  role: userRole.optional(),
+  status: userStatus.optional(),
+  metadata: z.record(z.any()).optional(),
+});
+
+export const adminModerateProductSchema = z.object({
+  moderationStatus: moderationStatus.optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const adminModerateListingSchema = z.object({
+  status: listingStatusEnum,
+});
+
+export const adminReviewReportSchema = z.object({
+  status: z.enum(['open','reviewed','actioned']),
+  note: z.string().max(1000).optional(),
+});
+
+export const adminAssignCommissionSchema = z.object({
+  commissionSchemeId: bigId.nullable().optional(),
+});
+
+export const adminUpdatePayoutStatusSchema = z.object({
+  status: payoutStatus,
+  externalRef: z.string().max(128).optional(),
+});
+
+export const adminImpersonateSchema = z.object({
+  userId: bigId,
 });
 
 // Reports

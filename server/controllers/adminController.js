@@ -8,8 +8,8 @@ import User from '../models/User.js';
 import Store from '../models/Store.js';
 import Product from '../models/Product.js';
 import Listing from '../models/Listing.js';
-import Report from '../models/Report.js';
 import Payout from '../models/Payout.js';
+import Report from '../models/Report.js';
 import CommissionScheme from '../models/CommissionScheme.js';
 import AuditLog from '../models/AuditLog.js';
 
@@ -22,18 +22,18 @@ const audit = (req, { entity, entityId, action, before = null, after = null }) =
 
 /* ===== Dashboard ===== */
 export const getDashboardStats = asyncHandler(async (_req, res) => {
+  const safeCount = async (Model, where = undefined) => {
+    try { return await Model.count(where ? { where } : undefined); } catch { return 0; }
+  };
   const [users, stores, products, listings, reportsOpen, payoutsPending] = await Promise.all([
-    User.count(),
-    Store.count(),
-    Product.count(),
-    Listing.count(),
-    Report.count({ where: { status: 'open' } }),
-    Payout.count({ where: { status: 'pending' } }),
+    safeCount(User),
+    safeCount(Store),
+    safeCount(Product),
+    safeCount(Listing),
+    safeCount(Report, { status: 'open' }),
+    safeCount(Payout, { status: 'pending' }),
   ]);
-  res.json({
-    users, stores, products, listings,
-    reportsOpen, payoutsPending,
-  });
+  res.json({ users, stores, products, listings, reportsOpen, payoutsPending });
 });
 
 /* ===== Users (admin) ===== */
@@ -130,6 +130,24 @@ export const reviewReport = asyncHandler(async (req, res) => {
   await row.update(patch);
   await audit(req, { entity: 'Report', entityId: row.id, action: 'review', before, after: row.toJSON() });
   res.json(row);
+});
+
+export const listReports = asyncHandler(async (req, res) => {
+  try {
+    const { status, page = '1', limit = '50' } = req.query;
+    const where = {};
+    if (status) where.status = status;
+    const rows = await Report.findAndCountAll({
+      where,
+      order: [['id', 'DESC']],
+      limit: +limit,
+      offset: (+page - 1) * (+limit),
+    });
+    return res.json({ total: rows.count, items: rows.rows });
+  } catch (e) {
+    // if table not ready, avoid crashing the admin screen
+    return res.json({ total: 0, items: [] });
+  }
 });
 
 /* ===== Stores, commissions, payouts ===== */

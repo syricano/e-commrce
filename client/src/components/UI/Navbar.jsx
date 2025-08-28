@@ -1,5 +1,5 @@
 // client/src/components/Navbar.jsx
-import { useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 import { Link } from "react-router-dom";
 import LangSwitcher from "@/components/UI/LangSwitcher.jsx";
 import CartButton from "@/components/UI/CartButton.jsx";
@@ -17,31 +17,34 @@ const CATS = [
   { to: '/c/games',       en: 'Games',       ar: 'الألعاب'      },
 ];
 
+ 
+
 function DesktopBar() {
   const { t, lang } = useLang();
   const label = (c) => (lang === 'en' ? c.en : c.ar);
+  const [catsOpen, setCatsOpen] = useState(false);
 
   return (
-    <div className="navbar max-w-screen-2xl mx-auto px-4">
+    <div className="navbar max-w-screen-2xl mx-auto px-4" onMouseLeave={() => setCatsOpen(false)}>
       <div className="navbar-start gap-2">
-        <Link to="/" className="btn btn-ghost text-xl">{t("Free Market")}</Link>
+        <Link to="/" className="btn btn-ghost text-xl">{t('brand')}</Link>
         <ul className="menu menu-horizontal px-2">
           <li><Link to="/">{t("home")}</Link></li>
           <li><Link to="/collections">{t("offers")}</Link></li>
           <li><Link to="/stores">{t("stores")}</Link></li>
-          <li tabIndex={0}>
-            <details>
-              <summary>{t("categories")}</summary>
-              <ul className="p-2 bg-base-100 min-w-56">
+          <li className="relative">
+            <button className="btn btn-ghost btn-sm" onMouseEnter={()=>setCatsOpen(true)} onClick={()=>setCatsOpen(v=>!v)}>{t('categories')}</button>
+            {catsOpen && (
+              <ul className="p-2 bg-base-100 min-w-56 shadow rounded-box absolute z-50 mt-2" onMouseLeave={()=>setCatsOpen(false)}>
                 {CATS.map(c => (
-                  <li key={c.to}><Link to={c.to}>{label(c)}</Link></li>
+                  <li key={c.to}><Link to={c.to} onClick={()=>setCatsOpen(false)}>{label(c)}</Link></li>
                 ))}
               </ul>
-            </details>
+            )}
           </li>
           {/* C2C */}
           <li><Link to="/listings">{t("listings")}</Link></li>
-          <li><Link to="/listings/new">{t("sell")}</Link></li>
+          <li><Link to="/account/listings/new">{t("sell")}</Link></li>
         </ul>
       </div>
 
@@ -69,7 +72,7 @@ function MobileBar() {
     <>
       <div className="navbar max-w-screen-2xl mx-auto px-4">
         <div className="navbar-start">
-          <Link to="/" className="btn btn-ghost text-lg p-0">Free Market</Link>
+          <Link to="/" className="btn btn-ghost text-lg p-0">{t('brand')}</Link>
         </div>
         <div className="navbar-end gap-2">
           <CartButton />
@@ -119,7 +122,7 @@ function MobileBar() {
             </li>
             {/* C2C */}
             <li><Link to="/listings">{t("listings")}</Link></li>
-            <li><Link to="/listings/new">{t("sell")}</Link></li>
+            <li><Link to="/account/listings/new">{t("sell")}</Link></li>
           </ul>
         </div>
 

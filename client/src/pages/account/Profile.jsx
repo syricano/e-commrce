@@ -185,9 +185,9 @@ function Profile() {
       <h1 className="text-2xl font-bold">Profile</h1>
 
       <div className="flex gap-2 flex-wrap">
-        <Link className="btn btn-outline btn-sm" to="/orders">My Orders</Link>
-        <Link className="btn btn-outline btn-sm" to="/my/listings">My Listings</Link>
-        <Link className="btn btn-outline btn-sm" to="/listings/new">Create Listing</Link>
+        <Link className="btn btn-outline btn-sm" to="/account/orders">My Orders</Link>
+        <Link className="btn btn-outline btn-sm" to="/account/listings">My Listings</Link>
+        <Link className="btn btn-outline btn-sm" to="/account/listings/new">Create Listing</Link>
       </div>
 
       {meUserCard}

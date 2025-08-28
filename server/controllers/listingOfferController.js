@@ -27,6 +27,27 @@ export const createListingOffer = asyncHandler(async (req, res) => {
   res.status(201).json(row);
 });
 
+export const listListingOffers = asyncHandler(async (req, res) => {
+  const { page = '1', limit = '50', status, listingId, buyerUserId } = req.query;
+  const where = {};
+  if (status) where.status = status;
+  if (listingId) where.listingId = Number(listingId);
+  if (buyerUserId) where.buyerUserId = Number(buyerUserId);
+  const rows = await ListingOffer.findAndCountAll({
+    where,
+    order: [['id', 'DESC']],
+    limit: +limit,
+    offset: (+page - 1) * (+limit),
+  });
+  res.json({ total: rows.count, items: rows.rows });
+});
+
+export const getListingOfferById = asyncHandler(async (req, res) => {
+  const row = await ListingOffer.findByPk(req.params.id);
+  if (!row) throw new ErrorResponse('Not found', 404);
+  res.json(row);
+});
+
 export const updateListingOffer = asyncHandler(async (req, res) => {
   const row = await ListingOffer.findByPk(req.params.id);
   if (!row) throw new ErrorResponse('Not found', 404);
@@ -105,4 +126,6 @@ export default {
   acceptListingOffer,
   declineListingOffer,
   markTransactionStatus,
+  listListingOffers,
+  getListingOfferById,
 };

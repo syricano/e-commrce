@@ -50,6 +50,7 @@ import blockRouter from './blockRouter.js';
 import geoSearchRouter from './geoSearchRouter.js';
 
 import adminRouter from './adminRouter.js';
+import partnerRouter from './partnerRouter.js';
 
 
 export const routeMap = [
@@ -103,6 +104,7 @@ export const routeMap = [
   { path: '/api/notifications', handler: notificationRouter },
   { path: '/api/blocks', handler: blockRouter },
   { path: '/api/geo', handler: geoSearchRouter },
+  { path: '/api/partners', handler: partnerRouter },
 ];
 
 export default function mountAll(app) {

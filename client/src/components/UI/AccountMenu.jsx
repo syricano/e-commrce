@@ -35,11 +35,12 @@ function AccountMenu() {
           <li><button onClick={() => go("/account/orders")}>{t("My Orders") || "My Orders"}</button></li>
           <li><button onClick={() => go("/account/messages")}>{t("Messages") || "Messages"}</button></li>
 
-          {isAdmin && (
+          {(isAdmin || user?.role === 'seller') && (
             <>
               <li className="mt-1 border-t" />
               <li className="px-3 pt-2 text-xs font-semibold opacity-70">{t("admin") || "Admin"}</li>
               <li><button onClick={() => go("/admin")}>{t("Dashboard") || "Dashboard"}</button></li>
+              <li><button onClick={() => go("/merchant")}>{t("Stores") || 'Store Dashboard'}</button></li>
               {/* Users link removed from menu; accessible inside Dashboard */}
             </>
           )}

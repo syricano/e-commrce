@@ -9,8 +9,8 @@ const storeRouter = express.Router();
 storeRouter.get('/', listStores);
 storeRouter.get('/:id', getStore);
 
-// Protected writes
-storeRouter.post('/', auth, requireAdmin, createStore);
+// Create store: allow any authenticated user (ownerUserId defaults to req.user.id)
+storeRouter.post('/', auth, createStore);
 storeRouter.put('/:id', auth, requireAdmin, updateStore);
 storeRouter.delete('/:id', auth, requireAdmin, deleteStore);
 

@@ -4,6 +4,7 @@ import { useAuth } from "@/context";
 import { useLang } from "@/context/LangProvider";
 import { errorHandler } from "@/utils";
 import { toast } from "react-hot-toast";
+import usePageTitle from '@/hooks/usePageTitle';
 
 const ALL_STATUSES = ["active", "reserved", "sold", "draft", "expired"];
 const CONDITIONS = ["new", "used", "refurbished"];
@@ -36,9 +37,20 @@ const statusBadge = (s) => {
   return "badge";
 };
 
+const reservedCountdown = (reservedAt) => {
+  if (!reservedAt) return null;
+  const end = new Date(new Date(reservedAt).getTime() + 48 * 60 * 60 * 1000);
+  const diff = end.getTime() - Date.now();
+  if (diff <= 0) return "expired";
+  const hours = Math.floor(diff / (60 * 60 * 1000));
+  const mins = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
+  return `${hours}h ${mins}m`;
+};
+
 export default function MyListings() {
   const { user } = useAuth();
-  const { lang } = useLang();
+  const { lang, t } = useLang();
+  usePageTitle('ManageListings');
 
   const [items, setItems] = useState([]);
   const [catTxs, setCatTxs] = useState([]); // category translations
@@ -91,7 +103,7 @@ export default function MyListings() {
 
   const fetchMine = async () => {
     const params = {
-      limit: 500,
+      limit: 100,
       ...(statusFilter !== "all" ? { status: statusFilter } : {}),
     };
     const r = await axiosInstance.get("/listings/mine", { params });
@@ -233,7 +245,7 @@ export default function MyListings() {
   return (
     <section className="p-4 space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h1 className="text-2xl font-bold">My Listings</h1>
+        <h1 className="text-2xl font-bold">{t('ManageListings')}</h1>
         <div className="flex gap-2">
           <button className="btn btn-ghost btn-sm" onClick={load} disabled={loading}>
             {loading ? "…" : "Refresh"}
@@ -293,6 +305,9 @@ export default function MyListings() {
                 </td>
                 <td className="whitespace-nowrap">
                   <span className={statusBadge(l.status)}>{l.status || "active"}</span>
+                  {String(l.status).toLowerCase() === 'reserved' && (
+                    <span className="ml-2 text-xs opacity-60">{reservedCountdown(l.reservedAt)}</span>
+                  )}
                 </td>
                 <td className="text-right space-x-2">
                   <button

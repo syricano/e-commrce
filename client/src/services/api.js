@@ -25,9 +25,11 @@ export const googleLoginUrl = () =>
 
 /* ===== Public read-only (catalog browse) ===== */
 const categories  = createCrud('/categories');
+export const Categories = createCrud('/categories');
 const brands      = createCrud('/brands');
 const products    = createCrud('/products');
 const collections = createCrud('/collections');
+export const CategoryTranslations = createCrud('/category-translations');
 
 export const getAllCategories = categories.list;
 export const getCategoryById  = categories.get;

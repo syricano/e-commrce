@@ -18,3 +18,29 @@ export const adminSuspendUser = (id) =>
 
 export const adminDeleteUser = (id) =>
   asyncHandler(() => axiosInstance.delete(`/admin/users/${id}`), 'Failed to delete user')();
+
+// Products moderation
+export const adminModerateProduct = (id, payload) =>
+  asyncHandler(() => axiosInstance.post(`/admin/products/${id}/moderate`, payload), 'Failed to moderate product')();
+
+// Listings moderation
+export const adminModerateListing = (id, payload) =>
+  asyncHandler(() => axiosInstance.post(`/admin/listings/${id}/moderate`, payload), 'Failed to moderate listing')();
+
+// Reports
+export const adminListReports = (params) =>
+  asyncHandler(() => axiosInstance.get('/admin/reports', { params }), 'Failed to load reports')();
+export const adminReviewReport = (id, payload) =>
+  asyncHandler(() => axiosInstance.post(`/admin/reports/${id}/review`, payload), 'Failed to review report')();
+
+// Stores / commissions
+export const adminAssignCommission = (storeId, payload) =>
+  asyncHandler(() => axiosInstance.put(`/admin/stores/${storeId}/commission`, payload), 'Failed to set commission')();
+
+// Payouts
+export const adminUpdatePayoutStatus = (id, payload) =>
+  asyncHandler(() => axiosInstance.put(`/admin/payouts/${id}/status`, payload), 'Failed to update payout')();
+
+// Impersonation
+export const adminImpersonate = (userId) =>
+  asyncHandler(() => axiosInstance.post('/admin/impersonate', { userId }), 'Failed to impersonate')();

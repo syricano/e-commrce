@@ -8,6 +8,7 @@ import session from 'express-session';
 import passport from './config/passport.js';
 import sequelize from './db/index.js';
 import applyAssociations from './db/association.js';
+import startExpireReservedJob from './jobs/expireReserved.js';
 import mountAll from './routes/index.js'; // router exporter
 import errorHandler from './middleware/errorHandler.js';
 import ErrorResponse from './utils/errorResponse.js';
@@ -89,7 +90,11 @@ const start = async () => {
     // ensure env matches Sequelize init (DB_URL vs DATABASE_URL)
     await sequelize.authenticate();
     applyAssociations();
-    await sequelize.sync();
+    // keep alter in dev to evolve schema during development
+    if (process.env.NODE_ENV !== 'production') {
+      await sequelize.sync({ alter: true });
+    }
+    startExpireReservedJob();
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   } catch (err) {
     console.error('❌ Failed to start server:', err);

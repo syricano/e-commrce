@@ -2,22 +2,26 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAdminStats } from '@/services';
 import { errorHandler } from '@/utils';
+import { useLang } from '@/context/LangProvider';
+import usePageTitle from '@/hooks/usePageTitle';
 
 const cards = [
-  { to: "/admin/manage/users",               label: "Users" },
-  { to: "/admin/manage/stores",              label: "ManageStores" },
-  { to: "/admin/manage/products",            label: "ManageProducts" },
-  { to: "/admin/manage/categories",          label: "ManageCategories" },
-  { to: "/admin/manage/collections",         label: "ManageCollections" },
-  { to: "/admin/manage/media",               label: "ManageMedia" },
-  { to: "/admin/manage/listings",            label: "ManageListings" },
-  { to: "/admin/manage/listing-offers",      label: "ManageListingOffers" },
-  { to: "/admin/manage/listing-promotions",  label: "ManageListingPromotions" },
-  { to: "/admin/manage/reports",             label: "ManageReports" },
+  { to: "/admin/users",               labelKey: "Users" },
+  { to: "/admin/stores",              labelKey: "Stores" },
+  { to: "/admin/products",            labelKey: "ManageProducts" },
+  { to: "/admin/categories",          labelKey: "ManageCategories" },
+  { to: "/admin/collections",         labelKey: "ManageCollections" },
+  { to: "/admin/media",               labelKey: "ManageMedia" },
+  { to: "/admin/listings",            labelKey: "ManageListings" },
+  { to: "/admin/listing-offers",      labelKey: "ManageListingOffers" },
+  { to: "/admin/listing-promotions",  labelKey: "ManageListingPromotions" },
+  { to: "/admin/reports",             labelKey: "ManageReports" },
 ];
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
+  const { t } = useLang();
+  usePageTitle('dashboard');
 
   useEffect(() => {
     getAdminStats()
@@ -27,14 +31,14 @@ export default function Dashboard() {
 
   return (
     <section className="space-y-4">
-      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+      <h1 className="text-2xl font-bold">{t('dashboard')}</h1>
 
       {/* KPI */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {stats ? Object.entries(stats).map(([k,v])=>(
           <div key={k} className="card bg-base-200">
             <div className="card-body">
-              <h3 className="card-title capitalize">{k}</h3>
+              <h3 className="card-title capitalize">{t(k) || k}</h3>
               <p className="text-3xl font-bold">{v}</p>
             </div>
           </div>
@@ -46,8 +50,8 @@ export default function Dashboard() {
         {cards.map(c=>(
           <Link key={c.to} to={c.to} className="card bg-base-100 border hover:shadow-md transition">
             <div className="card-body">
-              <h3 className="card-title">{c.label}</h3>
-              <p className="opacity-70">Open {c.label}</p>
+              <h3 className="card-title">{t(c.labelKey)}</h3>
+              <p className="opacity-70">{t('Manage')} {t(c.labelKey)}</p>
             </div>
           </Link>
         ))}

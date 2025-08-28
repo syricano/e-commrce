@@ -1,0 +1,7 @@
+{
+  "threshold": 100,
+  "reporters": ["consoleFull","markdown","json"],
+  "output": ".jscpd",
+  "patterns": ["src/**/*.{js,jsx,ts,tsx,css,scss}"],
+  "exclude": ["**/node_modules/**","**/dist/**","**/build/**","**/.git/**","**/__archive/**"]
+}

@@ -16,4 +16,26 @@ export const bumpListing = asyncHandler(async (req, res) => {
   res.status(201).json(row);
 });
 
-export default { bumpListing };
+export const listPromotions = asyncHandler(async (req, res) => {
+  const { page = '1', limit = '50', status, type, listingId } = req.query;
+  const where = {};
+  if (status) where.status = status;
+  if (type) where.type = type;
+  if (listingId) where.listingId = Number(listingId);
+  const rows = await ListingPromotion.findAndCountAll({
+    where,
+    order: [['id', 'DESC']],
+    limit: +limit,
+    offset: (+page - 1) * (+limit),
+  });
+  res.json({ total: rows.count, items: rows.rows });
+});
+
+export const updatePromotion = asyncHandler(async (req, res) => {
+  const row = await ListingPromotion.findByPk(req.params.id);
+  if (!row) throw new ErrorResponse('Not found', 404);
+  await row.update(req.body);
+  res.json(row);
+});
+
+export default { bumpListing, listPromotions, updatePromotion };

@@ -2,14 +2,15 @@
 import { Routes, Route } from 'react-router-dom'
 import {
   // Public
-  HomePage, About, NotFound, Signin, Signup, Listings,
+  HomePage, About, NotFound, Signin, Signup, Listings, PartnerApply,
   // User
-  Profile, MyOrders, MyListings, ListingCreate,
+  Profile, MyOrders, MyListings, ListingCreate, Messages,
   // Admin
   Dashboard,
   ManageUsers, ManageStores, ManageProducts, ManageCategories,
   ManageCollections, ManageMedia, ManageListings, ManageListingOffers,
   ManageListingPromotions, ManageReports,
+  MerchantDashboard,
 } from '@/pages'
 import { ProtectedLayout, RootLayout, AccountLayout ,AdminLayout } from '@/layouts'
 
@@ -20,6 +21,7 @@ function App() {
         {/* Public */}
         <Route index element={<HomePage />} />
         <Route path="about" element={<About />} />
+        <Route path="partner" element={<PartnerApply />} />
         <Route path="listings" element={<Listings />} />
 
         {/* Auth */}
@@ -29,6 +31,7 @@ function App() {
         {/* Protected */}
         <Route element={<ProtectedLayout />}>
           <Route path="account/profile" element={<Profile />} />
+          <Route path="merchant" element={<MerchantDashboard />} />
 
           {/* Account area */}
           <Route path="account" element={<AccountLayout />}>
@@ -36,6 +39,7 @@ function App() {
             <Route path="orders" element={<MyOrders />} />
             <Route path="listings" element={<MyListings />} />
             <Route path="listings/new" element={<ListingCreate />} />
+            <Route path="messages" element={<Messages />} />
           </Route>
 
         </Route>

@@ -1,8 +1,16 @@
-export default function Page() {
+import CrudPage from './_CrudPage';
+
+export default function ManageCollections() {
   return (
-    <section className="p-4">
-      <h1 className="text-xl font-semibold">TODO</h1>
-      <p className="opacity-70">Build this admin section.</p>
-    </section>
+    <CrudPage
+      title="ManageCollections"
+      base="/collections"
+      columns={[
+        { key: 'id', label: 'ID' },
+        { key: 'key', label: 'Key', editable: true, create: true },
+        { key: 'type', label: 'Type', editable: true, create: true },
+        { key: 'isActive', label: 'Active', type: 'bool', editable: true, create: true },
+      ]}
+    />
   );
 }
