@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import axiosInstance from '@/config/axiosConfig';
 import usePageTitle from '@/hooks/usePageTitle';
 import { useLang } from '@/context/LangProvider';
@@ -56,12 +56,12 @@ export default function CategoryBrowse() {
       <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
         <div dir={lang==='ar' ? 'rtl' : undefined} className={`grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 ${lang==='ar'?'text-right justify-items-end w-fit':'text-left w-full'}`}>
           {rows.map((l) => (
-            <a key={l.id} href={`/listings/${l.id}`} className="card bg-base-100 border hover:shadow">
+            <Link key={l.id} to={`/listings/${l.id}`} className="card bg-base-100 border hover:shadow">
               <div className="card-body p-3">
                 <div className="font-semibold truncate">{titleOf(l)}</div>
                 <div className="opacity-70 text-sm">{l.priceAmount} {l.currency}</div>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

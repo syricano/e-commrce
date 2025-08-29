@@ -6,6 +6,7 @@ import {
   SearchResults,
   // User
   Profile, MyOrders, MyListings, ListingCreate, Messages,
+  OrderDetail,
   // Admin
   Dashboard,
   ManageUsers, ManageStores, ManageProducts, ManageCategories,
@@ -43,6 +44,7 @@ function App() {
           <Route path="account" element={<AccountLayout />}>
             <Route index element={<MyOrders />} />
             <Route path="orders" element={<MyOrders />} />
+            <Route path="orders/:id" element={<OrderDetail />} />
             <Route path="listings" element={<MyListings />} />
             <Route path="listings/new" element={<ListingCreate />} />
             <Route path="messages" element={<Messages />} />

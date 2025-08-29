@@ -30,6 +30,7 @@ import MerchantDashboard from './merchant/Dashboard.jsx';
 
 import Profile from './account/Profile.jsx';
 import MyOrders from './account/MyOrders.jsx';
+import OrderDetail from './account/OrderDetail.jsx';
 import MyListings from './account/MyListings.jsx';
 import ListingCreate from './account/ListingCreate.jsx';
 import Messages from './account/Messages.jsx';
@@ -55,6 +56,7 @@ export {
   // User
   Profile,
   MyOrders,
+  OrderDetail,
   MyListings,
   ListingCreate,
   Messages,

@@ -4,6 +4,7 @@ import usePageTitle from '@/hooks/usePageTitle';
 import { useLang } from '@/context/LangProvider';
 import { useEffect, useMemo, useState } from 'react';
 import axiosInstance from '@/config/axiosConfig';
+import { Link } from 'react-router-dom';
 
 const HomePage = () => {
   usePageTitle('home');
@@ -99,11 +100,11 @@ const HomePage = () => {
               <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
                 <div dir={lang==='ar' ? 'rtl' : undefined} className={`grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 ${lang==='ar'?'text-right justify-items-end w-fit':'text-left w-full'}`}>
                   {(byParent.get(activeParentId) || []).map((c) => (
-                    <a key={c.id} href={`/c/${catSlugById.get(Number(c.id)) || c.id}`} className="card bg-base-100 border hover:shadow transition">
+                    <Link key={c.id} to={`/c/${catSlugById.get(Number(c.id)) || c.id}`} className="card bg-base-100 border hover:shadow transition">
                       <div className="card-body p-3">
                         <div className="font-semibold truncate">{catNameById.get(Number(c.id)) || c.slug || `#${c.id}`}</div>
                       </div>
-                    </a>
+                    </Link>
                   ))}
                   {(byParent.get(activeParentId)?.length===0) && (
                     <div className="opacity-60">No subcategories</div>
@@ -121,12 +122,12 @@ const HomePage = () => {
         <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
           <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 w-full">
             {listings.map(l => (
-              <a key={l.id} href={`/listings/${l.id}`} className="card bg-base-100 border hover:shadow">
+              <Link key={l.id} to={`/listings/${l.id}`} className="card bg-base-100 border hover:shadow">
                 <div className="card-body p-3">
                   <div className="font-semibold">#{l.id}</div>
                   <div className="opacity-70 text-sm">{l.priceAmount} {l.currency}</div>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -138,12 +139,12 @@ const HomePage = () => {
         <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
           <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 w-full">
             {products.map(p => (
-              <a key={p.id} href={`/products/${p.id}`} className="card bg-base-100 border hover:shadow">
+              <Link key={p.id} to={`/products/${p.id}`} className="card bg-base-100 border hover:shadow">
                 <div className="card-body p-3">
                   <div className="font-semibold">SKU {p.canonicalSku || p.id}</div>
                   <div className="opacity-70 text-sm">{String(p.moderationStatus || 'draft')}</div>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         </div>

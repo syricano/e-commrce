@@ -32,6 +32,7 @@ export default function ListingCreate() {
   const [cats, setCats] = useState([]);
   const [catTrs, setCatTrs] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [attrs, setAttrs] = useState({});
 
   const [f, setF] = useState({
     categoryId: '',
@@ -84,6 +85,8 @@ export default function ListingCreate() {
     catNameById.get(Number(c?.id)) || c?.name || c?.slug || `#${c?.id}`;
 
   const cities = useMemo(() => CITIES_BY_COUNTRY[f.country] || [], [f.country]);
+  const selectedCat = useMemo(() => cats.find(c => String(c.id) === String(f.categoryId)) || null, [cats, f.categoryId]);
+  const filterFields = useMemo(() => selectedCat?.metadata?.filters?.fields || [], [selectedCat]);
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -129,6 +132,11 @@ export default function ListingCreate() {
       body.expiresAt = new Date(f.expiresAt).toISOString();
     }
 
+    // Attach category-specific attributes into metadata
+    if (filterFields.length) {
+      body.metadata = { ...(body.metadata || {}), ...attrs };
+    }
+
     setBusy(true);
     try {
       await axiosInstance.post('/listings', body);
@@ -171,6 +179,34 @@ export default function ListingCreate() {
             />
           </label>
         </div>
+
+        {/* Category-specific attributes */}
+        {filterFields.length > 0 && (
+          <div className="grid md:grid-cols-2 gap-3">
+            {filterFields.map(field => (
+              <label key={field.key} className="form-control">
+                <span className="label-text">{field.label || field.key}</span>
+                {field.type === 'select' ? (
+                  <select
+                    className="select select-bordered"
+                    value={attrs[field.key] || ''}
+                    onChange={(e)=>setAttrs(s=>({ ...s, [field.key]: e.target.value }))}
+                  >
+                    <option value="">—</option>
+                    {(field.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    className="input input-bordered"
+                    type={field.type==='number'?'number':'text'}
+                    value={attrs[field.key] || ''}
+                    onChange={(e)=>setAttrs(s=>({ ...s, [field.key]: e.target.value }))}
+                  />
+                )}
+              </label>
+            ))}
+          </div>
+        )}
 
         <div className="grid md:grid-cols-3 gap-3">
           <label className="form-control">

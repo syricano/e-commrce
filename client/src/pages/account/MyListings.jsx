@@ -54,6 +54,7 @@ export default function MyListings() {
 
   const [items, setItems] = useState([]);
   const [catTxs, setCatTxs] = useState([]); // category translations
+  const [cats, setCats] = useState([]); // categories with metadata
   const [loading, setLoading] = useState(false);
 
   const [statusFilter, setStatusFilter] = useState("all");
@@ -66,6 +67,7 @@ export default function MyListings() {
   );
 
   const [edit, setEdit] = useState(null);
+  const [editAttrs, setEditAttrs] = useState({});
   const isEditing = !!edit;
 
   // categoryId -> best name for current language (fallback en -> ar -> any)
@@ -99,6 +101,12 @@ export default function MyListings() {
       .sort((a, b) => String(a.name).localeCompare(String(b.name)));
   }, [catTxs, catMap]);
 
+  const editFilterFields = useMemo(() => {
+    const cid = edit?.categoryId;
+    const cat = cats.find(c => String(c.id) === String(cid));
+    return cat?.metadata?.filters?.fields || [];
+  }, [cats, edit?.categoryId]);
+
   /* ---------------- Load helpers ---------------- */
 
   const fetchMine = async () => {
@@ -131,10 +139,12 @@ export default function MyListings() {
 
   const loadCategoryTranslations = async () => {
     try {
-      const res = await axiosInstance.get("/category-translations", {
-        params: { limit: 1000 },
-      });
-      setCatTxs(res?.data?.items || res?.data || []);
+      const [trRes, cRes] = await Promise.all([
+        axiosInstance.get('/category-translations', { params: { limit: 1000 } }),
+        axiosInstance.get('/categories', { params: { limit: 1000 } }),
+      ]);
+      setCatTxs(trRes?.data?.items || trRes?.data || []);
+      setCats(cRes?.data?.items || cRes?.data || []);
     } catch {
       // non-blocking
     }
@@ -172,6 +182,7 @@ export default function MyListings() {
       country: l.country || "",
       city: l.locationCity || "",
     });
+    setEditAttrs(l.metadata || {});
   };
 
   const saveEdit = async () => {
@@ -189,6 +200,7 @@ export default function MyListings() {
     if (raw.status) patch.status = raw.status;
     if (raw.city) patch.locationCity = raw.city;
     if (raw.country) patch.country = raw.country;
+    if (editAttrs && Object.keys(editAttrs).length) patch.metadata = editAttrs;
 
     try {
       setItems((s) =>
@@ -544,6 +556,32 @@ export default function MyListings() {
                     placeholder="optional"
                   />
                 </label>
+                {editFilterFields.length > 0 && (
+                  <div className="md:col-span-2 grid md:grid-cols-2 gap-3">
+                    {editFilterFields.map(field => (
+                      <label key={field.key} className="form-control">
+                        <span className="label-text">{field.label || field.key}</span>
+                        {field.type === 'select' ? (
+                          <select
+                            className="select select-bordered"
+                            value={editAttrs[field.key] || ''}
+                            onChange={(e)=>setEditAttrs(s=>({ ...s, [field.key]: e.target.value }))}
+                          >
+                            <option value="">—</option>
+                            {(field.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                          </select>
+                        ) : (
+                          <input
+                            className="input input-bordered"
+                            type={field.type==='number'?'number':'text'}
+                            value={editAttrs[field.key] || ''}
+                            onChange={(e)=>setEditAttrs(s=>({ ...s, [field.key]: e.target.value }))}
+                          />
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

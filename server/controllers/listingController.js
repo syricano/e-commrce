@@ -99,6 +99,7 @@ export const searchListings = asyncHandler(async (req, res) => {
     maxPrice,
     status,
     sort,
+    attrs,
   } = q;
 
   const where = {};
@@ -127,6 +128,18 @@ export const searchListings = asyncHandler(async (req, res) => {
     where.priceAmount = {};
     if (minPrice != null) where.priceAmount[Op.gte] = Number(minPrice);
     if (maxPrice != null) where.priceAmount[Op.lte] = Number(maxPrice);
+  }
+
+  // Category-specific attribute filters via JSONB contains
+  if (attrs) {
+    try {
+      const obj = typeof attrs === 'string' ? JSON.parse(attrs) : attrs;
+      if (obj && typeof obj === 'object' && Object.keys(obj).length > 0) {
+        where.metadata = { ...(where.metadata || {}), [Op.contains]: obj };
+      }
+    } catch (_) {
+      // ignore malformed attrs
+    }
   }
 
   const order =

@@ -1,5 +1,6 @@
 // client/src/pages/account/MyOrders.jsx
 import { useEffect, useState } from "react";
+import { Link } from 'react-router-dom';
 import { listMyOrders } from "@/services";
 import { errorHandler } from "@/utils";
 
@@ -23,7 +24,7 @@ export default function MyOrders() {
           <tbody>
             {items.map(o=>(
               <tr key={o.id}>
-                <td>{o.id}</td>
+                <td><Link className="link" to={`/account/orders/${o.id}`}>{o.id}</Link></td>
                 <td>{o.status}</td>
                 <td>{o.total ?? o.amount ?? "—"}</td>
                 <td>{o.createdAt ? new Date(o.createdAt).toLocaleString() : "—"}</td>

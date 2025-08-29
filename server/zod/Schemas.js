@@ -362,6 +362,7 @@ export const listingCreateSchema = z.object({
   locationLat: z.number().min(-90).max(90).optional().nullable(),
   locationLng: z.number().min(-180).max(180).optional().nullable(),
   status: z.enum(['draft','active','reserved','sold','expired']).optional(),
+  metadata: z.record(z.any()).optional(),
   translations: z
     .array(
       z.object({
@@ -389,6 +390,8 @@ export const listingSearchSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   sort: z.enum(['new','price_asc','price_desc','popular']).optional(),
+  // Optional JSON string to filter by metadata (category-specific attributes)
+  attrs: z.string().optional(),
 });
 
 // Threads
