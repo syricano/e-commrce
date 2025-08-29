@@ -3,10 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '@/config/axiosConfig';
 import usePageTitle from '@/hooks/usePageTitle';
 import { useLang } from '@/context/LangProvider';
-import { errorHandler } from '@/utils';
 import { useAuth } from '@/context';
+import { errorHandler } from '@/utils';
 import { toast } from 'react-hot-toast';
 import Spinner from '@/components/UI/Spinner.jsx';
+import { toggleFavorite as apiToggleFavorite } from '@/services';
 
 const pickTr = (row, lang) => {
   const trs = Array.isArray(row?.translations) ? row.translations : [];
@@ -18,13 +19,14 @@ const pickTr = (row, lang) => {
 export default function ListingDetail() {
   const { id } = useParams();
   const { lang, t } = useLang();
-  const { isAuthenticated, user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const nav = useNavigate();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(false);
   const [current, setCurrent] = useState(0);
   const [catName, setCatName] = useState('');
   const [offerOpen, setOfferOpen] = useState(false);
+  const [fav, setFav] = useState(false);
   const [offer, setOffer] = useState({ amount: '', message: '' });
 
   usePageTitle('Listings');
@@ -65,14 +67,28 @@ export default function ListingDetail() {
   const onPrev = () => setCurrent((i) => (media.length ? (i - 1 + media.length) % media.length : 0));
   const onNext = () => setCurrent((i) => (media.length ? (i + 1) % media.length : 0));
 
+  const onToggleFav = async () => {
+    try {
+      await apiToggleFavorite(item.id);
+      setFav(v=>!v);
+      toast.success(!fav ? 'Added to favorites' : 'Removed from favorites');
+    } catch(e) { errorHandler(e, 'Failed to update favorite'); }
+  };
+
   const onMessageSeller = async () => {
     if (!isAuthenticated) return nav('/signin');
     if (!item) return;
     if (isOwner) return toast.error('This is your listing');
     try {
-      await axiosInstance.post('/threads', { listingId: item.id });
+      const res = await axiosInstance.post('/threads', { listingId: Number(item.id) });
+      const thread = res?.data || res;
+      const name = user?.firstName || user?.email || 'User';
+      const template = lang==='ar'
+        ? `مرحباً،\nأنا مهتم بهذا العرض.\nهل ما زال متاحاً؟\nشكراً،\n${name}`
+        : `Hi,\nI'm interested in this offer.\nIs it still available?\nThanks,\n${name}`;
+      const url = `/account/messages?threadId=${encodeURIComponent(thread?.id || '')}&prefill=${encodeURIComponent(template)}`;
       toast.success('Thread started');
-      nav('/account/messages');
+      nav(url);
     } catch (e) { errorHandler(e, 'Failed to start chat'); }
   };
 
@@ -110,7 +126,7 @@ export default function ListingDetail() {
       {!!item && (
         <div className="space-y-4">
           <div className="flex items-start gap-6 flex-col md:flex-row">
-            <div className="w-full md:w-1/2">
+            <div className="w-full md:w-1/2 relative">
               {media.length > 0 ? (
                 <div className="space-y-2">
                   <div className="relative">
@@ -119,7 +135,10 @@ export default function ListingDetail() {
                       alt={tr?.title || `#${item.id}`}
                       className="w-full aspect-square object-cover rounded"
                     />
-                    {media.length > 1 && (
+                    <button className={`btn btn-circle btn-sm absolute right-2 top-2 ${fav?'btn-error':'btn-ghost'}`} onClick={onToggleFav} title="Favorite">
+                      {fav ? '♥' : '♡'}
+                    </button>
+                  {media.length > 1 && (
                       <>
                         <button className="btn btn-circle btn-sm absolute left-2 top-1/2 -translate-y-1/2" onClick={onPrev}>&lt;</button>
                         <button className="btn btn-circle btn-sm absolute right-2 top-1/2 -translate-y-1/2" onClick={onNext}>&gt;</button>

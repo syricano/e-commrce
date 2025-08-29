@@ -44,11 +44,15 @@ export const getAllCollections = collections.list;
 export const getCollectionById = collections.get;
 
 /* ===== Profile: self only ===== */
-export const getMyProfile = () =>
-  asyncHandler(() => axiosInstance.get('/profiles/me'), 'Failed to load profile')();
+export const getMyProfile = async () => {
+  const res = await asyncHandler(() => axiosInstance.get('/profiles/me'), 'Failed to load profile')();
+  return res?.data || res || null;
+};
 
-export const updateMyProfile = (data) =>
-  asyncHandler(() => axiosInstance.put('/profiles/me', data), 'Failed to update profile')();
+export const updateMyProfile = async (data) => {
+  const res = await asyncHandler(() => axiosInstance.put('/profiles/me', data), 'Failed to update profile')();
+  return res?.data || res || null;
+};
 
 /* ===== Orders: self only ===== */
 export const listMyOrders = (params) =>
@@ -96,6 +100,9 @@ export const createThread = (data) =>
 
 export const sendMessage = (threadId, body) =>
   asyncHandler(() => axiosInstance.post(`/threads/${threadId}/messages`, body), 'Failed to send message')();
+
+export const listThreadMessages = (threadId) =>
+  asyncHandler(() => axiosInstance.get(`/threads/${threadId}/messages`), 'Failed to load messages')();
 
 /* ===== Reports ===== */
 export const reportListing = (payload) =>

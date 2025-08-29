@@ -2,7 +2,7 @@
 import { z } from 'zod';
 
 // ===== Primitives / helpers =====
-export const id = z.number().int().positive();
+export const id = z.coerce.number().int().positive();
 export const bigId = id;
 export const locale = z.enum(['ar','en','de']);
 export const currency = z.enum(['EUR', 'USD', 'SAR', 'AED', 'GBP']);

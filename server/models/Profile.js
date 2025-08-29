@@ -4,6 +4,7 @@ import sequelize from '../db/index.js';
 const Profile = sequelize.define('Profile', {
   id: { type: DataTypes.BIGINT, autoIncrement: true, primaryKey: true },
   userId: { type: DataTypes.BIGINT, allowNull: false, unique: true },
+  displayName: { type: DataTypes.STRING(120) },
   avatarUrl: { type: DataTypes.STRING(1024) },
   bio: { type: DataTypes.TEXT },
   birthday: { type: DataTypes.DATE },

@@ -5,7 +5,8 @@ export const auth = async (req, res, next) => {
   const cookieToken = req.cookies?.token;
   const header = req.headers.authorization;
   const headerToken = header?.startsWith('Bearer ') ? header.split(' ')[1] : undefined;
-  const token = cookieToken || headerToken;
+  // Prefer explicit Bearer header over cookie to respect active client session
+  const token = headerToken || cookieToken;
 
   if (!token) return res.status(401).json({ error: 'Unauthorized. Please sign in' });
 

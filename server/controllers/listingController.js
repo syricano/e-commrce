@@ -166,6 +166,28 @@ export const searchListings = asyncHandler(async (req, res) => {
   return res.json({ page: Number(page), limit: Number(limit), total: rows.count, items: rows.rows });
 });
 
+// Dedicated "mine" endpoint that bypasses query/Zod quirks and enforces ownership
+export const listMyListings = asyncHandler(async (req, res) => {
+  if (!req.user?.id) throw new ErrorResponse('Unauthorized', 401);
+  const { page = '1', limit = '50', status } = req.query || {};
+  const ownerKey = detectOwnerAttr() || 'ownerUserId';
+  const where = { [ownerKey]: req.user.id };
+  if (status) where.status = status;
+
+  const rows = await Listing.findAndCountAll({
+    where,
+    include: [
+      { model: ListingTranslation, as: 'translations', required: false },
+      { model: ListingMedia, as: 'media', required: false },
+    ],
+    order: [['createdAt','DESC']],
+    limit: Number(limit) || 50,
+    offset: ((Number(page) || 1) - 1) * (Number(limit) || 50),
+    distinct: true,
+  });
+  res.json({ page: Number(page)||1, limit: Number(limit)||50, total: rows.count, items: rows.rows });
+});
+
 export const updateListing = asyncHandler(async (req, res) => {
   const row = await Listing.findByPk(req.params.id);
   if (!row) throw new ErrorResponse('Not found', 404);

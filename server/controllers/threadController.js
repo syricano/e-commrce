@@ -41,4 +41,15 @@ export const sendMessage = async (req,res,next)=>{
   }catch(e){ next(e); }
 };
 
-export default { startThread, listThreads, sendMessage };
+export const listMessages = async (req,res,next)=>{
+  try{
+    const { id } = req.params;
+    const thread = await MessageThread.findByPk(id);
+    if(!thread) return res.status(404).json({ message:'thread not found' });
+    if (![thread.buyerUserId, thread.sellerUserId].includes(req.user.id)) return res.status(403).json({ message:'forbidden' });
+    const rows = await Message.findAll({ where:{ threadId: thread.id }, order:[['id','ASC']] });
+    res.json(rows);
+  }catch(e){ next(e); }
+};
+
+export default { startThread, listThreads, sendMessage, listMessages };

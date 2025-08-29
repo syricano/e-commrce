@@ -180,33 +180,7 @@ export default function ListingCreate() {
           </label>
         </div>
 
-        {/* Category-specific attributes */}
-        {filterFields.length > 0 && (
-          <div className="grid md:grid-cols-2 gap-3">
-            {filterFields.map(field => (
-              <label key={field.key} className="form-control">
-                <span className="label-text">{field.label || field.key}</span>
-                {field.type === 'select' ? (
-                  <select
-                    className="select select-bordered"
-                    value={attrs[field.key] || ''}
-                    onChange={(e)=>setAttrs(s=>({ ...s, [field.key]: e.target.value }))}
-                  >
-                    <option value="">—</option>
-                    {(field.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
-                ) : (
-                  <input
-                    className="input input-bordered"
-                    type={field.type==='number'?'number':'text'}
-                    value={attrs[field.key] || ''}
-                    onChange={(e)=>setAttrs(s=>({ ...s, [field.key]: e.target.value }))}
-                  />
-                )}
-              </label>
-            ))}
-          </div>
-        )}
+        
 
         <div className="grid md:grid-cols-3 gap-3">
           <label className="form-control">
@@ -254,6 +228,34 @@ export default function ListingCreate() {
             </select>
           </label>
         </div>
+
+        {/* Category-specific attributes (after selecting category) */}
+        {filterFields.length > 0 && (
+          <div className="grid md:grid-cols-2 gap-3">
+            {filterFields.map(field => (
+              <label key={field.key} className="form-control">
+                <span className="label-text">{field.label || field.key}</span>
+                {field.type === 'select' ? (
+                  <select
+                    className="select select-bordered"
+                    value={attrs[field.key] || ''}
+                    onChange={(e)=>setAttrs(s=>({ ...s, [field.key]: e.target.value }))}
+                  >
+                    <option value="">—</option>
+                    {(field.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    className="input input-bordered"
+                    type={field.type==='number'?'number':'text'}
+                    value={attrs[field.key] || ''}
+                    onChange={(e)=>setAttrs(s=>({ ...s, [field.key]: e.target.value }))}
+                  />
+                )}
+              </label>
+            ))}
+          </div>
+        )}
 
         <div className="grid md:grid-cols-3 gap-3">
           <label className="form-control">
