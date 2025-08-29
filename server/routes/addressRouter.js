@@ -1,12 +1,12 @@
 import express from 'express';
 import { auth } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/roleAuth.js';
-import { listAddresss, getAddress, createAddress, updateAddress, deleteAddress } from '../controllers/addressController.js';
+import { listAddresses, getAddress, createAddress, updateAddress, deleteAddress } from '../controllers/addressController.js';
 
 const addressRouter = express.Router();
 
 // Public reads
-addressRouter.get('/', listAddresss);
+addressRouter.get('/', listAddresses);
 addressRouter.get('/:id', getAddress);
 
 // Protected writes

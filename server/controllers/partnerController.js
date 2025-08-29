@@ -8,6 +8,9 @@ export const createInquiry = asyncHandler(async (req, res) => {
     email: body.email,
     phone: body.phone,
     businessField: body.businessField,
+    country: body.country,
+    city: body.city,
+    address: body.address,
     shippingOptions: body.shippingOptions || [],
     preferredPayments: body.preferredPayments || [],
     message: body.message,
@@ -36,4 +39,3 @@ export const updateInquiry = asyncHandler(async (req, res) => {
 });
 
 export default { createInquiry, listInquiries, updateInquiry };
-

@@ -362,6 +362,7 @@ export const listingCreateSchema = z.object({
   locationLat: z.number().min(-90).max(90).optional().nullable(),
   locationLng: z.number().min(-180).max(180).optional().nullable(),
   status: z.enum(['draft','active','reserved','sold','expired']).optional(),
+  expiresAt: dateIso,
   metadata: z.record(z.any()).optional(),
   translations: z
     .array(

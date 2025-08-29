@@ -13,6 +13,8 @@ const HomePage = () => {
   const [catTrs, setCatTrs] = useState([]);
   const [listings, setListings] = useState([]);
   const [products, setProducts] = useState([]);
+  const [listingsLoaded, setListingsLoaded] = useState(false);
+  const [productsLoaded, setProductsLoaded] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -25,8 +27,12 @@ const HomePage = () => {
         ]);
         setCats(cRes?.data?.items || cRes?.data || []);
         setCatTrs(tRes?.data?.items || tRes?.data || []);
-        setListings(lRes?.data?.items || lRes?.data || []);
-        setProducts(pRes?.data?.items || pRes?.data || []);
+        const ls = lRes?.data?.items || lRes?.data || [];
+        const ps = pRes?.data?.items || pRes?.data || [];
+        setListings(Array.isArray(ls) ? ls : []);
+        setProducts(Array.isArray(ps) ? ps : []);
+        setListingsLoaded(true);
+        setProductsLoaded(true);
       } catch {}
     };
     load();
@@ -118,26 +124,44 @@ const HomePage = () => {
 
       <section className="max-w-screen-2xl mx-auto px-4">
         <h2 className="text-xl font-semibold mb-3">{t('Listings')}</h2>
-        {!listings?.length && <Spinner size={24} />}
+        {!listingsLoaded && <Spinner size={24} />}
         <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
           <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 w-full">
-            {listings.map(l => (
-              <Link key={l.id} to={`/listings/${l.id}`} className="card bg-base-100 border hover:shadow">
-                <div className="card-body p-3">
-                  <div className="font-semibold">#{l.id}</div>
-                  <div className="opacity-70 text-sm">{l.priceAmount} {l.currency}</div>
-                </div>
-              </Link>
-            ))}
+            {listings.map(l => {
+              const media = Array.isArray(l?.media) ? l.media : [];
+              const img = media[0]?.url || '';
+              const trs = Array.isArray(l?.translations) ? l.translations : [];
+              const by = {}; for (const t of trs) if (t?.locale) by[t.locale] = t;
+              const title = by[lang]?.title || by.en?.title || by.ar?.title || trs[0]?.title || `#${l.id}`;
+              const src = img && !/^https?:\/\//.test(img)
+                ? `${import.meta.env.VITE_FILES_BASE_URL || ''}${img.startsWith('/')? '' : '/'}${img}`
+                : img;
+              return (
+                <Link key={l.id} to={`/listings/${l.id}`} className="card bg-base-100 border hover:shadow">
+                  {src ? (
+                    <img src={src} alt={title} className="w-full h-28 object-cover" />
+                  ) : (
+                    <div className="w-full h-28 bg-base-200 flex items-center justify-center text-sm opacity-70">No image</div>
+                  )}
+                  <div className="card-body p-3">
+                    <div className="font-semibold truncate" title={title}>{title}</div>
+                    <div className="opacity-70 text-sm">{l.priceAmount} {l.currency}</div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
 
       <section className="max-w-screen-2xl mx-auto px-4">
         <h2 className="text-xl font-semibold mb-3">{t('Products')}</h2>
-        {!products?.length && <Spinner size={24} />}
+        {!productsLoaded && <Spinner size={24} />}
         <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
           <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 w-full">
+            {productsLoaded && products.length === 0 && (
+              <div className="opacity-60 col-span-full">No products found</div>
+            )}
             {products.map(p => (
               <Link key={p.id} to={`/products/${p.id}`} className="card bg-base-100 border hover:shadow">
                 <div className="card-body p-3">

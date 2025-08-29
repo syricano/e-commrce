@@ -188,6 +188,9 @@ function Profile() {
         <Link className="btn btn-outline btn-sm" to="/account/orders">My Orders</Link>
         <Link className="btn btn-outline btn-sm" to="/account/listings">My Listings</Link>
         <Link className="btn btn-outline btn-sm" to="/account/listings/new">Create Listing</Link>
+        {(role === 'seller' || role === 'admin' || role === 'staff') && (
+          <Link className="btn btn-primary btn-sm" to="/merchant">Store Management</Link>
+        )}
       </div>
 
       {meUserCard}

@@ -36,7 +36,7 @@ app.use(
 // sessions (needed for passport OAuth)
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'dev-change-me',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {

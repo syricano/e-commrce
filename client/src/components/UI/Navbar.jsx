@@ -70,6 +70,7 @@ function DesktopBar() {
   const trOf = (id) => pickCatTr(catTr, id, lang);
 
   return (
+    <>
     <div className="navbar max-w-screen-2xl mx-auto px-4 relative z-40">
       <div className="navbar-start gap-2">
         <Link to="/" className="btn btn-ghost text-xl">{t("Free Market")}</Link>
@@ -77,33 +78,9 @@ function DesktopBar() {
           <li><Link to="/">{t("home")}</Link></li>
           <li><Link to="/collections">{t("offers")}</Link></li>
           <li><Link to="/stores">{t("stores")}</Link></li>
-          {/* Categories dropdown with grouped children on hover */}
-          <li className="relative" onMouseEnter={()=>{ setCatsOpen(true); if (!hoverRootId && roots[0]) setHoverRootId(roots[0].id); }} onMouseLeave={()=>setCatsOpen(false)}>
+          {/* Categories button (panel renders below navbar) */}
+          <li className="relative" onMouseEnter={()=>{ setCatsOpen(true); if (!hoverRootId && roots[0]) setHoverRootId(roots[0].id); }}>
             <button className="btn btn-ghost btn-sm">{t("categories")}</button>
-            {catsOpen && (
-              <div className="absolute z-50 mt-2 bg-base-100 shadow rounded-box p-2 min-w-[600px]">
-                <div className="flex">
-                  {/* Roots column */}
-                  <ul className="w-64 pr-2 border-r">
-                    {roots.map(rc => (
-                      <li key={rc.id} className={`px-2 py-1 cursor-pointer ${hoverRootId===rc.id?'bg-base-200 font-semibold':''}`} onMouseEnter={()=>setHoverRootId(rc.id)}>
-                        <Link to={`/c/${trOf(rc.id)?.slug || rc.id}`}>{trOf(rc.id)?.name || `#${rc.id}`}</Link>
-                      </li>
-                    ))}
-                  </ul>
-                  {/* Children column */}
-                  <div className="flex-1 pl-3">
-                    <ul className="grid grid-cols-2 gap-1">
-                      {(byParent.get(hoverRootId) || []).map(sc => (
-                        <li key={sc.id} className="px-2 py-1">
-                          <Link to={`/c/${trOf(sc.id)?.slug || sc.id}`}>{trOf(sc.id)?.name || `#${sc.id}`}</Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
           </li>
           {/* C2C */}
           <li><Link to="/listings">{t("listings")}</Link></li>
@@ -122,6 +99,32 @@ function DesktopBar() {
         <AccountMenu />
       </div>
     </div>
+
+    {catsOpen && (
+      <div className="w-full bg-base-100 border-t shadow" onMouseLeave={()=>setCatsOpen(false)}>
+        <div className="max-w-screen-2xl mx-auto px-4 py-3 flex">
+          {/* Roots column */}
+          <ul className="w-64 pr-3 border-r">
+            {roots.map(rc => (
+              <li key={rc.id} className={`px-2 py-1 cursor-pointer ${hoverRootId===rc.id?'bg-base-200 font-semibold':''}`} onMouseEnter={()=>setHoverRootId(rc.id)}>
+                <Link to={`/c/${trOf(rc.id)?.slug || rc.id}`}>{trOf(rc.id)?.name || `#${rc.id}`}</Link>
+              </li>
+            ))}
+          </ul>
+          {/* Children grid */}
+          <div className="flex-1 pl-3">
+            <ul className="grid grid-cols-2 md:grid-cols-3 gap-1">
+              {(byParent.get(hoverRootId) || []).map(sc => (
+                <li key={sc.id} className="px-2 py-1">
+                  <Link to={`/c/${trOf(sc.id)?.slug || sc.id}`}>{trOf(sc.id)?.name || `#${sc.id}`}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 

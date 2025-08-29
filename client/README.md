@@ -1,5 +1,7 @@
 # 🛒 Free Market — Hybrid Marketplace (B2C Stores + C2C Classifieds)
 
+> This document focuses on the web client. For a repo‑wide overview, shared features, and quickstart, see the root README at `../README.md`. For backend/API specifics, see `../server/README.md`.
+
 A full‑stack marketplace that combines **multi‑vendor e‑commerce (B2C)** with **peer‑to‑peer listings (C2C)**—think “Shopify + eBay Kleinanzeigen” in one platform.  
 Back end is production‑ready to keep evolving; front end(s) include a web client and (planned) **mobile apps**.
 
@@ -118,7 +120,13 @@ All associations are defined in `server/db/association.js` and are **in sync** w
 
 ## ✅ Recent Additions
 - Public Listing Detail page at route `/listings/:id` displaying title/description (per language), price, condition, city, and media.
-- Admin pages continue expanding for marketplace management.
+- Search: `SearchBar` now routes to `/search?q=…`; results page renders listings and products.
+- Navigation: single "Categories" item opens a hover mega‑menu (roots on left, children on right).
+- Listings browse: dynamic filters by category (fields appear immediately on category select), filter chips, and numbered pagination.
+- Account: "My Listings" shows only the signed‑in user’s listings; edit supports category‑specific attributes.
+- Messages: threads list + chat UI; listing page starts a thread and opens Messages with a prefilled template (AR/EN); template picker inserts text on selection.
+- Favorites: listing detail includes a quick favorite toggle (server stub for now).
+- Profile: display name/fields persist correctly.
 
 ---
 
@@ -158,12 +166,12 @@ All associations are defined in `server/db/association.js` and are **in sync** w
 - Background jobs (cron/queue) for listing expiry, payout cycles
 
 ### Web Frontend
-- **Listings** pages: index, detail, create/edit, favorites
-- **My Orders** pages: list + detail
-- **Profile** page: fetch/edit `profiles/me`
-- Hook up **SearchBar** to `/api/search`
-- Storefront pages (store detail with products/offers)
-- Admin UI (protected) for content management
+- Listings: browse with dynamic filters + chips + pagination; detail; create/edit; favorites (toggle stubbed).
+- Messages: threads + chat, prefilled templates.
+- Profile: fetch/edit `profiles/me` persisted.
+- Orders: list + detail (basic page present; wiring ongoing).
+- Storefront pages: store list present; store detail with offers planned.
+- Admin UI (protected) for content management.
 
 ### Mobile App (New)
 - **Stack**: React Native (Expo), Expo Router

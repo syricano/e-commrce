@@ -13,7 +13,7 @@ export default function Stores() {
         { key: 'email', label: 'Email', editable: true, create: true },
         { key: 'phone', label: 'Phone', editable: true, create: true },
         { key: 'address', label: 'Address', editable: true, create: true },
-        { key: 'status', label: 'Status', editable: true, create: true },
+        { key: 'status', label: 'Status', type: 'select', options: ['pending','active','suspended'], editable: true, create: true },
         { key: 'invoiceEmail', label: 'Invoice Email', editable: true, create: true },
         { key: 'autoInvoice', label: 'Auto Invoice', type: 'bool', editable: true, create: true },
       ]}

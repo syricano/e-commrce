@@ -1,15 +1,25 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import axiosInstance from '@/config/axiosConfig';
 import { useLang } from '@/context/LangProvider';
 import { toast } from 'react-hot-toast';
 import usePageTitle from '@/hooks/usePageTitle';
+import { COUNTRIES, CITIES_BY_COUNTRY } from '@/services/geo';
 
 export default function PartnerApply() {
   const { t } = useLang();
   usePageTitle('Become a Partner');
+  const BUSINESS_OPTIONS = [
+    'Fashion & Apparel', 'Electronics', 'Computers', 'Mobile & Accessories', 'Automotive', 'Grocery',
+    'Health & Beauty', 'Home & Garden', 'Furniture', 'Appliances', 'Books & Media', 'Baby',
+    'Pet Supplies', 'Office & Stationery', 'Toys & Games', 'Sports & Outdoors', 'Jewelry & Accessories',
+    'Cosmetics & Personal Care', 'Pharmacy', 'Bakery', 'Restaurant / Food Service', 'Industrial & Tools', 'Hardware'
+  ];
   const [f, setF] = useState({
     name: '', email: '', phone: '',
-    businessField: '',
+    country: COUNTRIES[0],
+    city: '',
+    address: '',
+    businessField: BUSINESS_OPTIONS[0],
     shippingOptions: { shipping: false, pickup: false },
     payments: { cash: false, bank: false, online: false, invoice: false },
     message: '',
@@ -21,6 +31,8 @@ export default function PartnerApply() {
     setF((s) => ({ ...s, [name]: value }));
   };
 
+  const cities = useMemo(() => CITIES_BY_COUNTRY[f.country] || [], [f.country]);
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setBusy(true);
@@ -29,14 +41,17 @@ export default function PartnerApply() {
         name: f.name.trim(),
         email: f.email.trim(),
         phone: f.phone.trim(),
-        businessField: f.businessField.trim(),
+        businessField: f.businessField,
+        country: f.country,
+        city: f.city,
+        address: f.address.trim(),
         shippingOptions: Object.keys(f.shippingOptions).filter(k => f.shippingOptions[k]),
         preferredPayments: Object.keys(f.payments).filter(k => f.payments[k]),
         message: f.message.trim(),
       };
       await axiosInstance.post('/partners/inquiries', payload);
       toast.success(t('Submit'));
-      setF({ name:'', email:'', phone:'', businessField:'', shippingOptions:{shipping:false,pickup:false}, payments:{cash:false,bank:false,online:false,invoice:false}, message:'' });
+      setF({ name:'', email:'', phone:'', country: COUNTRIES[0], city:'', address:'', businessField: BUSINESS_OPTIONS[0], shippingOptions:{shipping:false,pickup:false}, payments:{cash:false,bank:false,online:false,invoice:false}, message:'' });
     } catch (e) {
       toast.error('Failed to send');
     } finally { setBusy(false); }
@@ -58,10 +73,46 @@ export default function PartnerApply() {
           <span className="label-text">{t('Phone')}</span>
           <input className="input input-bordered" name="phone" value={f.phone} onChange={onChange} required />
         </label>
+
+        {/* Address block above Business Field */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <label className="form-control">
+            <span className="label-text">{t('Country') || 'Country'}</span>
+            <select
+              className="select select-bordered"
+              name="country"
+              value={f.country}
+              onChange={(e) => {
+                const country = e.target.value;
+                const list = CITIES_BY_COUNTRY[country] || [];
+                setF(s => ({ ...s, country, city: list.includes(s.city) ? s.city : (list[0] || '') }));
+              }}
+            >
+              {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </label>
+
+          <label className="form-control">
+            <span className="label-text">{t('City') || 'City'}</span>
+            <select className="select select-bordered" name="city" value={f.city} onChange={onChange}>
+              <option value="">— select —</option>
+              {cities.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </label>
+
+          <label className="form-control">
+            <span className="label-text">{t('Address') || 'Address'}</span>
+            <input className="input input-bordered" name="address" value={f.address} onChange={onChange} placeholder="Street / Building" />
+          </label>
+        </div>
         <label className="form-control">
           <span className="label-text">{t('Business Field')}</span>
-          <input className="input input-bordered" name="businessField" value={f.businessField} onChange={onChange} placeholder="Fashion, Electronics, Agriculture, Home…" />
-        </label>
+          <select className="select select-bordered" name="businessField" value={f.businessField} onChange={onChange}>
+            {BUSINESS_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        </label>        
 
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -103,4 +154,3 @@ export default function PartnerApply() {
     </section>
   );
 }
-

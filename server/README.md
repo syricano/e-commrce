@@ -1,5 +1,7 @@
 # 🛒 E-Commerce Marketplace/ Backend (Node.js + Express + Sequelize + PostgreSQL)
 
+> This document focuses on the API server. For a repo‑wide overview, shared features, and quickstart, see the root README at `../README.md`. For the web client, see `../client/README.md`.
+
 This project is a **multi-vendor e-commerce platform** built with:
 
 - **Backend**: Node.js, Express, PostgreSQL (Sequelize ORM)
@@ -200,6 +202,12 @@ Admin frontend should consume the /api/* endpoints with JWT auth.
 ## ✅ Recent Additions
 - Category Translations: robust slug generation and idempotent upsert to prevent 409 conflicts on duplicate `categoryId+locale` or `slug+locale`.
 - Listings API: detail endpoint now includes `translations` and `media` so clients can render full listing pages.
+- Listings API: dedicated `GET /api/listings/mine` returns only the authenticated user’s listings (enforces ownership server‑side).
+- Messaging: `GET /api/threads/:id/messages` to fetch thread messages for chat screens (auth + membership enforced).
+- Auth middleware: prefers `Authorization: Bearer` over cookie token to avoid cross‑user confusion in multi‑session dev.
+- Zod: ID schemas coerce numeric strings → numbers to avoid “expected number, received string” errors with BIGINT.
+- Profiles: added `displayName` to `Profile` model.
+- Categories seed: rich metadata filters per root/subcategory for dynamic UI (see Seeding).
 
 ## ✅ TODO
 Auth controllers: register, login, logout with bcrypt + jwt.
@@ -211,6 +219,19 @@ File uploads for media (S3/local) with moderation hooks.
 Notifications (email/push/webhooks) for offers/messages/orders.
 
 Background jobs (listing expiry, payouts), unified search improvements.
+
+## 🌱 Seeding Categories & Filters
+
+Seed a comprehensive category tree with per‑category filter metadata used by the web dynamic filters.
+
+```bash
+cd server
+npm run seed:categories
+```
+
+Notes:
+- The seed wipes existing categories/translations (paranoid force delete) before inserting.
+- Filters are stored under `categories.metadata.filters.fields` and consumed by the client to render inputs immediately on category select.
 
 📜 License
 MIT

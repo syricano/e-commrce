@@ -67,17 +67,6 @@ export default function CrudPage({ title, base, columns }) {
             <tr key={it.id}>
               {columns.map((c) => {
                 const val = (drafts[it.id]?.[c.key] ?? it?.[c.key]) ?? '';
-                if (c.editable) {
-                  return (
-                    <td key={c.key}>
-                      <input
-                        className="input input-bordered input-xs w-full"
-                        value={val}
-                        onChange={(e)=>onChangeCell(it.id, c.key, e.target.value)}
-                      />
-                    </td>
-                  );
-                }
                 if (c.type === 'bool') {
                   return (
                     <td key={c.key}>
@@ -86,6 +75,30 @@ export default function CrudPage({ title, base, columns }) {
                         className="toggle toggle-xs"
                         checked={!!val}
                         onChange={(e)=>onChangeCell(it.id, c.key, e.target.checked)}
+                      />
+                    </td>
+                  );
+                }
+                if (c.type === 'select' && Array.isArray(c.options)) {
+                  return (
+                    <td key={c.key}>
+                      <select
+                        className="select select-bordered select-xs w-full"
+                        value={val}
+                        onChange={(e)=>onChangeCell(it.id, c.key, e.target.value)}
+                      >
+                        {c.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                      </select>
+                    </td>
+                  );
+                }
+                if (c.editable) {
+                  return (
+                    <td key={c.key}>
+                      <input
+                        className="input input-bordered input-xs w-full"
+                        value={val}
+                        onChange={(e)=>onChangeCell(it.id, c.key, e.target.value)}
                       />
                     </td>
                   );
@@ -137,6 +150,14 @@ export default function CrudPage({ title, base, columns }) {
                       checked={!!createData[c.key]}
                       onChange={(e)=>setCreateData((s)=>({ ...s, [c.key]: e.target.checked }))}
                     />
+                  ) : c.type === 'select' && Array.isArray(c.options) ? (
+                    <select
+                      className="select select-bordered"
+                      value={createData[c.key] ?? ''}
+                      onChange={(e)=>setCreateData((s)=>({ ...s, [c.key]: e.target.value }))}
+                    >
+                      {c.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
                   ) : (
                     <input
                       className="input input-bordered"

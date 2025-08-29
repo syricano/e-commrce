@@ -7,6 +7,9 @@ const PartnerInquiry = sequelize.define('PartnerInquiry', {
   email: { type: DataTypes.STRING(320), allowNull: false },
   phone: { type: DataTypes.STRING(64) },
   businessField: { type: DataTypes.STRING(255) },
+  country: { type: DataTypes.STRING(100) },
+  city: { type: DataTypes.STRING(120) },
+  address: { type: DataTypes.STRING(500) },
   shippingOptions: { type: DataTypes.JSONB },
   preferredPayments: { type: DataTypes.JSONB },
   message: { type: DataTypes.TEXT },
@@ -14,4 +17,3 @@ const PartnerInquiry = sequelize.define('PartnerInquiry', {
 },{ tableName:'partner_inquiries', underscored:true, paranoid:true });
 
 export default PartnerInquiry;
-

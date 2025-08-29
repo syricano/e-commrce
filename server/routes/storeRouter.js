@@ -9,8 +9,8 @@ const storeRouter = express.Router();
 storeRouter.get('/', listStores);
 storeRouter.get('/:id', getStore);
 
-// Create store: allow any authenticated user (ownerUserId defaults to req.user.id)
-storeRouter.post('/', auth, createStore);
+// Create store: admin-managed flow (ownerUserId can be set explicitly)
+storeRouter.post('/', auth, requireAdmin, createStore);
 storeRouter.put('/:id', auth, requireAdmin, updateStore);
 storeRouter.delete('/:id', auth, requireAdmin, deleteStore);
 

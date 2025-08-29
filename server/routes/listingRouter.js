@@ -25,8 +25,8 @@ listingRouter.get('/mine', auth, listMyListings);
 
 // CRUD by id
 listingRouter.get('/:id', getListingById);
-// Temporarily bypass body validation for create to avoid schema edge causing 500
-listingRouter.post('/', auth, createListing);
+// Re-enabled body validation now that client payload aligns with schema
+listingRouter.post('/', auth, validate.body(listingCreateSchema), createListing);
 listingRouter.put('/:id', auth, validate.body(listingUpdateSchema), updateListing);
 listingRouter.patch('/:id/status', auth, validate.body(listingStatusPatchSchema), changeListingStatus);
 listingRouter.delete('/:id', auth, deleteListing);

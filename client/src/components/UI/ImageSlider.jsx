@@ -51,9 +51,9 @@ const ImageSlider = () => {
                   ) : (
                     <div className="w-full h-full bg-base-200 flex items-center justify-center">No Image</div>
                   )}
-                  <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2">
+                  <div className="absolute inset-0 flex flex-col items-center justify-end gap-2 pb-4">
+                    <div className="badge badge-sm md:badge-md opacity-95">{s.price} {s.currency}</div>
                     <a className="btn btn-primary" href={`/listings/${s.id}`}>View Listing</a>
-                    <div className="badge badge-lg ml-auto">{s.price} {s.currency}</div>
                   </div>
                   <div className="absolute left-2 right-2 top-1/2 flex -translate-y-1/2 transform justify-between">
                     <a href={`#slide${prevIndex + 1}`} className="btn btn-circle">❮</a>

@@ -52,19 +52,21 @@ function App() {
 
         </Route>
 
-        {/* Admin */}
-        <Route path="admin" element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="users" element={<ManageUsers />} />
-          <Route path="stores" element={<ManageStores />} />
-          <Route path="products" element={<ManageProducts />} />
-          <Route path="categories" element={<ManageCategories />} />
-          <Route path="collections" element={<ManageCollections />} />
-          <Route path="media" element={<ManageMedia />} />
-          <Route path="listings" element={<ManageListings />} />
-          <Route path="listing-offers" element={<ManageListingOffers />} />
-          <Route path="listing-promotions" element={<ManageListingPromotions />} />
-          <Route path="reports" element={<ManageReports />} />
+        {/* Admin (UI protected to staff/admin) */}
+        <Route element={<ProtectedLayout roles={["staff","admin"]} />}>
+          <Route path="admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="users" element={<ManageUsers />} />
+            <Route path="stores" element={<ManageStores />} />
+            <Route path="products" element={<ManageProducts />} />
+            <Route path="categories" element={<ManageCategories />} />
+            <Route path="collections" element={<ManageCollections />} />
+            <Route path="media" element={<ManageMedia />} />
+            <Route path="listings" element={<ManageListings />} />
+            <Route path="listing-offers" element={<ManageListingOffers />} />
+            <Route path="listing-promotions" element={<ManageListingPromotions />} />
+            <Route path="reports" element={<ManageReports />} />
+          </Route>
         </Route>
 
         {/* 404 */}
