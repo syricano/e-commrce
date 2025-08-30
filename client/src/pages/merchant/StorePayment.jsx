@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '@/config/axiosConfig';
 import usePageTitle from '@/hooks/usePageTitle';
+import StoreNav from '@/components/merchant/StoreNav.jsx';
 import { errorHandler } from '@/utils';
 import { useLang } from '@/context/LangProvider';
 
@@ -27,6 +28,7 @@ export default function StorePayment() {
   return (
     <section className="p-4 max-w-3xl mx-auto space-y-4">
       <h1 className="text-2xl font-bold">{t('Store')} {id} — {t('Payment')}</h1>
+      <StoreNav />
       <div className="card bg-base-100 border"><div className="card-body space-y-3">
         {['cash','bank','online','invoice'].map(k => (
           <label key={k} className="flex items-center gap-2">

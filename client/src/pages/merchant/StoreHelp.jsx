@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '@/config/axiosConfig';
 import usePageTitle from '@/hooks/usePageTitle';
+import StoreNav from '@/components/merchant/StoreNav.jsx';
 import { errorHandler } from '@/utils';
 import { toast } from 'react-hot-toast';
 import { useLang } from '@/context/LangProvider';
@@ -19,6 +20,7 @@ export default function StoreHelp(){
   return (
     <section className="p-4 max-w-3xl mx-auto space-y-3">
       <h1 className="text-2xl font-bold">{t('Request Help')} — {t('Store')} {id}</h1>
+      <StoreNav />
       <label className="form-control">
         <span className="label-text">{t('Subject') || 'Subject'}</span>
         <input className="input input-bordered" value={subject} onChange={e=>setSubject(e.target.value)} />

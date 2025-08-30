@@ -20,7 +20,7 @@ export default function StoreDetail() {
       try {
         const [sRes, oRes] = await Promise.all([
           axiosInstance.get(`/stores/${id}`),
-          axiosInstance.get('/offers', { params: { storeId: id, limit: 24 } }).catch(()=>({ data: [] })),
+          axiosInstance.get('/store-offers', { params: { storeId: id } }).catch(()=>({ data: [] })),
         ]);
         if (!alive) return;
         setStore(sRes?.data || null);
@@ -52,16 +52,24 @@ export default function StoreDetail() {
             {offers.map(o => (
               <div key={o.id} className="card bg-base-100 border">
                 <div className="card-body p-3">
-                  <div className="font-semibold truncate">#{o.id}</div>
-                  <div className="opacity-70 text-sm">{o.priceAmount} {o.currency}</div>
+                  <div className="font-semibold truncate">{o.product?.name || `#${o.id}`}</div>
+                  <div className="opacity-70 text-sm">
+                    {o.compareAtAmount ? (
+                      <>
+                        <span className="line-through opacity-60 mr-1">{o.compareAtAmount} {o.currency}</span>
+                        <span>{o.priceAmount} {o.currency}</span>
+                      </>
+                    ) : (
+                      <span>{o.priceAmount} {o.currency}</span>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
-            {!offers.length && <div className="opacity-60">No offers</div>}
+            {!offers.length && <div className="opacity-60">{t('No offers') || 'No offers'}</div>}
           </div>
         </>
       )}
     </section>
   );
 }
-

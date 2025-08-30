@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import LangSwitcher from "@/components/UI/LangSwitcher.jsx";
 import CartButton from "@/components/UI/CartButton.jsx";
@@ -20,6 +20,8 @@ function DesktopBar() {
   const [counts, setCounts] = useState({ stores: 0, listings: 0, offers: 0 });
   const [catsOpen, setCatsOpen] = useState(false);
   const [hoverRootId, setHoverRootId] = useState(null);
+  const menuRef = useRef(null);
+  const btnRef = useRef(null);
 
   useEffect(() => {
     let alive = true;
@@ -69,6 +71,22 @@ function DesktopBar() {
   // helper to read tr
   const trOf = (id) => pickCatTr(catTr, id, lang);
 
+  // Close categories on click-outside
+  useEffect(() => {
+    if (!catsOpen) return;
+    const onDown = (e) => {
+      const m = menuRef.current;
+      const b = btnRef.current;
+      const target = e.target;
+      if (!m || !target) return;
+      const insideMenu = m.contains(target);
+      const onButton = b && b.contains(target);
+      if (!insideMenu && !onButton) setCatsOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [catsOpen]);
+
   return (
     <>
     <div className="navbar max-w-screen-2xl mx-auto px-4 relative z-40">
@@ -80,7 +98,7 @@ function DesktopBar() {
           <li><Link to="/stores">{t("stores")}</Link></li>
           {/* Categories button (panel renders below navbar) */}
           <li className="relative" onMouseEnter={()=>{ setCatsOpen(true); if (!hoverRootId && roots[0]) setHoverRootId(roots[0].id); }}>
-            <button className="btn btn-ghost btn-sm">{t("categories")}</button>
+            <button ref={btnRef} className="btn btn-ghost btn-sm">{t("categories")}</button>
           </li>
           {/* C2C */}
           <li><Link to="/listings">{t("listings")}</Link></li>
@@ -101,7 +119,7 @@ function DesktopBar() {
     </div>
 
     {catsOpen && (
-      <div className="w-full bg-base-100 border-t shadow" onMouseLeave={()=>setCatsOpen(false)}>
+      <div ref={menuRef} className="w-full bg-base-100 border-t shadow" onMouseLeave={()=>setCatsOpen(false)}>
         <div className="max-w-screen-2xl mx-auto px-4 py-3 flex">
           {/* Roots column */}
           <ul className="w-64 pr-3 border-r">

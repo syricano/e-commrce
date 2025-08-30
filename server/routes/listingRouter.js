@@ -25,9 +25,8 @@ listingRouter.get('/mine', auth, listMyListings);
 
 // CRUD by id
 listingRouter.get('/:id', getListingById);
-// Re-enabled body validation now that client payload aligns with schema
-// Temporarily bypass body validation to avoid regressions with Arabic payloads
-listingRouter.post('/', auth, createListing);
+// Re-enable body validation now that client payload aligns with schema
+listingRouter.post('/', auth, validate.body(listingCreateSchema), createListing);
 listingRouter.put('/:id', auth, validate.body(listingUpdateSchema), updateListing);
 listingRouter.patch('/:id/status', auth, validate.body(listingStatusPatchSchema), changeListingStatus);
 listingRouter.delete('/:id', auth, deleteListing);

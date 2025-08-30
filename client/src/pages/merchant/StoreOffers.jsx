@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import usePageTitle from '@/hooks/usePageTitle';
 import axiosInstance from '@/config/axiosConfig';
+import StoreNav from '@/components/merchant/StoreNav.jsx';
 import { errorHandler } from '@/utils';
 import { useLang } from '@/context/LangProvider';
 
@@ -12,7 +13,9 @@ export default function StoreOffers() {
   const { t } = useLang();
   const [products, setProducts] = useState([]);
   const [offers, setOffers] = useState([]);
-  const [f, setF] = useState({ storeProductId: '', priceAmount: '', currency: 'EUR', stockOnHand: 0 });
+  const [f, setF] = useState({ storeProductId: '', compareAtAmount: '', discountPct: 10, priceAmount: '', currency: 'EUR', stockOnHand: 0 });
+  const [priceTouched, setPriceTouched] = useState(false);
+  const DISCOUNTS = Array.from({ length: 15 }, (_, i) => (i + 1) * 5); // 5..75
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -29,28 +32,99 @@ export default function StoreOffers() {
   };
   useEffect(()=>{ if (storeId) load(); }, [storeId]);
 
+  // Index last offer per product for auto-fill
+  const lastByProduct = useMemo(() => {
+    const by = new Map();
+    for (const o of offers) {
+      const pid = o?.product?.id;
+      if (pid) {
+        const cur = by.get(pid);
+        if (!cur || (o.id > cur.id)) by.set(pid, o);
+      }
+    }
+    return by;
+  }, [offers]);
+
   const onCreate = async () => {
-    const payload = { ...f, storeProductId: Number(f.storeProductId), priceAmount: Number(f.priceAmount), stockOnHand: Number(f.stockOnHand) };
-    if (!payload.storeProductId || isNaN(payload.priceAmount)) return;
-    try { await axiosInstance.post('/store-offers', payload); setF({ storeProductId:'', priceAmount:'', currency:'EUR', stockOnHand:0 }); await load(); }
+    const base = Number(f.compareAtAmount);
+    const price = Number(f.priceAmount);
+    if (!f.storeProductId || isNaN(base) || base <= 0 || isNaN(price) || price < 0) return;
+    const payload = {
+      storeProductId: Number(f.storeProductId),
+      compareAtAmount: base,
+      priceAmount: Math.round(price),
+      currency: f.currency,
+      stockOnHand: Number(f.stockOnHand) || 0,
+    };
+    try { await axiosInstance.post('/store-offers', payload); setF({ storeProductId:'', compareAtAmount:'', discountPct:10, priceAmount:'', currency:'EUR', stockOnHand:0 }); setPriceTouched(false); await load(); }
     catch (e) { errorHandler(e, t('Create failed') || 'Create failed'); }
   };
 
   return (
     <section className="p-4 space-y-4 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold">{t('Store')} {storeId} — {t('Offers') || 'Offers'}</h1>
+      <StoreNav />
       <div className="card bg-base-100 border">
-        <div className="card-body grid md:grid-cols-4 gap-3">
+        <div className="card-body grid md:grid-cols-6 gap-3">
           <label className="form-control md:col-span-2">
             <span className="label-text">{t('Product') || 'Product'}</span>
-            <select className="select select-bordered" value={f.storeProductId} onChange={(e)=>setF(s=>({...s, storeProductId:e.target.value}))}>
+            <select className="select select-bordered" value={f.storeProductId} onChange={(e)=>{
+              const val = e.target.value;
+              setF(s=>{
+                const next = { ...s, storeProductId: val };
+                const pid = Number(val);
+                const last = products && offers ? lastByProduct.get(pid) : null;
+                if (last) {
+                  const base = Number(last.compareAtAmount || last.priceAmount || 0) || '';
+                  next.compareAtAmount = base === '' ? '' : String(base);
+                  next.stockOnHand = Number.isFinite(Number(last.stockOnHand)) ? Number(last.stockOnHand) : 0;
+                  // Compute a default discounted price when selecting a product
+                  const pct = Number(next.discountPct) || 0;
+                  const computed = base ? Math.max(0, Math.round(Number(base) * (1 - pct/100))) : '';
+                  next.priceAmount = computed === '' ? '' : String(computed);
+                }
+                setPriceTouched(false);
+                return next;
+              });
+            }}>
               <option value="">{t('Select product') || '— select product —'}</option>
               {products.map(p => <option key={p.id} value={p.id}>{p.name} (SKU {p.articleNumber})</option>)}
             </select>
           </label>
           <label className="form-control">
-            <span className="label-text">{t('Price') || 'Price'}</span>
-            <input className="input input-bordered" type="number" min="0" value={f.priceAmount} onChange={(e)=>setF(s=>({...s, priceAmount:e.target.value}))} />
+            <span className="label-text">{t('Original Price') || 'Original Price'}</span>
+            <input className="input input-bordered" type="number" min="0" value={f.compareAtAmount} onChange={(e)=>{
+              const v = e.target.value;
+              setF(s=>{
+                const next = { ...s, compareAtAmount: v };
+                if (!priceTouched) {
+                  const base = Number(v);
+                  const pct = Number(next.discountPct) || 0;
+                  next.priceAmount = isNaN(base) ? '' : String(Math.max(0, Math.round(base * (1 - pct/100))));
+                }
+                return next;
+              });
+            }} />
+          </label>
+          <label className="form-control">
+            <span className="label-text">{t('Discount') || 'Discount'}</span>
+            <select className="select select-bordered" value={f.discountPct} onChange={(e)=>{
+              const d = Number(e.target.value);
+              setF(s=>{
+                const next = { ...s, discountPct: d };
+                if (!priceTouched) {
+                  const base = Number(next.compareAtAmount);
+                  next.priceAmount = isNaN(base) ? '' : String(Math.max(0, Math.round(base * (1 - d/100))));
+                }
+                return next;
+              });
+            }}>
+              {DISCOUNTS.map(d => <option key={d} value={d}>{d}%</option>)}
+            </select>
+          </label>
+          <label className="form-control">
+            <span className="label-text">{t('Final Price') || 'Final Price'}</span>
+            <input className="input input-bordered" type="number" min="0" value={f.priceAmount} onChange={(e)=>{ setPriceTouched(true); setF(s=>({...s, priceAmount:e.target.value})); }} />
           </label>
           <label className="form-control">
             <span className="label-text">{t('Currency') || 'Currency'}</span>

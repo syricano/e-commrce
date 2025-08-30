@@ -233,11 +233,11 @@ export default function Listings() {
             <>
               {primary.map(field => (
                 <label key={field.key} className="form-control">
-                  <span className="label-text">{field.label || field.key}</span>
+                  <span className="label-text">{t(field.label) || field.label || field.key}</span>
                   {field.type === 'select' ? (
                     <select name={`attr.${field.key}`} className="select select-bordered" defaultValue={attrsQS[field.key] || ''}>
                       <option value="">—</option>
-                      {(field.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                      {(field.options || []).map(opt => <option key={opt} value={opt}>{t(opt) || opt}</option>)}
                     </select>
                   ) : (
                     <input name={`attr.${field.key}`} className="input input-bordered" type={field.type==='number'?'number':'text'} defaultValue={attrsQS[field.key] || ''} />
@@ -253,11 +253,11 @@ export default function Listings() {
               )}
               {showMoreAttrs && more.map(field => (
                 <label key={field.key} className="form-control">
-                  <span className="label-text">{field.label || field.key}</span>
+                  <span className="label-text">{t(field.label) || field.label || field.key}</span>
                   {field.type === 'select' ? (
                     <select name={`attr.${field.key}`} className="select select-bordered" defaultValue={attrsQS[field.key] || ''}>
                       <option value="">—</option>
-                      {(field.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                      {(field.options || []).map(opt => <option key={opt} value={opt}>{t(opt) || opt}</option>)}
                     </select>
                   ) : (
                     <input name={`attr.${field.key}`} className="input input-bordered" type={field.type==='number'?'number':'text'} defaultValue={attrsQS[field.key] || ''} />

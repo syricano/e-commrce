@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '@/config/axiosConfig';
 import usePageTitle from '@/hooks/usePageTitle';
+import StoreNav from '@/components/merchant/StoreNav.jsx';
 import { errorHandler } from '@/utils';
 import { useLang } from '@/context/LangProvider';
 
@@ -34,6 +35,7 @@ export default function StoreAssets() {
   return (
     <section className="p-4 max-w-3xl mx-auto space-y-4">
       <h1 className="text-2xl font-bold">{t('Store')} {id} — {t('Assets')}</h1>
+      <StoreNav />
       <div className="card bg-base-100 border"><div className="card-body grid md:grid-cols-2 gap-3">
         <div>
           <div className="font-semibold mb-2">{t('Logo') || 'Logo'}</div>
