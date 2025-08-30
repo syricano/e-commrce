@@ -45,7 +45,7 @@ export default function ManageProducts() {
       <h1 className="text-xl font-semibold">{t('Products')}</h1>
       <div className="flex items-end gap-2">
         <label className="form-control">
-          <span className="label-text">Search</span>
+          <span className="label-text">{t('Search') || 'Search'}</span>
           <input className="input input-bordered" value={q} onChange={(e)=>setQ(e.target.value)} placeholder="sku, id…" />
         </label>
         <button className="btn" onClick={load} disabled={loading}>{loading?'…':t('refresh')}</button>
@@ -54,12 +54,12 @@ export default function ManageProducts() {
         <table className="table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>SKU</th>
-              <th>Brand</th>
-              <th>Status</th>
-              <th>Active</th>
-              <th className="text-right">Actions</th>
+              <th>{t('ID') || 'ID'}</th>
+              <th>{t('SKU') || 'SKU'}</th>
+              <th>{t('Brand') || 'Brand'}</th>
+              <th>{t('Status') || 'Status'}</th>
+              <th>{t('Active') || 'Active'}</th>
+              <th className="text-right">{t('Actions') || 'Actions'}</th>
             </tr>
           </thead>
           <tbody>
@@ -77,7 +77,7 @@ export default function ManageProducts() {
                 </td>
               </tr>
             ))}
-            {filtered.length===0 && !loading && (<tr><td colSpan={6} className="py-6 text-center opacity-60">No products</td></tr>)}
+            {filtered.length===0 && !loading && (<tr><td colSpan={6} className="py-6 text-center opacity-60">{t('No products') || 'No products'}</td></tr>)}
           </tbody>
         </table>
       </div>

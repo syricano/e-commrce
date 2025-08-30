@@ -19,6 +19,7 @@ function AccountMenu() {
 
   const go = (path) => { setOpen(false); nav(path); };
   const isAdmin = user?.role === "admin" || user?.role === "staff";
+  const isMerchant = user?.role === 'seller' || user?.role === 'staff';
 
   return (
     <div className="dropdown dropdown-end">
@@ -35,13 +36,16 @@ function AccountMenu() {
           <li><button onClick={() => go("/account/orders")}>{t("My Orders") || "My Orders"}</button></li>
           <li><button onClick={() => go("/account/messages")}>{t("Messages") || "Messages"}</button></li>
 
-          {(isAdmin || user?.role === 'seller') && (
+          {(isAdmin || isMerchant) && (
             <>
               <li className="mt-1 border-t" />
-              <li className="px-3 pt-2 text-xs font-semibold opacity-70">{t("admin") || "Admin"}</li>
-              <li><button onClick={() => go("/admin")}>{t("Dashboard") || "Dashboard"}</button></li>
-              <li><button onClick={() => go("/merchant")}>{t("Store Management") || 'Store Management'}</button></li>
-              {/* Users link removed from menu; accessible inside Dashboard */}
+              <li className="px-3 pt-2 text-xs font-semibold opacity-70">{isAdmin ? (t('Admin Management') || 'Admin Management') : (t('Merchant Management') || 'Merchant Management')}</li>
+              {isAdmin && (
+                <li><button onClick={() => go("/admin")}>{t("Dashboard") || "Dashboard"}</button></li>
+              )}
+              {!isAdmin && isMerchant && (
+                <li><button onClick={() => go("/merchant")}>{t("Store Management") || 'Store Management'}</button></li>
+              )}
             </>
           )}
 

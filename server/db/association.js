@@ -48,6 +48,11 @@ import ListingPromotion from '../models/ListingPromotion.js';
 import SavedSearch from '../models/SavedSearch.js';
 import Notification from '../models/Notification.js';
 import BlockedUser from '../models/BlockedUser.js';
+// Merchant store-scoped
+import StoreCategory from '../models/StoreCategory.js';
+import StoreProduct from '../models/StoreProduct.js';
+import StoreProductMedia from '../models/StoreProductMedia.js';
+import StoreOffer from '../models/StoreOffer.js';
 
 export function applyAssociations() {
   // ------- B2C -------
@@ -236,13 +241,34 @@ export function applyAssociations() {
   User.hasMany(BlockedUser, { foreignKey:'blocked_user_id', as:'blockedBy', onDelete:'CASCADE' });
   BlockedUser.belongsTo(User, { foreignKey:'blocked_user_id', as:'blocked' });
 
+  // ------- Merchant store-scoped -------
+  Store.hasMany(StoreCategory, { foreignKey: 'store_id', as: 'storeCategories', onDelete: 'CASCADE' });
+  StoreCategory.belongsTo(Store, { foreignKey: 'store_id', as: 'store' });
+  StoreCategory.hasMany(StoreCategory, { foreignKey: 'parent_id', as: 'children' });
+  StoreCategory.belongsTo(StoreCategory, { foreignKey: 'parent_id', as: 'parent' });
+
+  Store.hasMany(StoreProduct, { foreignKey: 'store_id', as: 'storeProducts', onDelete: 'CASCADE' });
+  StoreProduct.belongsTo(Store, { foreignKey: 'store_id', as: 'store' });
+  StoreCategory.hasMany(StoreProduct, { foreignKey: 'store_category_id', as: 'products' });
+  StoreProduct.belongsTo(StoreCategory, { foreignKey: 'store_category_id', as: 'storeCategory' });
+
+  // Link to global Category as well (for listing-like filters)
+  Category.hasMany(StoreProduct, { foreignKey: 'category_id', as: 'storeProducts' });
+  StoreProduct.belongsTo(Category, { foreignKey: 'category_id', as: 'category' });
+
+  StoreProduct.hasMany(StoreProductMedia, { foreignKey: 'store_product_id', as: 'media', onDelete: 'CASCADE' });
+  StoreProductMedia.belongsTo(StoreProduct, { foreignKey: 'store_product_id', as: 'product' });
+  StoreProduct.hasMany(StoreOffer, { foreignKey: 'store_product_id', as: 'offers', onDelete: 'CASCADE' });
+  StoreOffer.belongsTo(StoreProduct, { foreignKey: 'store_product_id', as: 'product' });
+
   return {
     User, Profile, Address, Store, StoreUser, Category, CategoryTranslation, Brand, BrandTranslation,
     Product, ProductTranslation, ProductVariant, Media, Offer, Inventory, Cart, CartItem, Order, OrderItem,
     Shipment, Payment, Refund, ReturnRequest, Review, CommissionScheme, Payout, Collection, CollectionTranslation,
     CollectionRule, Placement, ReviewVote, AuditLog,
     Listing, ListingTranslation, ListingMedia, ListingOffer, MessageThread, Message, Favorite, Report,
-    C2CTransaction, UserRating, ListingPromotion, SavedSearch, Notification, BlockedUser
+    C2CTransaction, UserRating, ListingPromotion, SavedSearch, Notification, BlockedUser,
+    StoreCategory, StoreProduct, StoreProductMedia, StoreOffer
   };
 }
 

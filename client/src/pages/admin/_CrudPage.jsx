@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 import { useLang } from '@/context/LangProvider';
 import usePageTitle from '@/hooks/usePageTitle';
 
-export default function CrudPage({ title, base, columns }) {
+export default function CrudPage({ title, base, columns, createHelp, beforeCreate, hideCreate = false, inputSize = 'xs', reloadSignal = 0, showRowActions = true, createButtonLabel }) {
   const { t } = useLang();
   usePageTitle(title);
   const api = useMemo(() => createCrud(base), [base]);
@@ -25,7 +25,7 @@ export default function CrudPage({ title, base, columns }) {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, []); // eslint-disable-line
+  useEffect(() => { load(); }, [reloadSignal]); // eslint-disable-line
 
   const onChangeCell = (id, key, val) =>
     setDrafts((d) => ({ ...d, [id]: { ...(d[id] || {}), [key]: val } }));
@@ -49,13 +49,20 @@ export default function CrudPage({ title, base, columns }) {
 
   const startCreate = () => { setCreateData({}); setCreating(true); };
   const doCreate = async () => {
-    try { await api.create(createData); toast.success(t('create')); setCreating(false); load(); }
+    try {
+      const payload = typeof beforeCreate === 'function' ? beforeCreate(createData) : createData;
+      if (payload === false) return; // aborted by validator
+      await api.create(payload);
+      toast.success(t('create'));
+      setCreating(false);
+      load();
+    }
     catch (e) { errorHandler(e, t('create')); }
   };
 
   const table = useMemo(() => (
     <div className="overflow-x-auto">
-      <table className="table">
+      <table className="table table-xs">
         <thead>
           <tr>
             {columns.map(c => <th key={c.key} style={c.width ? {width:c.width} : undefined}>{t(c.label) || c.label}</th>)}
@@ -67,12 +74,19 @@ export default function CrudPage({ title, base, columns }) {
             <tr key={it.id}>
               {columns.map((c) => {
                 const val = (drafts[it.id]?.[c.key] ?? it?.[c.key]) ?? '';
+                if (typeof c.render === 'function') {
+                  return (
+                    <td key={c.key} className="whitespace-nowrap">
+                      {c.render(it, val)}
+                    </td>
+                  );
+                }
                 if (c.type === 'bool') {
                   return (
                     <td key={c.key}>
                       <input
                         type="checkbox"
-                        className="toggle toggle-xs"
+                        className={`toggle toggle-${inputSize}`}
                         checked={!!val}
                         onChange={(e)=>onChangeCell(it.id, c.key, e.target.checked)}
                       />
@@ -83,7 +97,7 @@ export default function CrudPage({ title, base, columns }) {
                   return (
                     <td key={c.key}>
                       <select
-                        className="select select-bordered select-xs w-full"
+                        className={`select select-bordered select-${inputSize} w-full`}
                         value={val}
                         onChange={(e)=>onChangeCell(it.id, c.key, e.target.value)}
                       >
@@ -96,7 +110,7 @@ export default function CrudPage({ title, base, columns }) {
                   return (
                     <td key={c.key}>
                       <input
-                        className="input input-bordered input-xs w-full"
+                        className={`input input-bordered input-${inputSize} w-full`}
                         value={val}
                         onChange={(e)=>onChangeCell(it.id, c.key, e.target.value)}
                       />
@@ -105,10 +119,14 @@ export default function CrudPage({ title, base, columns }) {
                 }
                 return <td key={c.key} className="whitespace-nowrap">{String(val ?? '')}</td>;
               })}
-              <td className="text-right space-x-2">
-                <button className="btn btn-primary btn-xs" onClick={()=>onSaveRow(it.id)}>{t('save')}</button>
-                <button className="btn btn-error btn-xs" onClick={()=>onDeleteRow(it.id)}>{t('delete')}</button>
-              </td>
+              {showRowActions ? (
+                <td className="text-right space-x-2">
+                  <button className="btn btn-primary btn-xs" onClick={()=>onSaveRow(it.id)}>{t('save')}</button>
+                  <button className="btn btn-error btn-xs" onClick={()=>onDeleteRow(it.id)}>{t('delete')}</button>
+                </td>
+              ) : (
+                <td />
+              )}
             </tr>
           ))}
           {items.length === 0 && !loading && (
@@ -129,13 +147,15 @@ export default function CrudPage({ title, base, columns }) {
           </label>
         </div>
         <button className="btn btn-primary" onClick={()=>load()} disabled={loading}>{loading ? '...' : t('search')}</button>
-        <button className="btn" onClick={startCreate}>{t('addNew')}</button>
+        {!hideCreate && (
+          <button className="btn" onClick={startCreate}>{createButtonLabel || t('addNew')}</button>
+        )}
       </div>
 
       <h1 className="text-xl font-semibold">{t(title)}</h1>
       {table}
 
-      {creating && (
+      {!hideCreate && creating && (
         <dialog open className="modal">
           <div className="modal-box">
             <h3 className="font-bold text-lg">{t('create')} {t(title)}</h3>
@@ -167,6 +187,10 @@ export default function CrudPage({ title, base, columns }) {
                   )}
                 </label>
               ))}
+              {/* Optional helper content for create modal */}
+              {createHelp && (
+                <div className="text-xs opacity-70">{createHelp}</div>
+              )}
             </div>
             <div className="modal-action">
               <button className="btn" onClick={()=>setCreating(false)}>{t('cancel')}</button>

@@ -63,7 +63,7 @@ export default function ListingCreate() {
         const trs = tRes?.data?.items || tRes?.data || [];
         setCatTrs(Array.isArray(trs) ? trs : []);
       } catch (e) {
-        errorHandler(e, 'Failed to load categories');
+        errorHandler(e, t('Failed to load categories') || 'Failed to load categories');
       }
     };
     run();
@@ -87,6 +87,11 @@ export default function ListingCreate() {
   const cities = useMemo(() => CITIES_BY_COUNTRY[f.country] || [], [f.country]);
   const selectedCat = useMemo(() => cats.find(c => String(c.id) === String(f.categoryId)) || null, [cats, f.categoryId]);
   const filterFields = useMemo(() => selectedCat?.metadata?.filters?.fields || [], [selectedCat]);
+  const childrenOfSelected = useMemo(() => {
+    const id = selectedCat?.id;
+    if (!id) return [];
+    return cats.filter(c => String(c.parentId || '') === String(id));
+  }, [cats, selectedCat?.id]);
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -96,9 +101,14 @@ export default function ListingCreate() {
   const onSubmit = async (e) => {
     e.preventDefault();
     const title = f.title.trim();
-    if (!title) return toast.error('Title is required');
+    const selected = cats.find(c => String(c.id) === String(f.categoryId));
+    if (selected) {
+      const hasChildren = cats.some(c => String(c.parentId || '') === String(selected.id));
+      if (hasChildren) return toast.error(t('Please select a subcategory'));
+    }
+    if (!title) return toast.error(t('Title is required') || 'Title is required');
     if (f.priceAmount === '' || Number.isNaN(Number(f.priceAmount))) {
-      return toast.error('Valid price is required');
+      return toast.error(t('Valid price is required') || 'Valid price is required');
     }
 
     const body = {
@@ -140,10 +150,10 @@ export default function ListingCreate() {
     setBusy(true);
     try {
       await axiosInstance.post('/listings', body);
-      toast.success('Listing created');
+      toast.success(t('Listing created') || 'Listing created');
       nav('/account/listings');
     } catch (err) {
-      errorHandler(err, 'Create listing failed');
+      errorHandler(err, t('Create listing failed') || 'Create listing failed');
     } finally {
       setBusy(false);
     }
@@ -156,26 +166,26 @@ export default function ListingCreate() {
       <form className="grid gap-4" onSubmit={onSubmit}>
         <div className="grid gap-3">
           <label className="form-control">
-            <span className="label-text">Title</span>
+            <span className="label-text">{t('Title') || 'Title'}</span>
             <input
               name="title"
               className="input input-bordered"
               value={f.title}
               onChange={onChange}
-              placeholder="e.g. iPhone 12 128GB"
+              placeholder={t('e.g. iPhone 12 128GB') || 'e.g. iPhone 12 128GB'}
               required
             />
           </label>
 
           <label className="form-control">
-            <span className="label-text">Description</span>
+            <span className="label-text">{t('Description') || 'Description'}</span>
             <textarea
               name="description"
               className="textarea textarea-bordered"
               rows={4}
               value={f.description}
               onChange={onChange}
-              placeholder="Condition, what’s included, pickup/shipping details…"
+              placeholder={t('Condition, what’s included, pickup/shipping details…') || 'Condition, what’s included, pickup/shipping details…'}
             />
           </label>
         </div>
@@ -184,14 +194,14 @@ export default function ListingCreate() {
 
         <div className="grid md:grid-cols-3 gap-3">
           <label className="form-control">
-            <span className="label-text">Category</span>
+            <span className="label-text">{t('Category') || 'Category'}</span>
             <select
               name="categoryId"
               className="select select-bordered"
               value={f.categoryId}
               onChange={onChange}
             >
-              <option value="">— none —</option>
+              <option value="">{t('None') || 'None'}</option>
               {cats
                 .slice()
                 .sort((a,b) => pickCatLabel(a).localeCompare(pickCatLabel(b)))
@@ -202,9 +212,20 @@ export default function ListingCreate() {
                 ))}
             </select>
           </label>
+          {childrenOfSelected.length > 0 && (
+            <label className="form-control">
+              <span className="label-text">{t('Subcategory') || 'Subcategory'}</span>
+              <select className="select select-bordered" value={''} onChange={(e)=>{ const v=e.target.value; if (v) setF(s=>({...s, categoryId:v})); }}>
+                <option value="">{t('Select') || 'Select'}</option>
+                {childrenOfSelected.map(ch => (
+                  <option key={ch.id} value={ch.id}>{pickCatLabel(ch)}</option>
+                ))}
+              </select>
+            </label>
+          )}
 
           <label className="form-control">
-            <span className="label-text">Price</span>
+            <span className="label-text">{t('Price') || 'Price'}</span>
             <input
               name="priceAmount"
               type="number"
@@ -217,7 +238,7 @@ export default function ListingCreate() {
           </label>
 
           <label className="form-control">
-            <span className="label-text">Currency</span>
+            <span className="label-text">{t('Currency') || 'Currency'}</span>
             <select
               name="currency"
               className="select select-bordered"
@@ -259,19 +280,19 @@ export default function ListingCreate() {
 
         <div className="grid md:grid-cols-3 gap-3">
           <label className="form-control">
-            <span className="label-text">Condition</span>
+            <span className="label-text">{t('Condition') || 'Condition'}</span>
             <select
               name="condition"
               className="select select-bordered"
               value={f.condition}
               onChange={onChange}
             >
-              {CONDITIONS.map(v => <option key={v} value={v}>{v}</option>)}
+              {CONDITIONS.map(v => <option key={v} value={v}>{t(v) || v}</option>)}
             </select>
           </label>
 
           <label className="form-control">
-            <span className="label-text">Negotiable</span>
+            <span className="label-text">{t('Negotiable') || 'Negotiable'}</span>
             <input
               name="negotiable"
               type="checkbox"
@@ -282,7 +303,7 @@ export default function ListingCreate() {
           </label>
 
           <label className="form-control">
-            <span className="label-text">Allow online checkout</span>
+            <span className="label-text">{t('Allow online checkout') || 'Allow online checkout'}</span>
             <input
               name="allowCheckout"
               type="checkbox"
@@ -295,7 +316,7 @@ export default function ListingCreate() {
 
         <div className="grid md:grid-cols-2 gap-3">
           <label className="form-control">
-            <span className="label-text">Country</span>
+            <span className="label-text">{t('Country') || 'Country'}</span>
             <select
               name="country"
               className="select select-bordered"
@@ -315,14 +336,14 @@ export default function ListingCreate() {
           </label>
 
           <label className="form-control">
-            <span className="label-text">City</span>
+            <span className="label-text">{t('City') || 'City'}</span>
             <select
               name="city"
               className="select select-bordered"
               value={f.city}
               onChange={onChange}
             >
-              <option value="">— select —</option>
+              <option value="">{t('Select') || 'Select'}</option>
               {(CITIES_BY_COUNTRY[f.country] || []).map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </label>
@@ -337,13 +358,13 @@ export default function ListingCreate() {
               checked={f.setCoords}
               onChange={onChange}
             />
-            <span className="label-text">Set map coordinates (optional)</span>
+            <span className="label-text">{t('Set map coordinates (optional)') || 'Set map coordinates (optional)'}</span>
           </label>
 
           {f.setCoords && (
             <div className="grid md:grid-cols-2 gap-3">
               <label className="form-control">
-                <span className="label-text">Latitude</span>
+                <span className="label-text">{t('Latitude') || 'Latitude'}</span>
                 <input
                   name="locationLat"
                   type="number"
@@ -351,11 +372,11 @@ export default function ListingCreate() {
                   className="input input-bordered"
                   value={f.locationLat}
                   onChange={onChange}
-                  placeholder="e.g. 33.513"
+                  placeholder={t('e.g. 33.513') || 'e.g. 33.513'}
                 />
               </label>
               <label className="form-control">
-                <span className="label-text">Longitude</span>
+                <span className="label-text">{t('Longitude') || 'Longitude'}</span>
                 <input
                   name="locationLng"
                   type="number"
@@ -363,7 +384,7 @@ export default function ListingCreate() {
                   className="input input-bordered"
                   value={f.locationLng}
                   onChange={onChange}
-                  placeholder="e.g. 36.292"
+                  placeholder={t('e.g. 36.292') || 'e.g. 36.292'}
                 />
               </label>
             </div>
@@ -372,28 +393,28 @@ export default function ListingCreate() {
 
         <div className="grid md:grid-cols-2 gap-3">
           <label className="form-control">
-            <span className="label-text">Expiry</span>
+            <span className="label-text">{t('Expiry') || 'Expiry'}</span>
             <div className="join">
               <button
                 type="button"
                 className={`btn join-item ${f.expiryMode === 'never' ? 'btn-active' : ''}`}
                 onClick={() => setF(s => ({ ...s, expiryMode: 'never' }))}
               >
-                Never
+                {t('Never') || 'Never'}
               </button>
               <button
                 type="button"
                 className={`btn join-item ${f.expiryMode === 'date' ? 'btn-active' : ''}`}
                 onClick={() => setF(s => ({ ...s, expiryMode: 'date' }))}
               >
-                Choose date
+                {t('Choose date') || 'Choose date'}
               </button>
             </div>
           </label>
 
           {f.expiryMode === 'date' && (
             <label className="form-control">
-              <span className="label-text">Expires at</span>
+              <span className="label-text">{t('Expires at') || 'Expires at'}</span>
               <input
                 name="expiresAt"
                 type="datetime-local"
@@ -407,7 +428,7 @@ export default function ListingCreate() {
 
         <div className="card-actions justify-end mt-2">
           <button type="submit" className="btn btn-primary" disabled={busy}>
-            {busy ? 'Saving…' : 'Create'}
+            {busy ? (t('Saving…') || 'Saving…') : (t('Create') || 'Create')}
           </button>
         </div>
       </form>

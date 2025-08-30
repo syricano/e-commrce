@@ -2,7 +2,7 @@
 import { Routes, Route } from 'react-router-dom'
 import {
   // Public
-  HomePage, About, NotFound, Signin, Signup, Listings, ListingDetail, CategoryBrowse, Stores, PartnerApply, Collections,
+  HomePage, About, NotFound, Signin, Signup, Listings, ListingDetail, CategoryBrowse, Stores, StoreDetail, PartnerApply, Collections,
   SearchResults,
   // User
   Profile, MyOrders, MyListings, ListingCreate, Messages,
@@ -11,8 +11,10 @@ import {
   Dashboard,
   ManageUsers, ManageStores, ManageProducts, ManageCategories,
   ManageCollections, ManageMedia, ManageListings, ManageListingOffers,
-  ManageListingPromotions, ManageReports,
+  ManageListingPromotions, ManageReports, ManagePartnerRequests, ManageInvoices,
   MerchantDashboard,
+  StoreCategories, StoreProducts, StoreOffers,
+  StoreShipping, StorePayment, StoreAssets, StoreInvoices, StoreHelp,
 } from '@/pages'
 import { ProtectedLayout, RootLayout, AccountLayout ,AdminLayout } from '@/layouts'
 
@@ -28,6 +30,7 @@ function App() {
         <Route path="listings/:id" element={<ListingDetail />} />
         <Route path="c/:slug" element={<CategoryBrowse />} />
         <Route path="stores" element={<Stores />} />
+        <Route path="stores/:id" element={<StoreDetail />} />
         <Route path="collections" element={<Collections />} />
         <Route path="search" element={<SearchResults />} />
 
@@ -38,9 +41,24 @@ function App() {
         {/* Protected */}
         <Route element={<ProtectedLayout />}>
           <Route path="account/profile" element={<Profile />} />
-          <Route path="merchant" element={<MerchantDashboard />} />
+        </Route>
 
-          {/* Account area */}
+        {/* Merchant (seller/staff/admin only) */}
+        <Route element={<ProtectedLayout roles={["seller","staff","admin"]} />}>
+          <Route path="merchant" element={<MerchantDashboard />} />
+          <Route path="merchant/store/:id/categories" element={<StoreCategories />} />
+          <Route path="merchant/store/:id/products" element={<StoreProducts />} />
+          <Route path="merchant/store/:id/offers" element={<StoreOffers />} />
+          <Route path="merchant/store/:id/shipping" element={<StoreShipping />} />
+          <Route path="merchant/store/:id/pickup" element={<StoreShipping />} />
+          <Route path="merchant/store/:id/payment" element={<StorePayment />} />
+          <Route path="merchant/store/:id/invoices" element={<StoreInvoices />} />
+          <Route path="merchant/store/:id/assets" element={<StoreAssets />} />
+          <Route path="merchant/store/:id/help" element={<StoreHelp />} />
+        </Route>
+
+        {/* Account area (all signed-in users) */}
+        <Route element={<ProtectedLayout />}>
           <Route path="account" element={<AccountLayout />}>
             <Route index element={<MyOrders />} />
             <Route path="orders" element={<MyOrders />} />
@@ -49,7 +67,6 @@ function App() {
             <Route path="listings/new" element={<ListingCreate />} />
             <Route path="messages" element={<Messages />} />
           </Route>
-
         </Route>
 
         {/* Admin (UI protected to staff/admin) */}
@@ -65,8 +82,10 @@ function App() {
             <Route path="listings" element={<ManageListings />} />
             <Route path="listing-offers" element={<ManageListingOffers />} />
             <Route path="listing-promotions" element={<ManageListingPromotions />} />
-            <Route path="reports" element={<ManageReports />} />
-          </Route>
+          <Route path="reports" element={<ManageReports />} />
+          <Route path="partner-requests" element={<ManagePartnerRequests />} />
+          <Route path="invoices" element={<ManageInvoices />} />
+        </Route>
         </Route>
 
         {/* 404 */}

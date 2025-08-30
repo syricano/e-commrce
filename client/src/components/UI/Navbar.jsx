@@ -184,7 +184,7 @@ function MobileBar() {
     <>
       <div className="navbar max-w-screen-2xl mx-auto px-4">
         <div className="navbar-start">
-          <Link to="/" className="btn btn-ghost text-lg p-0">Free Market</Link>
+          <Link to="/" className="btn btn-ghost text-lg p-0">{t("Free Market")}</Link>
         </div>
         <div className="navbar-end gap-2">
           <CartButton />

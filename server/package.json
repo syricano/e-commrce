@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "node --env-file=.env --watch index.js",
     "start": "node index.js",
-    "seed:categories": "node --env-file=.env scripts/seed-categories.js"
+    "seed:categories": "node --env-file=.env scripts/seed-categories.js",
+    "cleanup:partners": "node --env-file=.env scripts/cleanup-duplicate-partner-inquiries.js",
+    "repair:taxonomy": "node --env-file=.env scripts/repair-taxonomy.js"
   },
   "keywords": [],
   "author": "",

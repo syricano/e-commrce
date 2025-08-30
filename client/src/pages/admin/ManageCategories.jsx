@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { errorHandler } from '@/utils';
+import { useLang } from '@/context/LangProvider';
 import { Categories, CategoryTranslations } from '@/services/api';
 
 const LOCALES = ['en', 'ar'];
@@ -28,6 +29,7 @@ const buildTrIndex = (trs) => {
 };
 
 export default function ManageCategories() {
+  const { t } = useLang();
   const [cats, setCats] = useState([]);
   const [trIndex, setTrIndex] = useState({});
   const [loading, setLoading] = useState(false);
@@ -47,7 +49,7 @@ export default function ManageCategories() {
       setCats(Array.isArray(c) ? c : []);
       setTrIndex(buildTrIndex(Array.isArray(t) ? t : []));
     } catch (e) {
-      errorHandler(e, 'Failed to load categories');
+      errorHandler(e, t('Failed to load categories') || 'Failed to load categories');
     } finally {
       setLoading(false);
     }
@@ -163,31 +165,31 @@ export default function ManageCategories() {
   };
 
   const remove = async (row) => {
-    if (!confirm(`Delete category #${row.id}? This cannot be undone.`)) return;
+    if (!confirm(`${t('Delete')} ${t('Category') || 'Category'} #${row.id}? ${t('This cannot be undone.') || 'This cannot be undone.'}`)) return;
     try {
       await Categories.remove(row.id);
-      toast.success('Category deleted');
+      toast.success(t('Category deleted') || 'Category deleted');
       setCats((s) => s.filter((x) => x.id !== row.id));
       const copy = { ...trIndex };
       delete copy[row.id];
       setTrIndex(copy);
-    } catch (e) { errorHandler(e, 'Delete failed'); }
+    } catch (e) { errorHandler(e, t('Delete failed') || 'Delete failed'); }
   };
 
   return (
     <section className="p-4 space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h1 className="text-2xl font-bold">Manage Categories</h1>
+        <h1 className="text-2xl font-bold">{t('ManageCategories') || 'Manage Categories'}</h1>
         <div className="flex gap-2">
-          <button className="btn btn-ghost btn-sm" onClick={load} disabled={loading}>{loading ? '…' : 'Refresh'}</button>
-          <button className="btn btn-primary btn-sm" onClick={beginCreate}>New Category</button>
+          <button className="btn btn-ghost btn-sm" onClick={load} disabled={loading}>{loading ? '…' : (t('refresh') || 'Refresh')}</button>
+          <button className="btn btn-primary btn-sm" onClick={beginCreate}>{t('New Category') || 'New Category'}</button>
         </div>
       </div>
 
       <div className="flex items-end gap-2 flex-wrap">
         <label className="form-control min-w-64">
-          <span className="label-text">Search</span>
-          <input className="input input-bordered" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="id, name, slug…" />
+          <span className="label-text">{t('search') || 'Search'}</span>
+          <input className="input input-bordered" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('id, name, slug…') || 'id, name, slug…'} />
         </label>
       </div>
 
@@ -195,7 +197,7 @@ export default function ManageCategories() {
         <table className="table">
           <thead>
             <tr>
-              <th>ID</th><th>Name (EN)</th><th>Name (AR)</th><th>Parent</th><th>Position</th><th>Active</th><th className="text-right">Actions</th>
+              <th>{t('ID') || 'ID'}</th><th>{t('Name (EN)') || 'Name (EN)'}</th><th>{t('Name (AR)') || 'Name (AR)'}</th><th>{t('Parent') || 'Parent'}</th><th>{t('Position') || 'Position'}</th><th>{t('Active') || 'Active'}</th><th className="text-right">{t('Actions') || 'Actions'}</th>
             </tr>
           </thead>
           <tbody>
@@ -216,16 +218,16 @@ export default function ManageCategories() {
                     try {
                       await Categories.update(c.id, { isActive: next });
                       setCats((s) => s.map((x) => (x.id === c.id ? { ...x, isActive: next } : x)));
-                    } catch (err) { errorHandler(err, 'Failed to toggle'); }
+                    } catch (err) { errorHandler(err, t('Failed to toggle') || 'Failed to toggle'); }
                   }} />
                 </td>
                 <td className="text-right space-x-2">
-                  <button className="btn btn-xs" onClick={() => beginEdit(c)}>Edit</button>
-                  <button className="btn btn-error btn-xs" onClick={() => remove(c)}>Delete</button>
+                  <button className="btn btn-xs" onClick={() => beginEdit(c)}>{t('Edit') || 'Edit'}</button>
+                  <button className="btn btn-error btn-xs" onClick={() => remove(c)}>{t('Delete') || 'Delete'}</button>
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && !loading && (<tr><td colSpan={7} className="text-center opacity-60 py-6">No categories</td></tr>)}
+            {filtered.length === 0 && !loading && (<tr><td colSpan={7} className="text-center opacity-60 py-6">{t('No categories') || 'No categories'}</td></tr>)}
           </tbody>
         </table>
       </div>
@@ -234,29 +236,29 @@ export default function ManageCategories() {
         <div className="card bg-base-200">
           <div className="card-body space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="card-title">{editing.base.id ? `Edit #${editing.base.id}` : 'Create category'}</h2>
+              <h2 className="card-title">{editing.base.id ? `${t('Edit') || 'Edit'} #${editing.base.id}` : (t('Create category') || 'Create category')}</h2>
               <div className="flex gap-2">
-                <button className="btn btn-ghost btn-sm" onClick={cancelEdit} disabled={busySave}>Cancel</button>
-                <button className="btn btn-primary btn-sm" onClick={save} disabled={busySave}>{busySave ? 'Saving…' : 'Save'}</button>
+                <button className="btn btn-ghost btn-sm" onClick={cancelEdit} disabled={busySave}>{t('cancel') || 'Cancel'}</button>
+                <button className="btn btn-primary btn-sm" onClick={save} disabled={busySave}>{busySave ? (t('Saving…') || 'Saving…') : (t('save') || 'Save')}</button>
               </div>
             </div>
 
             <div className="grid md:grid-cols-3 gap-3">
               <label className="form-control">
-                <span className="label-text">Parent</span>
+                <span className="label-text">{t('Parent') || 'Parent'}</span>
                 <select className="select select-bordered" value={editing.base.parentId} onChange={(e) => setEditing((s) => ({ ...s, base: { ...s.base, parentId: e.target.value || '' } }))}>
-                  <option value="">— none —</option>
+                  <option value="">{t('— none —') || '— none —'}</option>
                   {cats.filter((x) => x.id !== editing.base.id).map((x) => (<option key={x.id} value={x.id}>{nameOf(x.id)}</option>))}
                 </select>
               </label>
 
               <label className="form-control">
-                <span className="label-text">Position</span>
+                <span className="label-text">{t('Position') || 'Position'}</span>
                 <input type="number" className="input input-bordered" value={editing.base.position} onChange={(e) => setEditing((s) => ({ ...s, base: { ...s.base, position: e.target.value } }))} />
               </label>
 
               <label className="form-control">
-                <span className="label-text">Active</span>
+                <span className="label-text">{t('Active') || 'Active'}</span>
                 <input type="checkbox" className="toggle" checked={!!editing.base.isActive} onChange={(e) => setEditing((s) => ({ ...s, base: { ...s.base, isActive: e.target.checked } }))} />
               </label>
             </div>
@@ -267,19 +269,19 @@ export default function ManageCategories() {
                   <div className="card-body gap-3">
                     <h3 className="font-semibold uppercase">{loc}</h3>
                     <label className="form-control">
-                      <span className="label-text">Name</span>
+                      <span className="label-text">{t('Name') || 'Name'}</span>
                       <input className="input input-bordered" value={editing.tr[loc]?.name || ''} onChange={(e) => setEditing((s) => ({ ...s, tr: { ...s.tr, [loc]: { ...s.tr[loc], name: e.target.value } } }))} placeholder={loc === 'en' ? 'e.g. Phones' : 'مثال: هواتف'} />
                     </label>
                     <label className="form-control">
-                      <span className="label-text">Slug</span>
-                      <input className="input input-bordered" value={editing.tr[loc]?.slug || ''} onChange={(e) => setEditing((s) => ({ ...s, tr: { ...s.tr, [loc]: { ...s.tr[loc], slug: e.target.value } } }))} placeholder="auto if blank" />
+                      <span className="label-text">{t('Slug') || 'Slug'}</span>
+                      <input className="input input-bordered" value={editing.tr[loc]?.slug || ''} onChange={(e) => setEditing((s) => ({ ...s, tr: { ...s.tr, [loc]: { ...s.tr[loc], slug: e.target.value } } }))} placeholder={t('auto if blank') || 'auto if blank'} />
                     </label>
                     <label className="form-control">
-                      <span className="label-text">Meta title</span>
+                      <span className="label-text">{t('Meta title') || 'Meta title'}</span>
                       <input className="input input-bordered" value={editing.tr[loc]?.metaTitle || ''} onChange={(e) => setEditing((s) => ({ ...s, tr: { ...s.tr, [loc]: { ...s.tr[loc], metaTitle: e.target.value } } }))} />
                     </label>
                     <label className="form-control">
-                      <span className="label-text">Meta description</span>
+                      <span className="label-text">{t('Meta description') || 'Meta description'}</span>
                       <textarea className="textarea textarea-bordered" rows={3} value={editing.tr[loc]?.metaDescription || ''} onChange={(e) => setEditing((s) => ({ ...s, tr: { ...s.tr, [loc]: { ...s.tr[loc], metaDescription: e.target.value } } }))} />
                     </label>
                   </div>

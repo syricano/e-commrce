@@ -38,7 +38,7 @@ export default function ListingDetail() {
         const res = await axiosInstance.get(`/listings/${id}`);
         setItem(res?.data || res);
       } catch (e) {
-        errorHandler(e, 'Failed to load listing');
+        errorHandler(e, t('Failed to load listing') || 'Failed to load listing');
       } finally { setLoading(false); }
     };
     if (id) load();
@@ -71,14 +71,14 @@ export default function ListingDetail() {
     try {
       await apiToggleFavorite(item.id);
       setFav(v=>!v);
-      toast.success(!fav ? 'Added to favorites' : 'Removed from favorites');
-    } catch(e) { errorHandler(e, 'Failed to update favorite'); }
+      toast.success(!fav ? (t('Added to favorites') || 'Added to favorites') : (t('Removed from favorites') || 'Removed from favorites'));
+    } catch(e) { errorHandler(e, t('Update failed') || 'Failed to update favorite'); }
   };
 
   const onMessageSeller = async () => {
     if (!isAuthenticated) return nav('/signin');
     if (!item) return;
-    if (isOwner) return toast.error('This is your listing');
+    if (isOwner) return toast.error(t('This is your listing') || 'This is your listing');
     try {
       const res = await axiosInstance.post('/threads', { listingId: Number(item.id) });
       const thread = res?.data || res;
@@ -87,42 +87,42 @@ export default function ListingDetail() {
         ? `مرحباً،\nأنا مهتم بهذا العرض.\nهل ما زال متاحاً؟\nشكراً،\n${name}`
         : `Hi,\nI'm interested in this offer.\nIs it still available?\nThanks,\n${name}`;
       const url = `/account/messages?threadId=${encodeURIComponent(thread?.id || '')}&prefill=${encodeURIComponent(template)}`;
-      toast.success('Thread started');
+      toast.success(t('Thread started') || 'Thread started');
       nav(url);
-    } catch (e) { errorHandler(e, 'Failed to start chat'); }
+    } catch (e) { errorHandler(e, t('Failed to start chat') || 'Failed to start chat'); }
   };
 
   const onSubmitOffer = async () => {
     if (!isAuthenticated) return nav('/signin');
     if (!item) return;
     const amountNum = Number(offer.amount);
-    if (!Number.isFinite(amountNum) || amountNum <= 0) return toast.error('Enter a valid amount');
+    if (!Number.isFinite(amountNum) || amountNum <= 0) return toast.error(t('Enter a valid amount') || 'Enter a valid amount');
     try {
       await axiosInstance.post('/listing-offers', { listingId: item.id, amount: Math.round(amountNum), message: offer.message || undefined });
-      toast.success('Offer sent');
+      toast.success(t('Offer sent') || 'Offer sent');
       setOfferOpen(false);
       setOffer({ amount: '', message: '' });
-    } catch (e) { errorHandler(e, 'Failed to send offer'); }
+    } catch (e) { errorHandler(e, t('Failed to send offer') || 'Failed to send offer'); }
   };
 
   const onBuyNow = async () => {
     if (!isAuthenticated) return nav('/signin');
     if (!item) return;
-    if (!item.allowCheckout) return toast.error('Checkout disabled for this listing');
-    if (isOwner) return toast.error('This is your listing');
-    if (item.status !== 'active') return toast.error('Listing not available');
+    if (!item.allowCheckout) return toast.error(t('Checkout disabled for this listing') || 'Checkout disabled for this listing');
+    if (isOwner) return toast.error(t('This is your listing') || 'This is your listing');
+    if (item.status !== 'active') return toast.error(t('Listing not available') || 'Listing not available');
     try {
       const res = await axiosInstance.post(`/listings/${item.id}/buy`, { method: 'online' });
-      toast.success('Purchase initiated');
+      toast.success(t('Purchase initiated') || 'Purchase initiated');
       // In a real app, redirect to payment page or transaction detail
       // nav(`/transactions/${res?.data?.id || ''}`)
-    } catch (e) { errorHandler(e, 'Failed to start checkout'); }
+    } catch (e) { errorHandler(e, t('Failed to start checkout') || 'Failed to start checkout'); }
   };
 
   return (
     <section className="p-4 space-y-4 max-w-screen-lg mx-auto">
       {loading && <Spinner size={32} />}
-      {!loading && !item && <div className="opacity-60">Not found</div>}
+      {!loading && !item && <div className="opacity-60">{t('Not found') || 'Not found'}</div>}
       {!!item && (
         <div className="space-y-4">
           <div className="flex items-start gap-6 flex-col md:flex-row">
@@ -159,7 +159,7 @@ export default function ListingDetail() {
                   )}
                 </div>
               ) : (
-                <div className="bg-base-200 rounded aspect-square flex items-center justify-center">No media</div>
+                <div className="bg-base-200 rounded aspect-square flex items-center justify-center">{t('No media') || 'No media'}</div>
               )}
             </div>
             <div className="flex-1 space-y-3 w-full">
@@ -187,14 +187,14 @@ export default function ListingDetail() {
                 {!isOwner && item?.status === 'active' && (
                   <>
                     {item.allowCheckout && (
-                      <button className="btn btn-success" onClick={onBuyNow}>Buy Now</button>
+                      <button className="btn btn-success" onClick={onBuyNow}>{t('Buy Now') || 'Buy Now'}</button>
                     )}
-                    <button className="btn btn-primary" onClick={() => setOfferOpen(true)}>Make Offer</button>
-                    <button className="btn" onClick={onMessageSeller}>Message Seller</button>
+                    <button className="btn btn-primary" onClick={() => setOfferOpen(true)}>{t('Make Offer') || 'Make Offer'}</button>
+                    <button className="btn" onClick={onMessageSeller}>{t('Message Seller') || 'Message Seller'}</button>
                   </>
                 )}
                 {isOwner && (
-                  <div className="opacity-70">You are the owner</div>
+                  <div className="opacity-70">{t('You are the owner') || 'You are the owner'}</div>
                 )}
               </div>
             </div>
@@ -203,20 +203,20 @@ export default function ListingDetail() {
           {offerOpen && (
             <div className="modal modal-open">
               <div className="modal-box">
-                <h3 className="font-bold text-lg mb-3">Send Offer</h3>
+                <h3 className="font-bold text-lg mb-3">{t('Send Offer') || 'Send Offer'}</h3>
                 <div className="space-y-3">
                   <label className="form-control">
-                    <span className="label-text">Amount ({item.currency})</span>
+                    <span className="label-text">{t('Amount') || 'Amount'} ({item.currency})</span>
                     <input type="number" className="input input-bordered" value={offer.amount} onChange={(e)=>setOffer((s)=>({ ...s, amount: e.target.value }))} />
                   </label>
                   <label className="form-control">
-                    <span className="label-text">Message (optional)</span>
+                    <span className="label-text">{t('Message (optional)') || 'Message (optional)'}</span>
                     <textarea className="textarea textarea-bordered" rows={3} value={offer.message} onChange={(e)=>setOffer((s)=>({ ...s, message: e.target.value }))} />
                   </label>
                 </div>
                 <div className="modal-action">
-                  <button className="btn btn-ghost" onClick={()=>setOfferOpen(false)}>Cancel</button>
-                  <button className="btn btn-primary" onClick={onSubmitOffer}>Send</button>
+                  <button className="btn btn-ghost" onClick={()=>setOfferOpen(false)}>{t('Cancel') || 'Cancel'}</button>
+                  <button className="btn btn-primary" onClick={onSubmitOffer}>{t('Send') || 'Send'}</button>
                 </div>
               </div>
             </div>

@@ -51,6 +51,12 @@ import geoSearchRouter from './geoSearchRouter.js';
 
 import adminRouter from './adminRouter.js';
 import partnerRouter from './partnerRouter.js';
+import storeCategoryRouter from './storeCategoryRouter.js';
+import storeProductRouter from './storeProductRouter.js';
+import uploadRouter from './uploadRouter.js';
+import storeMerchantRouter from './storeMerchantRouter.js';
+import supportRouter from './supportRouter.js';
+import storeOfferRouter from './storeOfferRouter.js';
 
 
 export const routeMap = [
@@ -105,6 +111,12 @@ export const routeMap = [
   { path: '/api/blocks', handler: blockRouter },
   { path: '/api/geo', handler: geoSearchRouter },
   { path: '/api/partners', handler: partnerRouter },
+  { path: '/api/store-categories', handler: storeCategoryRouter },
+  { path: '/api/store-products', handler: storeProductRouter },
+  { path: '/api/store-offers', handler: storeOfferRouter },
+  { path: '/api/merchant/upload', handler: uploadRouter },
+  { path: '/api/merchant/stores', handler: storeMerchantRouter },
+  { path: '/api/support', handler: supportRouter },
 ];
 
 export default function mountAll(app) {

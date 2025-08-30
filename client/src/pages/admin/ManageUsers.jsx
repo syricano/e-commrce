@@ -54,7 +54,7 @@ export default function Users() {
       <table className="table">
         <thead>
           <tr>
-            <th>ID</th><th>Email</th><th>{t('First') || 'First'}</th><th>{t('Last') || 'Last'}</th><th>{t('Phone') || 'Phone'}</th><th>{t('Role') || 'Role'}</th><th>{t('Status') || 'Status'}</th><th className="text-right">{t('Actions') || 'Actions'}</th>
+            <th>{t('ID') || 'ID'}</th><th>{t('Email') || 'Email'}</th><th>{t('First') || 'First'}</th><th>{t('Last') || 'Last'}</th><th>{t('Phone') || 'Phone'}</th><th>{t('Role') || 'Role'}</th><th>{t('Status') || 'Status'}</th><th className="text-right">{t('Actions') || 'Actions'}</th>
           </tr>
         </thead>
         <tbody>
@@ -95,12 +95,12 @@ export default function Users() {
         <label className="form-control"><span className="label-text">{t('search')}</span>
           <input className="input input-bordered" value={q} onChange={e=>setQ(e.target.value)} placeholder={t('search')} />
         </label>
-        <label className="form-control"><span className="label-text">Role</span>
+        <label className="form-control"><span className="label-text">{t('Role') || 'Role'}</span>
           <select className="select select-bordered" value={roleFilter} onChange={e=>setRoleFilter(e.target.value)}>
             <option value="">Any</option>{ROLES.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </label>
-        <label className="form-control"><span className="label-text">Status</span>
+        <label className="form-control"><span className="label-text">{t('Status') || 'Status'}</span>
           <select className="select select-bordered" value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
             <option value="">Any</option>{STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>

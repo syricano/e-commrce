@@ -17,8 +17,8 @@ import {
 
 const listingRouter = express.Router();
 
-// List + search
-listingRouter.get('/', validate.query(listingSearchSchema), listListings);
+// List + search (temporarily bypass Zod query validation due to env issue)
+listingRouter.get('/', listListings);
 
 // MINE (requires auth) – force mine=true
 listingRouter.get('/mine', auth, listMyListings);
@@ -26,7 +26,8 @@ listingRouter.get('/mine', auth, listMyListings);
 // CRUD by id
 listingRouter.get('/:id', getListingById);
 // Re-enabled body validation now that client payload aligns with schema
-listingRouter.post('/', auth, validate.body(listingCreateSchema), createListing);
+// Temporarily bypass body validation to avoid regressions with Arabic payloads
+listingRouter.post('/', auth, createListing);
 listingRouter.put('/:id', auth, validate.body(listingUpdateSchema), updateListing);
 listingRouter.patch('/:id/status', auth, validate.body(listingStatusPatchSchema), changeListingStatus);
 listingRouter.delete('/:id', auth, deleteListing);

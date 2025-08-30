@@ -10,6 +10,7 @@ import Signup from './auth/Signup.jsx';
 import Listings from './outlet/Listings.jsx'
 import CategoryBrowse from './outlet/CategoryBrowse.jsx'
 import Stores from './outlet/Stores.jsx'
+import StoreDetail from './outlet/StoreDetail.jsx'
 import ListingDetail from './outlet/ListingDetail.jsx'
 import Collections from './outlet/Collections.jsx'
 import SearchResults from './outlet/SearchResults.jsx'
@@ -26,7 +27,17 @@ import ManageListings from './admin/ManageListings.jsx';
 import ManageListingOffers from './admin/ManageListingOffers.jsx';
 import ManageListingPromotions from './admin/ManageListingPromotions.jsx';
 import ManageReports from './admin/ManageReports.jsx';
+import ManagePartnerRequests from './admin/ManagePartnerRequests.jsx';
+import ManageInvoices from './admin/ManageInvoices.jsx';
 import MerchantDashboard from './merchant/Dashboard.jsx';
+import StoreCategories from './merchant/StoreCategories.jsx';
+import StoreProducts from './merchant/StoreProducts.jsx';
+import StoreOffers from './merchant/StoreOffers.jsx';
+import StoreShipping from './merchant/StoreShipping.jsx';
+import StorePayment from './merchant/StorePayment.jsx';
+import StoreAssets from './merchant/StoreAssets.jsx';
+import StoreInvoices from './merchant/StoreInvoices.jsx';
+import StoreHelp from './merchant/StoreHelp.jsx';
 
 import Profile from './account/Profile.jsx';
 import MyOrders from './account/MyOrders.jsx';
@@ -47,6 +58,7 @@ export {
   Listings,
   CategoryBrowse,
   Stores,
+  StoreDetail,
   ListingDetail,
   Collections,
   SearchResults,
@@ -73,5 +85,15 @@ export {
   ManageListingOffers,
   ManageListingPromotions,
   ManageReports,
+  ManagePartnerRequests,
+  ManageInvoices,
   MerchantDashboard,
+  StoreCategories,
+  StoreProducts,
+  StoreOffers,
+  StoreShipping,
+  StorePayment,
+  StoreAssets,
+  StoreInvoices,
+  StoreHelp,
 };

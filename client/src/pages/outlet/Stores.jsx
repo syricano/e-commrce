@@ -4,6 +4,7 @@ import usePageTitle from '@/hooks/usePageTitle';
 import { useLang } from '@/context/LangProvider';
 import { errorHandler } from '@/utils';
 import Spinner from '@/components/UI/Spinner.jsx';
+import { Link } from 'react-router-dom';
 
 export default function Stores() {
   usePageTitle('Stores');
@@ -33,12 +34,12 @@ export default function Stores() {
       )}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((s) => (
-          <div key={s.id} className="card bg-base-100 border">
+          <Link key={s.id} to={`/stores/${s.id}`} className="card bg-base-100 border hover:shadow">
             <div className="card-body p-4">
               <div className="font-semibold">{s.name || s.slug || `#${s.id}`}</div>
               <div className="opacity-70 text-sm">{s.email || s.phone || ''}</div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>

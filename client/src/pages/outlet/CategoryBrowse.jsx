@@ -37,7 +37,7 @@ export default function CategoryBrowse() {
 
         const listRes = await axiosInstance.get('/listings', { params: { categoryId, limit: 24 } });
         setRows(listRes?.data?.items || listRes?.data || []);
-      } catch (e) { errorHandler(e, 'Failed to load category'); }
+      } catch (e) { errorHandler(e, t('Failed to load category') || 'Failed to load category'); }
       finally { setLoading(false); }
     };
     run();
@@ -65,7 +65,7 @@ export default function CategoryBrowse() {
           ))}
         </div>
       </div>
-      {!loading && rows.length === 0 && (<div className="opacity-60 mt-6">No listings</div>)}
+      {!loading && rows.length === 0 && (<div className="opacity-60 mt-6">{t('No listings') || 'No listings'}</div>)}
     </section>
   );
 }

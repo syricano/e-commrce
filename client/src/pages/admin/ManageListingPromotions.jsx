@@ -26,11 +26,11 @@ export default function ManageListingPromotions() {
       <table className="table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Listing</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>Created</th>
+            <th>{t('ID') || 'ID'}</th>
+            <th>{t('Listing') || 'Listing'}</th>
+            <th>{t('Type') || 'Type'}</th>
+            <th>{t('Status') || 'Status'}</th>
+            <th>{t('Created') || 'Created'}</th>
           </tr>
         </thead>
         <tbody>
@@ -56,8 +56,8 @@ export default function ManageListingPromotions() {
         <label className="form-control">
           <span className="label-text">{t('Status')}</span>
           <select className="select select-bordered" value={status} onChange={(e)=>setStatus(e.target.value)}>
-            <option value="">Any</option>
-            {['active','expired','cancelled'].map(s=>(<option key={s} value={s}>{s}</option>))}
+            <option value="">{t('Any') || 'Any'}</option>
+            {['active','expired','cancelled'].map(s=>(<option key={s} value={s}>{t(s) || s}</option>))}
           </select>
         </label>
         <button className="btn" onClick={load} disabled={loading}>{loading?'…':t('refresh')}</button>

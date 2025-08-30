@@ -13,6 +13,7 @@ export default function SearchResults() {
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
   const [products, setProducts] = useState([]);
+  const [storeProducts, setStoreProducts] = useState([]);
 
   useEffect(() => {
     let live = true;
@@ -25,6 +26,7 @@ export default function SearchResults() {
         if (!live) return;
         setListings(Array.isArray(data.listings) ? data.listings : []);
         setProducts(Array.isArray(data.products) ? data.products : []);
+        setStoreProducts(Array.isArray(data.storeProducts) ? data.storeProducts : []);
       } finally { if (live) setLoading(false); }
     };
     run();
@@ -63,6 +65,17 @@ export default function SearchResults() {
     });
   }, [products]);
 
+  const storeProductCards = useMemo(() => {
+    return (storeProducts || []).map((sp) => (
+      <Link key={`sp-${sp.id}`} to={`/stores/${sp.storeId}`} className="card bg-base-100 border hover:shadow">
+        <div className="card-body p-3">
+          <div className="font-semibold truncate">{sp.name}</div>
+          <div className="opacity-70 text-sm">SKU: {sp.articleNumber}</div>
+        </div>
+      </Link>
+    ));
+  }, [storeProducts]);
+
   const onSubmit = (e) => {
     e.preventDefault();
     const input = new FormData(e.currentTarget).get('q');
@@ -91,7 +104,7 @@ export default function SearchResults() {
       )}
 
       {!loading && q && (
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
           <div>
             <h2 className="text-lg font-semibold mb-2">{lang==='ar' ? 'الإعلانات' : 'Listings'}</h2>
             <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
@@ -104,7 +117,7 @@ export default function SearchResults() {
             </div>
           </div>
           <div>
-            <h2 className="text-lg font-semibold mb-2">{lang==='ar' ? 'المنتجات' : 'Products'}</h2>
+            <h2 className="text-lg font-semibold mb-2">{t('Products') || (lang==='ar' ? 'المنتجات' : 'Products')}</h2>
             <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
               <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 w-full">
                 {productCards}
@@ -114,9 +127,19 @@ export default function SearchResults() {
               </div>
             </div>
           </div>
+          <div>
+            <h2 className="text-lg font-semibold mb-2">{t('Store Items') || (lang==='ar' ? 'عناصر المتاجر' : 'Store Items')}</h2>
+            <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
+              <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 w-full">
+                {storeProductCards}
+                {storeProductCards.length === 0 && (
+                  <div className="opacity-60">{t('No results') || (lang==='ar'?'لا نتائج':'No results')}</div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </section>
   );
 }
-

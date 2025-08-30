@@ -4,8 +4,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context";
 import { googleLoginUrl } from "@/services";
 import { toast } from "react-hot-toast";
+import { useLang } from "@/context/LangProvider";
 
 function Signin() {
+  const { t } = useLang();
   const navigate = useNavigate();
   const location = useLocation();
   const { loginWithCredentials } = useAuth();
@@ -22,7 +24,7 @@ function Signin() {
     const password = form.password.trim();
 
     if (!email || !password) {
-      toast.error("Email and password are required");
+      toast.error(t("Email and password are required") || "Email and password are required");
       return;
     }
 
@@ -37,11 +39,11 @@ function Signin() {
 
   return (
     <section className="max-w-md mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Sign in</h1>
+      <h1 className="text-2xl font-bold mb-4">{t('signin') || 'Sign in'}</h1>
 
       <form onSubmit={onSubmit} className="grid gap-3">
         <label className="form-control">
-          <span className="label-text">Email</span>
+          <span className="label-text">{t('Email') || 'Email'}</span>
           <input
             name="email"
             type="email"
@@ -54,7 +56,7 @@ function Signin() {
         </label>
 
         <label className="form-control">
-          <span className="label-text">Password</span>
+          <span className="label-text">{t('Password') || 'Password'}</span>
           <input
             name="password"
             type="password"
@@ -67,17 +69,17 @@ function Signin() {
         </label>
 
         <button disabled={loading} className="btn btn-primary w-full">
-          {loading ? "..." : "Sign in"}
+          {loading ? "..." : (t('signin') || 'Sign in')}
         </button>
       </form>
 
-      <div className="divider">or</div>
+      <div className="divider">{t('or') || 'or'}</div>
       <a className="btn btn-outline w-full" href={googleLoginUrl()}>
-        Continue with Google
+        {t('Continue with Google') || 'Continue with Google'}
       </a>
 
       <p className="text-sm mt-3">
-        No account? <Link className="link" to="/signup">Create one</Link>
+        {t('No account?') || 'No account?'} <Link className="link" to="/signup">{t('Create one') || 'Create one'}</Link>
       </p>
     </section>
   );

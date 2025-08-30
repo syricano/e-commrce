@@ -9,7 +9,7 @@ const api = createCrud('/media');
 
 export default function ManageMedia() {
   const { t } = useLang();
-  usePageTitle('Media');
+  usePageTitle('ManageMedia');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -34,11 +34,11 @@ export default function ManageMedia() {
       <table className="table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>URL</th>
-            <th>Product</th>
-            <th>Variant</th>
+            <th>{t('ID') || 'ID'}</th>
+            <th>{t('Type') || 'Type'}</th>
+            <th>{t('URL') || 'URL'}</th>
+            <th>{t('Product') || 'Product'}</th>
+            <th>{t('Variant') || 'Variant'}</th>
             <th className="text-right">{t('Actions') || 'Actions'}</th>
           </tr>
         </thead>
@@ -65,7 +65,7 @@ export default function ManageMedia() {
 
   return (
     <section className="p-4 space-y-4">
-      <h1 className="text-xl font-semibold">{t('Media')}</h1>
+      <h1 className="text-xl font-semibold">{t('ManageMedia') || t('Media') || 'Manage Media'}</h1>
       <div>
         <button className="btn" onClick={load} disabled={loading}>{loading?'…':t('refresh')}</button>
       </div>

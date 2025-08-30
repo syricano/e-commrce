@@ -6,6 +6,7 @@ import { useAuth } from '@/context';
 import { getMyProfile, updateMyProfile } from '@/services';
 import { errorHandler } from '@/utils';
 import { toast } from 'react-hot-toast';
+import { useLang } from '@/context/LangProvider';
 
 const ROLES = ['customer','seller','staff','admin'];
 
@@ -26,6 +27,7 @@ function Field({ label, name, value, onChange, type = 'text', readOnly = false }
 }
 
 function Profile() {
+  const { t } = useLang();
   const { user, role } = useAuth();
   const isAdmin = role === 'admin';
 
@@ -64,10 +66,10 @@ function Profile() {
         phone: acc.phone,
       })
       .then(() => {
-        toast.success('Account saved');
+        toast.success(t('Account saved') || 'Account saved');
         setAccEdit(false);
       })
-      .catch((e) => errorHandler(e, 'Failed to save account'))
+      .catch((e) => errorHandler(e, t('Failed to save account') || 'Failed to save account'))
       .finally(() => setAccBusy(false));
   };
 
@@ -90,7 +92,7 @@ function Profile() {
       .then((p) => setMe(p || { displayName: '', avatarUrl: '', bio: '' }))
       .catch((e) => {
         if (e?.response?.status === 404) setMe({ displayName: '', avatarUrl: '', bio: '' });
-        else errorHandler(e, 'Failed to load your profile');
+        else errorHandler(e, t('Failed to load your profile') || 'Failed to load your profile');
       })
       .finally(() => setMeLoading(false));
   }, []);
@@ -100,10 +102,10 @@ function Profile() {
     setMeBusy(true);
     updateMyProfile(me)
       .then(() => {
-        toast.success('Profile saved');
+        toast.success(t('Profile saved') || 'Profile saved');
         setMeEdit(false);
       })
-      .catch((e) => errorHandler(e, 'Failed to save profile'))
+      .catch((e) => errorHandler(e, t('Failed to save profile') || 'Failed to save profile'))
       .finally(() => setMeBusy(false));
   };
 
@@ -112,21 +114,21 @@ function Profile() {
       <div className="card bg-base-200">
         <div className="card-body">
           <div className="flex items-center justify-between">
-            <h2 className="card-title">Account</h2>
+            <h2 className="card-title">{t('Account') || 'Account'}</h2>
             {!accEdit ? (
-              <button className="btn btn-sm" onClick={() => setAccEdit(true)}>Edit account</button>
+              <button className="btn btn-sm" onClick={() => setAccEdit(true)}>{t('Edit') || 'Edit'} {t('Account') || 'Account'}</button>
             ) : (
               <div className="flex gap-2">
-                <button className="btn btn-primary btn-sm" onClick={saveAccount} disabled={accBusy}>Save account</button>
-                <button className="btn btn-ghost btn-sm" onClick={() => setAccEdit(false)}>Done</button>
+                <button className="btn btn-primary btn-sm" onClick={saveAccount} disabled={accBusy}>{t('save') || 'Save'} {t('Account') || 'Account'}</button>
+                <button className="btn btn-ghost btn-sm" onClick={() => setAccEdit(false)}>{t('Done') || 'Done'}</button>
               </div>
             )}
           </div>
 
           <div className="grid md:grid-cols-2 gap-3">
-            <Field label="Email" name="email" value={acc.email} onChange={onAccChange} readOnly />
+            <Field label={t('Email') || 'Email'} name="email" value={acc.email} onChange={onAccChange} readOnly />
             <label className="form-control">
-              <span className="label-text">Role</span>
+              <span className="label-text">{t('Role') || 'Role'}</span>
               <select
                 className="select select-bordered"
                 value={acc.role}
@@ -138,32 +140,32 @@ function Profile() {
                 ))}
               </select>
             </label>
-            <Field label="Status" name="status" value={acc.status} onChange={onAccChange} readOnly />
-            <Field label="First name" name="firstName" value={acc.firstName} onChange={onAccChange} readOnly={!accEdit} />
-            <Field label="Last name"  name="lastName"  value={acc.lastName}  onChange={onAccChange} readOnly={!accEdit} />
-            <Field label="Phone"      name="phone"     value={acc.phone}     onChange={onAccChange} readOnly={!accEdit} />
+            <Field label={t('Status') || 'Status'} name="status" value={acc.status} onChange={onAccChange} readOnly />
+            <Field label={t('First name') || 'First name'} name="firstName" value={acc.firstName} onChange={onAccChange} readOnly={!accEdit} />
+            <Field label={t('Last name')  || 'Last name'}  name="lastName"  value={acc.lastName}  onChange={onAccChange} readOnly={!accEdit} />
+            <Field label={t('Phone')      || 'Phone'}      name="phone"     value={acc.phone}     onChange={onAccChange} readOnly={!accEdit} />
           </div>
 
           <div className="divider my-3" />
 
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">Profile</h3>
+            <h3 className="font-semibold">{t('profile') || 'Profile'}</h3>
             {!meEdit ? (
-              <button className="btn btn-sm" onClick={() => setMeEdit(true)} disabled={meLoading}>Edit profile</button>
+              <button className="btn btn-sm" onClick={() => setMeEdit(true)} disabled={meLoading}>{t('Edit') || 'Edit'} {t('profile') || 'Profile'}</button>
             ) : (
               <div className="flex gap-2">
-                <button className="btn btn-primary btn-sm" onClick={saveSelf} disabled={meBusy}>Save profile</button>
-                <button className="btn btn-ghost btn-sm" onClick={() => setMeEdit(false)}>Done</button>
+                <button className="btn btn-primary btn-sm" onClick={saveSelf} disabled={meBusy}>{t('save') || 'Save'} {t('profile') || 'Profile'}</button>
+                <button className="btn btn-ghost btn-sm" onClick={() => setMeEdit(false)}>{t('Done') || 'Done'}</button>
               </div>
             )}
           </div>
 
           {!meLoading && (
             <div className="grid md:grid-cols-2 gap-3">
-              <Field label="Display name" name="displayName" value={me?.displayName ?? ''} onChange={onSelfChange} readOnly={!meEdit} />
-              <Field label="Avatar URL"   name="avatarUrl"   value={me?.avatarUrl   ?? ''} onChange={onSelfChange} readOnly={!meEdit} />
+              <Field label={t('Display name') || 'Display name'} name="displayName" value={me?.displayName ?? ''} onChange={onSelfChange} readOnly={!meEdit} />
+              <Field label={t('Avatar URL')   || 'Avatar URL'}   name="avatarUrl"   value={me?.avatarUrl   ?? ''} onChange={onSelfChange} readOnly={!meEdit} />
               <label className="form-control md:col-span-2">
-                <span className="label-text">Bio</span>
+                <span className="label-text">{t('Bio') || 'Bio'}</span>
                 <textarea
                   className="textarea textarea-bordered"
                   name="bio"
@@ -182,14 +184,14 @@ function Profile() {
 
   return (
     <section className="max-w-5xl mx-auto p-4 space-y-6">
-      <h1 className="text-2xl font-bold">Profile</h1>
+      <h1 className="text-2xl font-bold">{t('profile') || 'Profile'}</h1>
 
       <div className="flex gap-2 flex-wrap">
-        <Link className="btn btn-outline btn-sm" to="/account/orders">My Orders</Link>
-        <Link className="btn btn-outline btn-sm" to="/account/listings">My Listings</Link>
-        <Link className="btn btn-outline btn-sm" to="/account/listings/new">Create Listing</Link>
+        <Link className="btn btn-outline btn-sm" to="/account/orders">{t('My Orders') || 'My Orders'}</Link>
+        <Link className="btn btn-outline btn-sm" to="/account/listings">{t('My Listings') || 'My Listings'}</Link>
+        <Link className="btn btn-outline btn-sm" to="/account/listings/new">{t('Create a Listing') || 'Create Listing'}</Link>
         {(role === 'seller' || role === 'admin' || role === 'staff') && (
-          <Link className="btn btn-primary btn-sm" to="/merchant">Store Management</Link>
+          <Link className="btn btn-primary btn-sm" to="/merchant">{t('Store Management') || 'Store Management'}</Link>
         )}
       </div>
 

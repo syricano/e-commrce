@@ -49,7 +49,7 @@ export default function Listings() {
         const data = res?.data || {};
         setRows(data.items || data || []);
         if (typeof data.total === 'number') setPageMeta({ page: Number(data.page||1), limit: Number(data.limit||24), total: Number(data.total||0) });
-      } catch (e) { errorHandler(e, 'Failed to load listings'); }
+      } catch (e) { errorHandler(e, t('Failed to load listings') || 'Failed to load listings'); }
       finally { setLoading(false); }
     };
     run();
@@ -93,10 +93,10 @@ export default function Listings() {
 
   const CONDITIONS = ['new','used','refurbished'];
   const SORTS = [
-    { value: 'new', label: lang==='ar' ? 'الأحدث' : 'Newest' },
-    { value: 'price_asc', label: lang==='ar' ? 'السعر ↑' : 'Price ↑' },
-    { value: 'price_desc', label: lang==='ar' ? 'السعر ↓' : 'Price ↓' },
-    { value: 'popular', label: lang==='ar' ? 'الأكثر مشاهدة' : 'Popular' },
+    { value: 'new', label: t('Newest') || (lang==='ar' ? 'الأحدث' : 'Newest') },
+    { value: 'price_asc', label: t('Price ↑') || (lang==='ar' ? 'السعر ↑' : 'Price ↑') },
+    { value: 'price_desc', label: t('Price ↓') || (lang==='ar' ? 'السعر ↓' : 'Price ↓') },
+    { value: 'popular', label: t('Popular') || (lang==='ar' ? 'الأكثر مشاهدة' : 'Popular') },
   ];
 
   const onFilterSubmit = (e) => {
@@ -182,7 +182,7 @@ export default function Listings() {
       {/* Filters */}
       <form onSubmit={onFilterSubmit} className="mb-4 grid gap-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
         <label className="form-control">
-          <span className="label-text">{lang==='ar'?'القسم':'Category'}</span>
+          <span className="label-text">{t('Category') || 'Category'}</span>
           <select
             name="categoryId"
             className="select select-bordered"
@@ -196,22 +196,22 @@ export default function Listings() {
           </select>
         </label>
         <label className="form-control">
-          <span className="label-text">{lang==='ar'?'السعر الأدنى':'Min price'}</span>
+          <span className="label-text">{t('Min price') || (lang==='ar'?'السعر الأدنى':'Min price')}</span>
           <input name="minPrice" type="number" min="0" className="input input-bordered" defaultValue={sp.get('minPrice')||''} />
         </label>
         <label className="form-control">
-          <span className="label-text">{lang==='ar'?'السعر الأقصى':'Max price'}</span>
+          <span className="label-text">{t('Max price') || (lang==='ar'?'السعر الأقصى':'Max price')}</span>
           <input name="maxPrice" type="number" min="0" className="input input-bordered" defaultValue={sp.get('maxPrice')||''} />
         </label>
         <label className="form-control">
-          <span className="label-text">{lang==='ar'?'الحالة':'Condition'}</span>
+          <span className="label-text">{t('Condition') || (lang==='ar'?'الحالة':'Condition')}</span>
           <select name="condition" className="select select-bordered" defaultValue={sp.get('condition')||''}>
             <option value="">—</option>
-            {CONDITIONS.map(v => <option key={v} value={v}>{v}</option>)}
+            {CONDITIONS.map(v => <option key={v} value={v}>{t(v) || v}</option>)}
           </select>
         </label>
         <label className="form-control">
-          <span className="label-text">{lang==='ar'?'ترتيب':'Sort'}</span>
+          <span className="label-text">{t('Sort') || (lang==='ar'?'ترتيب':'Sort')}</span>
           <select name="sort" className="select select-bordered" defaultValue={sp.get('sort')||''}>
             <option value="">—</option>
             {SORTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
@@ -246,8 +246,8 @@ export default function Listings() {
               ))}
               {more.length > 0 && (
                 <div className="sm:col-span-2 md:col-span-4 lg:col-span-6">
-                  <button type="button" className="btn btn-outline btn-sm" onClick={()=>setShowMoreAttrs(v=>!v)}>
-                    {showMoreAttrs ? (lang==='ar'?'إخفاء المزيد':'Hide more') : (lang==='ar'?'المزيد من الفلاتر':'More filters')}
+              <button type="button" className="btn btn-outline btn-sm" onClick={()=>setShowMoreAttrs(v=>!v)}>
+                    {showMoreAttrs ? (t('Hide more') || (lang==='ar'?'إخفاء المزيد':'Hide more')) : (t('More filters') || (lang==='ar'?'المزيد من الفلاتر':'More filters'))}
                   </button>
                 </div>
               )}
@@ -271,8 +271,8 @@ export default function Listings() {
           <button type="button" className="btn btn-ghost" onClick={()=>{
             const keep = new URLSearchParams(); // clear all
             setSp(keep, { replace: false });
-          }}>{lang==='ar'?'إعادة ضبط':'Reset'}</button>
-          <button className="btn btn-primary">{lang==='ar'?'تطبيق':'Apply'}</button>
+          }}>{t('Reset') || (lang==='ar'?'إعادة ضبط':'Reset')}</button>
+          <button className="btn btn-primary">{t('Apply') || (lang==='ar'?'تطبيق':'Apply')}</button>
         </div>
       </form>
       {/* Chips */}
@@ -284,7 +284,7 @@ export default function Listings() {
               <button type="button" className="ml-2" onClick={()=>removeChip(c)}>×</button>
             </span>
           ))}
-          <button type="button" className="btn btn-ghost btn-xs" onClick={()=>{ setSp(new URLSearchParams(), { replace:false }); }}>Clear</button>
+          <button type="button" className="btn btn-ghost btn-xs" onClick={()=>{ setSp(new URLSearchParams(), { replace:false }); }}>{t('Clear') || 'Clear'}</button>
         </div>
       )}
 
@@ -301,7 +301,7 @@ export default function Listings() {
           ))}
         </div>
       </div>
-      {!loading && rows.length === 0 && (<div className="opacity-60 mt-6">No listings</div>)}
+      {!loading && rows.length === 0 && (<div className="opacity-60 mt-6">{t('No listings') || 'No listings'}</div>)}
       {pageMeta.total > pageMeta.limit && (
         <div className={`mt-6 flex ${lang==='ar'?'justify-end':'justify-start'} items-center`}>
           <div className="join">
@@ -310,7 +310,7 @@ export default function Listings() {
               const p = Math.max(1, Number(pageMeta.page)-1);
               if (p<=1) next.delete('page'); else next.set('page', String(p));
               setSp(next, { replace:false });
-            }}>{lang==='ar'?'السابق':'Prev'}</button>
+            }}>{t('Prev') || (lang==='ar'?'السابق':'Prev')}</button>
             {pagination.items.map((it, idx) => it==='…' ? (
               <span key={`gap-${idx}`} className="btn join-item btn-ghost">…</span>
             ) : (
@@ -325,7 +325,7 @@ export default function Listings() {
               const p = Math.min(pagination.totalPages, Number(pageMeta.page)+1);
               if (p<=1) next.delete('page'); else next.set('page', String(p));
               setSp(next, { replace:false });
-            }}>{lang==='ar'?'التالي':'Next'}</button>
+            }}>{t('Next') || (lang==='ar'?'التالي':'Next')}</button>
           </div>
         </div>
       )}

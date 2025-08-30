@@ -41,10 +41,10 @@ export default function ManageListings() {
       <h1 className="text-xl font-semibold">{t('Listings')}</h1>
       <div className="flex items-end gap-2">
         <label className="form-control">
-          <span className="label-text">Status</span>
+          <span className="label-text">{t('Status') || 'Status'}</span>
           <select className="select select-bordered" value={status} onChange={(e)=>setStatus(e.target.value)}>
-            <option value="">Any</option>
-            {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+            <option value="">{t('Any') || 'Any'}</option>
+            {STATUSES.map(s => <option key={s} value={s}>{t(s) || s}</option>)}
           </select>
         </label>
         <button className="btn" onClick={load} disabled={loading}>{loading?'…':t('refresh')}</button>
@@ -53,12 +53,12 @@ export default function ManageListings() {
         <table className="table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Owner</th>
-              <th>Category</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th className="text-right">Actions</th>
+              <th>{t('ID') || 'ID'}</th>
+              <th>{t('Owner') || 'Owner'}</th>
+              <th>{t('Category') || 'Category'}</th>
+              <th>{t('Price') || 'Price'}</th>
+              <th>{t('Status') || 'Status'}</th>
+              <th className="text-right">{t('Actions') || 'Actions'}</th>
             </tr>
           </thead>
           <tbody>
@@ -76,7 +76,7 @@ export default function ManageListings() {
                 </td>
               </tr>
             ))}
-            {rows.length===0 && !loading && (<tr><td colSpan={6} className="text-center opacity-60 py-6">No listings</td></tr>)}
+            {rows.length===0 && !loading && (<tr><td colSpan={6} className="text-center opacity-60 py-6">{t('No listings') || 'No listings'}</td></tr>)}
           </tbody>
         </table>
       </div>

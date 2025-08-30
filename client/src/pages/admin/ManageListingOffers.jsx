@@ -26,11 +26,11 @@ export default function ManageListingOffers() {
       <table className="table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Listing</th>
-            <th>Buyer</th>
-            <th>Amount</th>
-            <th>Status</th>
+            <th>{t('ID') || 'ID'}</th>
+            <th>{t('Listing') || 'Listing'}</th>
+            <th>{t('Buyer') || 'Buyer'}</th>
+            <th>{t('Amount') || 'Amount'}</th>
+            <th>{t('Status') || 'Status'}</th>
           </tr>
         </thead>
         <tbody>
@@ -56,8 +56,8 @@ export default function ManageListingOffers() {
         <label className="form-control">
           <span className="label-text">{t('Status')}</span>
           <select className="select select-bordered" value={status} onChange={(e)=>setStatus(e.target.value)}>
-            <option value="">Any</option>
-            {['open','accepted','declined'].map(s=>(<option key={s} value={s}>{s}</option>))}
+            <option value="">{t('Any') || 'Any'}</option>
+            {['open','accepted','declined'].map(s=>(<option key={s} value={s}>{t(s) || s}</option>))}
           </select>
         </label>
         <button className="btn" onClick={load} disabled={loading}>{loading?'…':t('refresh')}</button>

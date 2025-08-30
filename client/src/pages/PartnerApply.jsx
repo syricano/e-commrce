@@ -1,12 +1,14 @@
 import { useState, useMemo } from 'react';
 import axiosInstance from '@/config/axiosConfig';
 import { useLang } from '@/context/LangProvider';
+import { useAuth } from '@/context';
 import { toast } from 'react-hot-toast';
 import usePageTitle from '@/hooks/usePageTitle';
 import { COUNTRIES, CITIES_BY_COUNTRY } from '@/services/geo';
 
 export default function PartnerApply() {
   const { t } = useLang();
+  const { user } = useAuth() || {};
   usePageTitle('Become a Partner');
   const BUSINESS_OPTIONS = [
     'Fashion & Apparel', 'Electronics', 'Computers', 'Mobile & Accessories', 'Automotive', 'Grocery',
@@ -38,6 +40,7 @@ export default function PartnerApply() {
     setBusy(true);
     try {
       const payload = {
+        userId: user?.id,
         name: f.name.trim(),
         email: f.email.trim(),
         phone: f.phone.trim(),
@@ -53,7 +56,7 @@ export default function PartnerApply() {
       toast.success(t('Submit'));
       setF({ name:'', email:'', phone:'', country: COUNTRIES[0], city:'', address:'', businessField: BUSINESS_OPTIONS[0], shippingOptions:{shipping:false,pickup:false}, payments:{cash:false,bank:false,online:false,invoice:false}, message:'' });
     } catch (e) {
-      toast.error('Failed to send');
+      toast.error(t('Failed to send'));
     } finally { setBusy(false); }
   };
 
@@ -95,21 +98,21 @@ export default function PartnerApply() {
           <label className="form-control">
             <span className="label-text">{t('City') || 'City'}</span>
             <select className="select select-bordered" name="city" value={f.city} onChange={onChange}>
-              <option value="">— select —</option>
+              <option value="">{t('Select') || 'Select'}</option>
               {cities.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </label>
 
           <label className="form-control">
             <span className="label-text">{t('Address') || 'Address'}</span>
-            <input className="input input-bordered" name="address" value={f.address} onChange={onChange} placeholder="Street / Building" />
+            <input className="input input-bordered" name="address" value={f.address} onChange={onChange} placeholder={t('Street / Building') || 'Street / Building'} />
           </label>
         </div>
         <label className="form-control">
           <span className="label-text">{t('Business Field')}</span>
           <select className="select select-bordered" name="businessField" value={f.businessField} onChange={onChange}>
             {BUSINESS_OPTIONS.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
+              <option key={opt} value={opt}>{t(opt) || opt}</option>
             ))}
           </select>
         </label>        
@@ -119,20 +122,20 @@ export default function PartnerApply() {
             <div className="font-semibold mb-1">{t('Shipping Options')}</div>
             <label className="flex items-center gap-2">
               <input type="checkbox" className="checkbox" checked={f.shippingOptions.shipping} onChange={(e)=>setF(s=>({...s, shippingOptions:{...s.shippingOptions, shipping:e.target.checked}}))} />
-              <span>Shipping</span>
+              <span>{t('Shipping') || 'Shipping'}</span>
             </label>
             <label className="flex items-center gap-2">
               <input type="checkbox" className="checkbox" checked={f.shippingOptions.pickup} onChange={(e)=>setF(s=>({...s, shippingOptions:{...s.shippingOptions, pickup:e.target.checked}}))} />
-              <span>Pickup</span>
+              <span>{t('Pickup') || 'Pickup'}</span>
             </label>
           </div>
           <div>
             <div className="font-semibold mb-1">{t('Preferred Payments')}</div>
             {[
-              ['cash','Cash'],
-              ['bank','Bank Transfer'],
-              ['online','Online Payment'],
-              ['invoice','Invoice'],
+              ['cash', t('Cash') || 'Cash'],
+              ['bank', t('Bank Transfer') || 'Bank Transfer'],
+              ['online', t('Online Payment') || 'Online Payment'],
+              ['invoice', t('Invoice') || 'Invoice'],
             ].map(([key,label])=> (
               <label key={key} className="flex items-center gap-2">
                 <input type="checkbox" className="checkbox" checked={f.payments[key]} onChange={(e)=>setF(s=>({...s, payments:{...s.payments, [key]:e.target.checked}}))} />

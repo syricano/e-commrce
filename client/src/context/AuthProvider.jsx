@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import axiosInstance from "@/config/axiosConfig";
 import { login as apiLogin, logout as apiLogout, getMe } from "@/services";
 import { toast } from "react-hot-toast";
+import { useLang } from "@/context/LangProvider";
 import { errorHandler } from "@/utils";
 
 const AuthContext = createContext({
@@ -16,6 +17,7 @@ const AuthContext = createContext({
 });
 
 function AuthProvider({ children }) {
+  const { t } = useLang();
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
@@ -68,11 +70,11 @@ function AuthProvider({ children }) {
           setToken(t);
         }
         setUser(u ?? null);
-        toast.success("Signed in");
+        toast.success(t('Signed in') || 'Signed in');
         return true;
       })
       .catch((e) => {
-        errorHandler(e, "Login failed");
+        errorHandler(e, t('Login failed') || 'Login failed');
         return false;
       });
 
@@ -83,7 +85,7 @@ function AuthProvider({ children }) {
         localStorage.removeItem("token");
         setToken(null);
         setUser(null);
-        toast.success("Logged out");
+        toast.success(t('Logged out') || 'Logged out');
       });
 
   const value = useMemo(

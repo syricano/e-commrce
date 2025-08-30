@@ -31,10 +31,9 @@ export default function MerchantDashboard() {
     <section className="p-4 space-y-4 max-w-screen-xl mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('dashboard')} — {t('Stores')}</h1>
-        <Link to="/admin/stores" className="btn btn-outline btn-sm">{t('ManageStores') || 'Admin: Manage Stores'}</Link>
       </div>
 
-      {loading && <div className="opacity-60">Loading…</div>}
+      {loading && <div className="opacity-60">{t('Loading…') || 'Loading…'}</div>}
       {!loading && stores.length === 0 && (
         <div className="card bg-base-200">
           <div className="card-body">
@@ -57,9 +56,15 @@ export default function MerchantDashboard() {
               </div>
 
               <div className="mt-3 flex flex-wrap gap-2">
-                <button className="btn btn-sm" disabled title="Coming soon">Manage Categories</button>
-                <button className="btn btn-sm" disabled title="Coming soon">Manage Products</button>
-                <button className="btn btn-sm" disabled title="Coming soon">Manage Offers</button>
+                {/* Categories selection now follows global categories for products */}
+                <Link className="btn btn-sm" to={`/merchant/store/${s.id}/products`}>{t('ManageProducts') || 'Manage Products'}</Link>
+                <Link className="btn btn-sm" to={`/merchant/store/${s.id}/offers`}>{t('Manage Offers') || 'Manage Offers'}</Link>
+                <Link className="btn btn-sm" to={`/merchant/store/${s.id}/shipping`}>{t('Manage Shipping') || 'Manage Shipping'}</Link>
+                <Link className="btn btn-sm" to={`/merchant/store/${s.id}/pickup`}>{t('Manage Pickup') || 'Manage Pickup'}</Link>
+                <Link className="btn btn-sm" to={`/merchant/store/${s.id}/payment`}>{t('Manage Payment') || 'Manage Payment'}</Link>
+                <Link className="btn btn-sm" to={`/merchant/store/${s.id}/invoices`}>{t('Invoices') || 'Invoices'}</Link>
+                <Link className="btn btn-sm" to={`/merchant/store/${s.id}/assets`}>{t('Assets') || 'Assets'}</Link>
+                <Link className="btn btn-sm" to={`/merchant/store/${s.id}/help`}>{t('Request Help') || 'Request Help'}</Link>
               </div>
             </div>
           </div>

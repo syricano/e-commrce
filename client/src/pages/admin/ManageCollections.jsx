@@ -1,6 +1,8 @@
 import CrudPage from './_CrudPage';
+import { useLang } from '@/context/LangProvider';
 
 export default function ManageCollections() {
+  const { t } = useLang();
   return (
     <CrudPage
       title="ManageCollections"

@@ -29,4 +29,17 @@ export const createStore = asyncHandler(async (req, res) => {
 export const updateStore = updateById(Store);
 export const deleteStore = deleteById(Store);
 
+export const updateMerchantSettings = asyncHandler(async (req, res) => {
+  const row = await Store.findByPk(req.params.id);
+  if (!row) return res.status(404).json({ error: 'Not found' });
+  if (req.user?.role !== 'admin' && req.user?.role !== 'staff' && row.ownerUserId !== req.user?.id) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const allowed = ['shippingOptions','preferredPayments','logoUrl','coverUrl'];
+  const patch = {};
+  for (const k of allowed) if (Object.prototype.hasOwnProperty.call(req.body, k)) patch[k] = req.body[k];
+  await row.update(patch);
+  res.json(row);
+});
+
 export default { listStores, getStore, createStore, updateStore, deleteStore };

@@ -160,7 +160,7 @@ const HomePage = () => {
         <div className={`${lang==='ar'?'flex justify-end':'flex justify-start'}`}>
           <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 w-full">
             {productsLoaded && products.length === 0 && (
-              <div className="opacity-60 col-span-full">No products found</div>
+              <div className="opacity-60 col-span-full">{t('No products') || 'No products'}</div>
             )}
             {products.map(p => (
               <Link key={p.id} to={`/products/${p.id}`} className="card bg-base-100 border hover:shadow">
