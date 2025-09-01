@@ -3,21 +3,13 @@ import { toast } from 'react-hot-toast';
 import { errorHandler } from '@/utils';
 import { useLang } from '@/context/LangProvider';
 import { Categories, CategoryTranslations } from '@/services/api';
+import { slugify } from '@/utils/strings';
+
 
 const LOCALES = ['en', 'ar'];
 
 const unpack = (res) => res?.data?.items ?? res?.data ?? res?.items ?? res ?? [];
-const slugify = (s) =>
-  (s || '')
-    .toString()
-    .trim()
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '') || `cat-${Date.now()}`;
+
 
 const buildTrIndex = (trs) => {
   const idx = {};

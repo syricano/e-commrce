@@ -13,6 +13,7 @@ import Stores from './outlet/Stores.jsx'
 import StoreDetail from './outlet/StoreDetail.jsx'
 import ListingDetail from './outlet/ListingDetail.jsx'
 import Collections from './outlet/Collections.jsx'
+import DealsPage from './outlet/DealsPage.jsx'
 import SearchResults from './outlet/SearchResults.jsx'
 
 
@@ -61,6 +62,7 @@ export {
   StoreDetail,
   ListingDetail,
   Collections,
+  DealsPage,
   SearchResults,
 
 

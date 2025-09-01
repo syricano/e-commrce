@@ -11,13 +11,17 @@ import axiosInstance from "@/config/axiosConfig";
 
 // pick best translation for a given category id
 const pickCatTr = (trsByCat, id, lang) =>
-  trsByCat[id]?.[lang] || trsByCat[id]?.en || trsByCat[id]?.ar || (trsByCat[id] && Object.values(trsByCat[id])[0]) || null;
+  trsByCat[id]?.[lang] ||
+  trsByCat[id]?.en ||
+  trsByCat[id]?.ar ||
+  (trsByCat[id] && Object.values(trsByCat[id])[0]) ||
+  null;
 
+/* ===================== Desktop ===================== */
 function DesktopBar() {
   const { t, lang } = useLang();
   const [cats, setCats] = useState([]);
   const [catTr, setCatTr] = useState({});
-  const [counts, setCounts] = useState({ stores: 0, listings: 0, offers: 0 });
   const [catsOpen, setCatsOpen] = useState(false);
   const [hoverRootId, setHoverRootId] = useState(null);
   const menuRef = useRef(null);
@@ -27,35 +31,26 @@ function DesktopBar() {
     let alive = true;
     const load = async () => {
       try {
-        const [cRes, tRes, sRes, lRes, oRes] = await Promise.all([
-          axiosInstance.get('/categories', { params: { limit: 1000 } }),
-          axiosInstance.get('/category-translations', { params: { limit: 5000 } }).catch(()=>({ data: [] })),
-          axiosInstance.get('/stores', { params: { limit: 1 } }).catch(()=>({ data: { total: 0 } })),
-          axiosInstance.get('/listings', { params: { limit: 1 } }).catch(()=>({ data: { total: 0 } })),
-          axiosInstance.get('/offers', { params: { limit: 1 } }).catch(()=>({ data: { total: 0 } })),
+        const [cRes, tRes] = await Promise.all([
+          axiosInstance.get("/categories", { params: { limit: 1000 } }),
+          axiosInstance.get("/category-translations", { params: { limit: 5000 } }).catch(() => ({ data: [] })),
         ]);
         const c = cRes?.data?.items || cRes?.data || [];
         const trs = tRes?.data?.items || tRes?.data || [];
         const idx = {};
-        for (const t of trs) {
-          if (!idx[t.categoryId]) idx[t.categoryId] = {};
-          idx[t.categoryId][t.locale] = t;
+        for (const tr of trs) {
+          if (!idx[tr.categoryId]) idx[tr.categoryId] = {};
+          idx[tr.categoryId][tr.locale] = tr;
         }
         if (!alive) return;
         setCats(Array.isArray(c) ? c : []);
         setCatTr(idx);
-        setCounts({
-          stores: Number(sRes?.data?.total || 0),
-          listings: Number(lRes?.data?.total || 0),
-          offers: Number(oRes?.data?.total || 0),
-        });
       } catch {}
     };
     load();
     return () => { alive = false; };
   }, []);
 
-  // build hierarchy
   const byParent = useMemo(() => {
     const map = new Map();
     for (const c of cats) {
@@ -67,119 +62,139 @@ function DesktopBar() {
     return map;
   }, [cats]);
   const roots = useMemo(() => byParent.get(null) || byParent.get(undefined) || byParent.get(0) || [], [byParent]);
-
-  // helper to read tr
   const trOf = (id) => pickCatTr(catTr, id, lang);
 
-  // Close categories on click-outside
   useEffect(() => {
     if (!catsOpen) return;
     const onDown = (e) => {
       const m = menuRef.current;
       const b = btnRef.current;
       const target = e.target;
-      if (!m || !target) return;
+      if (!m) return;
       const insideMenu = m.contains(target);
       const onButton = b && b.contains(target);
       if (!insideMenu && !onButton) setCatsOpen(false);
     };
-    document.addEventListener('pointerdown', onDown);
-    return () => document.removeEventListener('pointerdown', onDown);
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
   }, [catsOpen]);
 
   return (
     <>
-    <div className="navbar max-w-screen-2xl mx-auto px-4 relative z-40">
-      <div className="navbar-start gap-2">
-        <Link to="/" className="btn btn-ghost text-xl">{t("Free Market")}</Link>
-        <ul className="menu menu-horizontal px-2">
-          <li><Link to="/">{t("home")}</Link></li>
-          <li><Link to="/collections">{t("offers")}</Link></li>
-          <li><Link to="/stores">{t("stores")}</Link></li>
-          {/* Categories button (panel renders below navbar) */}
-          <li className="relative" onMouseEnter={()=>{ setCatsOpen(true); if (!hoverRootId && roots[0]) setHoverRootId(roots[0].id); }}>
-            <button ref={btnRef} className="btn btn-ghost btn-sm">{t("categories")}</button>
-          </li>
-          {/* C2C */}
-          <li><Link to="/listings">{t("listings")}</Link></li>
-          <li><Link to="/account/listings/new">{t("sell")}</Link></li>
-        </ul>
-      </div>
+      <div className="sticky top-0 z-40 bg-base-100/90 backdrop-blur border-b">
+        <div className="navbar max-w-screen-2xl mx-auto px-4">
+          <div className="navbar-start gap-2">
+            <Link to="/" className="btn btn-ghost text-xl normal-case tracking-tight">Free Market</Link>
+            <ul className="menu menu-horizontal px-2">
+              <li><Link to="/">{t("home")}</Link></li>
+              <li><Link to="/deals">{t("Deals") || "Deals"}</Link></li>
+              <li><Link to="/collections">{t("Collections") || "Collections"}</Link></li>
+              <li><Link to="/stores">{t("stores")}</Link></li>
 
-      <div className="navbar-md">
-        <SearchBar wide />
-      </div>
-
-      <div className="navbar-end gap-2">
-        <LangSwitcher />
-        <ThemeToggle />
-        <CartButton />
-        <AccountMenu />
-      </div>
-    </div>
-
-    {catsOpen && (
-      <div ref={menuRef} className="w-full bg-base-100 border-t shadow" onMouseLeave={()=>setCatsOpen(false)}>
-        <div className="max-w-screen-2xl mx-auto px-4 py-3 flex">
-          {/* Roots column */}
-          <ul className="w-64 pr-3 border-r">
-            {roots.map(rc => (
-              <li key={rc.id} className={`px-2 py-1 cursor-pointer ${hoverRootId===rc.id?'bg-base-200 font-semibold':''}`} onMouseEnter={()=>setHoverRootId(rc.id)}>
-                <Link to={`/c/${trOf(rc.id)?.slug || rc.id}`}>{trOf(rc.id)?.name || `#${rc.id}`}</Link>
+              <li
+                className="relative"
+                onMouseEnter={() => {
+                  setCatsOpen(true);
+                  if (!hoverRootId && roots[0]) setHoverRootId(roots[0].id);
+                }}
+              >
+                <button
+                  ref={btnRef}
+                  className="btn btn-ghost btn-sm"
+                  aria-haspopup="true"
+                  aria-expanded={catsOpen}
+                >
+                  {t("categories")}
+                </button>
               </li>
-            ))}
-          </ul>
-          {/* Children grid */}
-          <div className="flex-1 pl-3">
-            <ul className="grid grid-cols-2 md:grid-cols-3 gap-1">
-              {(byParent.get(hoverRootId) || []).map(sc => (
-                <li key={sc.id} className="px-2 py-1">
-                  <Link to={`/c/${trOf(sc.id)?.slug || sc.id}`}>{trOf(sc.id)?.name || `#${sc.id}`}</Link>
-                </li>
-              ))}
+
+              <li><Link to="/listings">{t("listings")}</Link></li>
+              <li><Link to="/account/listings/new">{t("sell")}</Link></li>
             </ul>
+          </div>
+
+          <div className="flex-1 px-2">
+            <div className="max-w-xl mx-auto w-full">
+              <SearchBar wide />
+            </div>
+          </div>
+
+          <div className="navbar-end gap-2">
+            <LangSwitcher />
+            <ThemeToggle />
+            <CartButton />
+            <AccountMenu />
           </div>
         </div>
       </div>
-    )}
+
+      {catsOpen && (
+        <div
+          ref={menuRef}
+          className="w-full bg-base-100 border-b shadow-lg"
+          onMouseLeave={() => setCatsOpen(false)}
+        >
+          <div className="max-w-screen-2xl mx-auto px-4 py-4 flex">
+            <ul className="w-64 pr-3 border-r">
+              {roots.map(rc => (
+                <li
+                  key={rc.id}
+                  className={`px-2 py-2 cursor-pointer rounded ${hoverRootId===rc.id?'bg-base-200 font-semibold':''}`}
+                  onMouseEnter={()=>setHoverRootId(rc.id)}
+                >
+                  <Link to={`/c/${(pickCatTr(catTr, rc.id, lang))?.slug || rc.id}`}>
+                    {(pickCatTr(catTr, rc.id, lang))?.name || `#${rc.id}`}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <div className="flex-1 pl-4">
+              <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {(byParent.get(hoverRootId) || []).map(sc => {
+                  const tr = pickCatTr(catTr, sc.id, lang);
+                  return (
+                    <li key={sc.id} className="px-2 py-2 rounded hover:bg-base-200">
+                      <Link to={`/c/${tr?.slug || sc.id}`}>{tr?.name || `#${sc.id}`}</Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
 
+/* ===================== Mobile (custom panel, no dropdown) ===================== */
 function MobileBar() {
   const { t, lang } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
   const [catsOpen, setCatsOpen] = useState(false);
   const [cats, setCats] = useState([]);
   const [catTr, setCatTr] = useState({});
-  const [counts, setCounts] = useState({ stores: 0, listings: 0, offers: 0 });
+  const panelRef = useRef(null);
 
   useEffect(() => {
     let alive = true;
     const load = async () => {
       try {
-        const [cRes, tRes, sRes, lRes, oRes] = await Promise.all([
-          axiosInstance.get('/categories', { params: { limit: 1000 } }),
-          axiosInstance.get('/category-translations', { params: { limit: 5000 } }).catch(()=>({ data: [] })),
-          axiosInstance.get('/stores', { params: { limit: 1 } }).catch(()=>({ data: { total: 0 } })),
-          axiosInstance.get('/listings', { params: { limit: 1 } }).catch(()=>({ data: { total: 0 } })),
-          axiosInstance.get('/offers', { params: { limit: 1 } }).catch(()=>({ data: { total: 0 } })),
+        const [cRes, tRes] = await Promise.all([
+          axiosInstance.get("/categories", { params: { limit: 1000 } }),
+          axiosInstance.get("/category-translations", { params: { limit: 5000 } }).catch(() => ({ data: [] })),
         ]);
         const c = cRes?.data?.items || cRes?.data || [];
         const trs = tRes?.data?.items || tRes?.data || [];
         const idx = {};
-        for (const t of trs) {
-          if (!idx[t.categoryId]) idx[t.categoryId] = {};
-          idx[t.categoryId][t.locale] = t;
+        for (const tr of trs) {
+          if (!idx[tr.categoryId]) idx[tr.categoryId] = {};
+          idx[tr.categoryId][tr.locale] = tr;
         }
         if (!alive) return;
         setCats(Array.isArray(c) ? c : []);
         setCatTr(idx);
-        setCounts({
-          stores: Number(sRes?.data?.total || 0),
-          listings: Number(lRes?.data?.total || 0),
-          offers: Number(oRes?.data?.total || 0),
-        });
       } catch {}
     };
     load();
@@ -198,96 +213,137 @@ function MobileBar() {
   }, [cats]);
   const roots = useMemo(() => byParent.get(null) || byParent.get(undefined) || byParent.get(0) || [], [byParent]);
 
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") setMenuOpen(false); };
+    if (menuOpen) document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
   return (
     <>
-      <div className="navbar max-w-screen-2xl mx-auto px-4">
-        <div className="navbar-start">
-          <Link to="/" className="btn btn-ghost text-lg p-0">{t("Free Market")}</Link>
+      <div className="sticky top-0 z-40 bg-base-100/90 backdrop-blur border-b">
+        <div className="navbar max-w-screen-2xl mx-auto px-4">
+          <div className="navbar-start">
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => { setMenuOpen(true); }}
+              aria-label="open menu"
+              aria-expanded={menuOpen}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+              {t("menu") || "Menu"}
+            </button>
+          </div>
+          <div className="navbar-center">
+            <Link to="/" className="btn btn-ghost text-lg p-0">Free Market</Link>
+          </div>
+          
+          <div className="navbar-end gap-2">
+            <CartButton />
+            <AccountMenu />
+            
+          </div>
+          
         </div>
-        <div className="navbar-end gap-2">
-          <CartButton />
-          <AccountMenu />
+
+        <div className="max-w-screen-2xl mx-auto px-4 pb-2">
+          <div className="mt-4 flex items-center justify-between">
+              <LangSwitcher />
+              <SearchBar />
+              <ThemeToggle />
+            </div>       
+          
         </div>
       </div>
 
-      <div className="max-w-screen-2xl mx-auto px-4 pb-2">
-        <div className="navbar">
-          <SearchBar />
-        </div>
-      </div>
-
-      <div className="max-w-screen-2xl mx-auto px-4 pb-2 flex items-center justify-between">
-        <div className={`dropdown ${menuOpen ? 'dropdown-open' : ''}`}>
-          <button
-            tabIndex={0}
-            className="btn btn-ghost btn-sm"
-            onClick={()=>setMenuOpen(v=>!v)}
-            aria-label="menu"
-            aria-expanded={menuOpen}
+      {/* Full-screen panel */}
+      {menuOpen && (
+        <div className="fixed inset-0 z-50">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/30"
+            onClick={() => setMenuOpen(false)}
+          />
+          {/* Panel */}
+          <div
+            ref={panelRef}
+            className="absolute inset-y-0 left-0 w-[88%] max-w-sm bg-base-100 shadow-xl border-r p-3 overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-            {t("menu") || "Menu"}
-          </button>
-
-          <ul
-            tabIndex={0}
-            className="menu dropdown-content mt-2 w-64 bg-base-100 p-2 shadow rounded-box z-50"
-          >
-            <li><Link to="/">{t("home")}</Link></li>
-            <li><Link to="/collections">{t("offers")} {typeof counts?.offers==='number'?`(${counts.offers})`:''}</Link></li>
-            <li><Link to="/stores">{t("stores")} {typeof counts?.stores==='number'?`(${counts.stores})`:''}</Link></li>
-            <li>
-              <button type="button" onClick={(e)=>{e.stopPropagation(); setCatsOpen(v=>!v);}}>
-                {t("categories")} ▾
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-semibold text-lg">Menu</span>
+              <button className="btn btn-ghost btn-sm" onClick={() => setMenuOpen(false)} aria-label="close">
+                ✕
               </button>
-              {catsOpen && (
-                <ul className="p-2">
-                  {roots.map(rc => {
-                    const tr = pickCatTr(catTr, rc.id, lang);
-                    const children = byParent.get(rc.id) || [];
-                    return (
-                      <li key={rc.id} className="py-1">
-                        <Link to={`/c/${tr?.slug || rc.id}`}>{tr?.name || `#${rc.id}`}</Link>
-                        {children.length > 0 && (
-                          <ul className="pl-3 mt-1 space-y-1">
-                            {children.map(sc => {
-                              const tr2 = pickCatTr(catTr, sc.id, lang);
-                              return (
-                                <li key={sc.id}><Link to={`/c/${tr2?.slug || sc.id}`}>{tr2?.name || `#${sc.id}`}</Link></li>
-                              );
-                            })}
-                          </ul>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </li>
-            {/* C2C */}
-            <li><Link to="/listings">{t("listings")} {typeof counts?.listings==='number'?`(${counts.listings})`:''}</Link></li>
-            <li><Link to="/account/listings/new">{t("sell")}</Link></li>
-          </ul>
-        </div>
+            </div>
 
-        <div className="flex items-center gap-2">
-          <LangSwitcher />
-          <ThemeToggle />
+            <ul className="menu">
+              <li><Link to="/" onClick={() => setMenuOpen(false)}>{t("home")}</Link></li>
+              <li><Link to="/deals" onClick={() => setMenuOpen(false)}>{t("Deals") || "Deals"}</Link></li>
+              <li><Link to="/collections" onClick={() => setMenuOpen(false)}>{t("Collections") || "Collections"}</Link></li>
+              <li><Link to="/stores" onClick={() => setMenuOpen(false)}>{t("stores")}</Link></li>
+
+              {/* Categories toggle */}
+              <li>
+                <button
+                  type="button"
+                  className="justify-between"
+                  onClick={() => setCatsOpen(v => !v)}
+                  aria-expanded={catsOpen}
+                  aria-controls="mobile-cats"
+                >
+                  {t("categories")}
+                  <span className={`transition-transform ${catsOpen ? "rotate-180" : ""}`}>▾</span>
+                </button>
+
+                {catsOpen && (
+                  <ul id="mobile-cats" className="p-2 max-h-96 overflow-auto border rounded-box mt-2">
+                    {roots.map((rc) => {
+                      const tr = pickCatTr(catTr, rc.id, lang);
+                      const children = byParent.get(rc.id) || [];
+                      return (
+                        <li key={rc.id} className="py-1">
+                          <Link to={`/c/${tr?.slug || rc.id}`} onClick={() => setMenuOpen(false)}>
+                            {tr?.name || `#${rc.id}`}
+                          </Link>
+                          {children.length > 0 && (
+                            <ul className="pl-3 mt-1 space-y-1">
+                              {children.map((sc) => {
+                                const tr2 = pickCatTr(catTr, sc.id, lang);
+                                return (
+                                  <li key={sc.id}>
+                                    <Link to={`/c/${tr2?.slug || sc.id}`} onClick={() => setMenuOpen(false)}>
+                                      {tr2?.name || `#${sc.id}`}
+                                    </Link>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </li>
+
+              <li><Link to="/listings" onClick={() => setMenuOpen(false)}>{t("listings")}</Link></li>
+              <li><Link to="/account/listings/new" onClick={() => setMenuOpen(false)}>{t("sell")}</Link></li>
+            </ul>            
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
 
+/* ===================== Switcher ===================== */
 function Navbar() {
   const isMobile = useIsMobile(1024);
-  return (
-    <>
-      {isMobile ? <MobileBar /> : <DesktopBar />}
-    </>
-  );
+  return <>{isMobile ? <MobileBar /> : <DesktopBar />}</>;
 }
 
 export default Navbar;

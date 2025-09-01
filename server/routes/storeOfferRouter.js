@@ -1,9 +1,13 @@
 import express from 'express';
 import { auth } from '../middleware/auth.js';
 import { ensureSellerAuto } from '../middleware/roleAuth.js';
-import { list, create, updateOne, removeOne } from '../controllers/storeOfferController.js';
+import { list, create, updateOne, removeOne, listPublic, stats } from '../controllers/storeOfferController.js';
 
 const router = express.Router();
+
+// public reads
+router.get('/public', listPublic);
+router.get('/stats', stats);
 
 router.get('/', auth, list);
 router.post('/', auth, ensureSellerAuto, create);

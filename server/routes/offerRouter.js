@@ -1,11 +1,19 @@
 import express from 'express';
 import { auth } from '../middleware/auth.js';
 import { ensureSellerAuto } from '../middleware/roleAuth.js';
-import { listOffers, getOffer, createOffer, updateOffer, deleteOffer } from '../controllers/offerController.js';
+import {
+  listOffers,
+  listOffersPublic,
+  getOffer,
+  createOffer,
+  updateOffer,
+  deleteOffer,
+} from '../controllers/offerController.js';
 
 const offerRouter = express.Router();
 
 // Public reads
+offerRouter.get('/public', listOffersPublic);
 offerRouter.get('/', listOffers);
 offerRouter.get('/:id', getOffer);
 

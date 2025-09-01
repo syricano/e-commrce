@@ -1,9 +1,9 @@
 // client/src/App.jsx
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route ,Navigate  } from 'react-router-dom'
 import {
   // Public
   HomePage, About, NotFound, Signin, Signup, Listings, ListingDetail, CategoryBrowse, Stores, StoreDetail, PartnerApply, Collections,
-  SearchResults,
+  SearchResults, DealsPage,
   // User
   Profile, MyOrders, MyListings, ListingCreate, Messages,
   OrderDetail,
@@ -32,6 +32,7 @@ function App() {
         <Route path="stores" element={<Stores />} />
         <Route path="stores/:id" element={<StoreDetail />} />
         <Route path="collections" element={<Collections />} />
+        <Route path="deals" element={<DealsPage />} />
         <Route path="search" element={<SearchResults />} />
 
         {/* Auth */}

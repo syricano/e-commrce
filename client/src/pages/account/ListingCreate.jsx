@@ -7,21 +7,12 @@ import { errorHandler } from '@/utils';
 import { toast } from 'react-hot-toast';
 import { COUNTRIES, CITIES_BY_COUNTRY } from '@/services/geo';
 import usePageTitle from '@/hooks/usePageTitle';
+import { slugify } from '@/utils/strings';
 
 const CURRENCIES = ['EUR','USD','GBP','AED','SAR'];
 const CONDITIONS = ['new','used','refurbished'];
 
-const slugify = (s) => {
-  const base = (s || '').toString().trim()
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-  return base || `listing-${Date.now()}`;
-};
+
 
 export default function ListingCreate() {
   const nav = useNavigate();
