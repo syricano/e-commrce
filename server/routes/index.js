@@ -1,6 +1,6 @@
 import express from 'express';
 import authRouter from './authRouter.js';
-
+import categoryPublicRouter from './categoryPublicRouter.js';
 import userRouter from './userRouter.js';
 import profileRouter from './profileRouter.js';
 import addressRouter from './addressRouter.js';
@@ -64,7 +64,7 @@ export const routeMap = [
   { path: '/api/admin', handler: adminRouter },
   { path: '/api/users', handler: userRouter },
   { path: '/api/profiles', handler: profileRouter },
-  
+  { path: '/api/category-public', handler: categoryPublicRouter },
   { path: '/api/addresses', handler: addressRouter },
   { path: '/api/stores', handler: storeRouter },
   { path: '/api/store-users', handler: storeUserRouter },
