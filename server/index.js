@@ -5,11 +5,12 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import session from 'express-session';
+import { Umzug, SequelizeStorage } from 'umzug';
 import passport from './config/passport.js';
 import sequelize from './db/index.js';
 import applyAssociations from './db/association.js';
 import startExpireReservedJob from './jobs/expireReserved.js';
-import mountAll from './routes/index.js'; // router exporter
+import mountAll from './routes/index.js';
 import errorHandler from './middleware/errorHandler.js';
 import ErrorResponse from './utils/errorResponse.js';
 
@@ -17,12 +18,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = Number(process.env.PORT) || 8080;
 
-// trust proxy for secure cookies
+/* ---------- Core middleware ---------- */
 if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 
-// core middleware
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -33,10 +33,10 @@ app.use(
   })
 );
 
-// sessions (needed for passport OAuth)
+/* ---------- Sessions & auth ---------- */
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'change-me',
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -46,60 +46,88 @@ app.use(
     },
   })
 );
-
-// passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-// static uploads
+/* ---------- Static & health ---------- */
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// health + quiet favicon
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.get('/favicon.ico', (_req, res) => res.sendStatus(204));
 
-// API routes
+/* ---------- API routes ---------- */
 mountAll(app);
 
-// serve SPA only for non-/api paths in production
+/* ---------- SPA in production ---------- */
 if (process.env.NODE_ENV === 'production') {
   const buildPath = path.join(__dirname, '../client/dist');
   app.use(express.static(buildPath));
-  app.get(/^\/(?!api).*/, (_req, res) =>
-    res.sendFile(path.join(buildPath, 'index.html'))
-  );
+  app.get(/^\/(?!api).*/, (_req, res) => res.sendFile(path.join(buildPath, 'index.html')));
 }
 
-// root hint in dev
+/* ---------- Root hint in dev ---------- */
 if (process.env.NODE_ENV !== 'production') {
-  app.get('/', (_req, res) =>
-    res
-      .type('text')
-      .send('API running on :' + PORT + '. Try /health or /api/*')
-  );
+  app.get('/', (_req, res) => res.type('text').send(`API running on :${PORT}. Try /health or /api/*`));
 }
 
-// 404 for unmatched requests
-app.use((req, res, next) => next(new ErrorResponse('Not Found', 404)));
+/* ---------- 404 ---------- */
+app.use((_req, _res, next) => next(new ErrorResponse('Not Found', 404)));
 
+/* ---------- Error handler ---------- */
+app.use(errorHandler);
 
+/* ---------- Migrations with Umzug ---------- */
+async function runMigrations() {
+  // Ensure models & associations are registered before migrations that may rely on naming
+  applyAssociations();
 
+  const umzug = new Umzug({
+    migrations: { glob: path.join(__dirname, 'migrations', '*.js') },
+    context: sequelize.getQueryInterface(),
+    storage: new SequelizeStorage({
+      sequelize,
+      tableName: 'sequelize_meta', // default; customize if needed
+    }),
+    logger: console,
+  });
+
+  const pending = await umzug.pending();
+  if (pending.length > 0) {
+    console.log(`Running ${pending.length} migration(s)…`);
+  }
+  await umzug.up();
+  console.log('Migrations up to date.');
+}
+
+/* ---------- Startup ---------- */
 const start = async () => {
   try {
-    // ensure env matches Sequelize init (DB_URL vs DATABASE_URL)
     await sequelize.authenticate();
-    applyAssociations();
-    // keep alter in dev to evolve schema during development
-    if (process.env.NODE_ENV !== 'production') {
+    console.log('DB connection OK.');
+
+    // Prefer migrations. To force sync in dev, set SYNC_ALTER=1.
+    if (process.env.SYNC_ALTER === '1' && process.env.NODE_ENV !== 'production') {
+      console.warn('SYNC_ALTER enabled. Running sequelize.sync({ alter: true }) for development.');
+      applyAssociations();
       await sequelize.sync({ alter: true });
+    } else {
+      await runMigrations();
     }
+
     startExpireReservedJob();
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+    const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+    // Graceful shutdown
+    const shutdown = (sig) => {
+      console.log(`${sig} received. Shutting down…`);
+      server.close(() => process.exit(0));
+    };
+    process.on('SIGINT', () => shutdown('SIGINT'));
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
   } catch (err) {
     console.error('❌ Failed to start server:', err);
     process.exit(1);
   }
 };
-// error handler
-app.use(errorHandler);
+
 start();

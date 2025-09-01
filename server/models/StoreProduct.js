@@ -9,10 +9,14 @@ const StoreProduct = sequelize.define('StoreProduct', {
   articleNumber: { type: DataTypes.STRING(64), allowNull: false },
   name: { type: DataTypes.STRING(255), allowNull: false },
   description: { type: DataTypes.TEXT },
+  stockOnHand: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 }, // NEW
   attributes: { type: DataTypes.JSONB },
   metadata: { type: DataTypes.JSONB },
-}, { tableName: 'store_products', underscored: true, paranoid: true, indexes: [
-  { unique: true, fields: ['store_id', 'article_number'] },
-]});
+}, {
+  tableName: 'store_products',
+  underscored: true,
+  paranoid: true,
+  indexes: [{ unique: true, fields: ['store_id', 'article_number'] }],
+});
 
 export default StoreProduct;
