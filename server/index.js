@@ -82,8 +82,7 @@ if (process.env.NODE_ENV !== 'production') {
 // 404 for unmatched requests
 app.use((req, res, next) => next(new ErrorResponse('Not Found', 404)));
 
-// error handler
-app.use(errorHandler);
+
 
 const start = async () => {
   try {
@@ -101,5 +100,6 @@ const start = async () => {
     process.exit(1);
   }
 };
-
+// error handler
+app.use(errorHandler);
 start();

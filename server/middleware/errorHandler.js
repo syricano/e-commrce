@@ -1,16 +1,19 @@
-const errorHandler = (err, req, res, next) => {
-  process.env.NODE_ENV !== 'production' && console.error(err.stack || err);
+// server/utils/errorHandler.js
+function errorHandler(err, req, res, _next) {
+  const status = err?.statusCode || 500;
+  const out = { message: err?.message || 'Server error' };
 
-  // Zod validation errors (tagged in validateZod)
-  if (err.isZod && err.details && typeof err.details === 'object') {
-    const fields = Object.keys(err.details);
-    const first = fields.find((k) => err.details[k]?._errors?.length);
-    const message = (first && err.details[first]._errors[0]) || 'Invalid input';
-    return res.status(err.statusCode || 400).json({ error: message, details: err.details });
+  // Only emit Zod data if it exists. Never read ad-hoc props like "_zod".
+  if (err?.isZod && err?.details) out.validation = err.details;
+
+  if (process.env.NODE_ENV !== 'production') {
+    out.stack = err?.stack;
+    out.kind = err?.name;
+    if (err?.context) out.context = err.context;
   }
 
-  // Standard handler
-  res.status(err.statusCode || 500).json({ error: err.message || 'Something went wrong' });
-};
+  res.status(status).json(out);
+}
 
+export { errorHandler };
 export default errorHandler;
