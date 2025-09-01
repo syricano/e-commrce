@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import LangSwitcher from "@/components/UI/LangSwitcher.jsx";
 import CartButton from "@/components/UI/CartButton.jsx";
 import AccountMenu from "@/components/UI/AccountMenu.jsx";
@@ -62,7 +62,6 @@ function DesktopBar() {
     return map;
   }, [cats]);
   const roots = useMemo(() => byParent.get(null) || byParent.get(undefined) || byParent.get(0) || [], [byParent]);
-  const trOf = (id) => pickCatTr(catTr, id, lang);
 
   useEffect(() => {
     if (!catsOpen) return;
@@ -79,82 +78,94 @@ function DesktopBar() {
     return () => document.removeEventListener("pointerdown", onDown);
   }, [catsOpen]);
 
+  const trOf = (id) => pickCatTr(catTr, id, lang);
+
   return (
     <>
-      <div className="sticky top-0 z-40 bg-base-100/90 backdrop-blur border-b">
-        <div className="navbar max-w-screen-2xl mx-auto px-4">
-          <div className="navbar-start gap-2">
-            <Link to="/" className="btn btn-ghost text-xl normal-case tracking-tight">Free Market</Link>
-            <ul className="menu menu-horizontal px-2">
-              <li><Link to="/">{t("home")}</Link></li>
-              <li><Link to="/deals">{t("Deals") || "Deals"}</Link></li>
-              <li><Link to="/collections">{t("Collections") || "Collections"}</Link></li>
-              <li><Link to="/stores">{t("stores")}</Link></li>
+      <div className="navbar belsy-navbar bg-[var(--n)]/80 text-[var(--nc)] shadow-sm sticky top-0 z-50 backdrop-blur-md transition-colors duration-300">
+        {/* Left: brand + main links */}
+        <div className="navbar-start gap-2">
+          <NavLink to="/" className="btn btn-ghost normal-case text-3xl font-serif tracking-wider ml-1">
+            Free Market
+          </NavLink>
 
-              <li
-                className="relative"
-                onMouseEnter={() => {
-                  setCatsOpen(true);
-                  if (!hoverRootId && roots[0]) setHoverRootId(roots[0].id);
-                }}
+          <ul className="menu menu-horizontal px-1 gap-2 hidden lg:flex">
+            <li><NavLink to="/" className="nav-link">{t("home")}</NavLink></li>
+            <li><NavLink to="/deals" className="nav-link">{t("Deals") || "Deals"}</NavLink></li>
+            <li><NavLink to="/collections" className="nav-link">{t("Collections") || "Collections"}</NavLink></li>
+            <li><NavLink to="/stores" className="nav-link">{t("stores")}</NavLink></li>
+
+            {/* Categories hover trigger */}
+            <li
+              className="relative"
+              onMouseEnter={() => {
+                setCatsOpen(true);
+                if (!hoverRootId && roots[0]) setHoverRootId(roots[0].id);
+              }}
+            >
+              <button
+                ref={btnRef}
+                className="btn btn-ghost btn-sm"
+                aria-haspopup="true"
+                aria-expanded={catsOpen}
               >
-                <button
-                  ref={btnRef}
-                  className="btn btn-ghost btn-sm"
-                  aria-haspopup="true"
-                  aria-expanded={catsOpen}
-                >
-                  {t("categories")}
-                </button>
-              </li>
+                {t("categories")}
+              </button>
+            </li>
 
-              <li><Link to="/listings">{t("listings")}</Link></li>
-              <li><Link to="/account/listings/new">{t("sell")}</Link></li>
-            </ul>
+            <li><NavLink to="/listings" className="nav-link">{t("listings")}</NavLink></li>
+            <li><NavLink to="/account/listings/new" className="nav-link">{t("sell")}</NavLink></li>
+          </ul>
+        </div>
+
+        {/* Center: search */}
+        <div className="navbar-center hidden lg:flex">
+          <div className="w-[560px] max-w-xl">
+            <SearchBar wide />
           </div>
+        </div>
 
-          <div className="flex-1 px-2">
-            <div className="max-w-xl mx-auto w-full">
-              <SearchBar wide />
-            </div>
-          </div>
-
-          <div className="navbar-end gap-2">
-            <LangSwitcher />
-            <ThemeToggle />
-            <CartButton />
+        {/* Right: actions */}
+        <div className="navbar-end gap-3 pr-4">
+          <ThemeToggle />
+          <LangSwitcher />
+          <CartButton />
+          <div className="hidden lg:flex">
             <AccountMenu />
           </div>
         </div>
       </div>
 
+      {/* Hover mega menu */}
       {catsOpen && (
         <div
           ref={menuRef}
-          className="w-full bg-base-100 border-b shadow-lg"
+          className="w-full bg-[var(--n)] text-[var(--nc)] border-b border-[var(--bc)]/40 shadow-lg"
           onMouseLeave={() => setCatsOpen(false)}
         >
           <div className="max-w-screen-2xl mx-auto px-4 py-4 flex">
-            <ul className="w-64 pr-3 border-r">
+            {/* roots */}
+            <ul className="w-64 pr-3 border-r border-[var(--bc)]/40">
               {roots.map(rc => (
                 <li
                   key={rc.id}
-                  className={`px-2 py-2 cursor-pointer rounded ${hoverRootId===rc.id?'bg-base-200 font-semibold':''}`}
+                  className={`px-2 py-2 cursor-pointer rounded ${hoverRootId===rc.id?'bg-[var(--b2)] font-semibold':''}`}
                   onMouseEnter={()=>setHoverRootId(rc.id)}
                 >
-                  <Link to={`/c/${(pickCatTr(catTr, rc.id, lang))?.slug || rc.id}`}>
-                    {(pickCatTr(catTr, rc.id, lang))?.name || `#${rc.id}`}
+                  <Link to={`/c/${(trOf(rc.id))?.slug || rc.id}`}>
+                    {(trOf(rc.id))?.name || `#${rc.id}`}
                   </Link>
                 </li>
               ))}
             </ul>
 
+            {/* children */}
             <div className="flex-1 pl-4">
               <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                 {(byParent.get(hoverRootId) || []).map(sc => {
-                  const tr = pickCatTr(catTr, sc.id, lang);
+                  const tr = trOf(sc.id);
                   return (
-                    <li key={sc.id} className="px-2 py-2 rounded hover:bg-base-200">
+                    <li key={sc.id} className="px-2 py-2 rounded hover:bg-[var(--b2)]">
                       <Link to={`/c/${tr?.slug || sc.id}`}>{tr?.name || `#${sc.id}`}</Link>
                     </li>
                   );
@@ -168,14 +179,13 @@ function DesktopBar() {
   );
 }
 
-/* ===================== Mobile (custom panel, no dropdown) ===================== */
+/* ===================== Mobile (custom panel, Belsy style) ===================== */
 function MobileBar() {
   const { t, lang } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
   const [catsOpen, setCatsOpen] = useState(false);
   const [cats, setCats] = useState([]);
   const [catTr, setCatTr] = useState({});
-  const panelRef = useRef(null);
 
   useEffect(() => {
     let alive = true;
@@ -213,84 +223,64 @@ function MobileBar() {
   }, [cats]);
   const roots = useMemo(() => byParent.get(null) || byParent.get(undefined) || byParent.get(0) || [], [byParent]);
 
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === "Escape") setMenuOpen(false); };
-    if (menuOpen) document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [menuOpen]);
-
   return (
     <>
-      <div className="sticky top-0 z-40 bg-base-100/90 backdrop-blur border-b">
-        <div className="navbar max-w-screen-2xl mx-auto px-4">
-          <div className="navbar-start">
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={() => { setMenuOpen(true); }}
-              aria-label="open menu"
-              aria-expanded={menuOpen}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/>
-              </svg>
-              {t("menu") || "Menu"}
-            </button>
-          </div>
-          <div className="navbar-center">
-            <Link to="/" className="btn btn-ghost text-lg p-0">Free Market</Link>
-          </div>
-          
-          <div className="navbar-end gap-2">
-            <CartButton />
-            <AccountMenu />
-            
-          </div>
-          
+      {/* Top bar */}
+      <div className="navbar belsy-navbar bg-[var(--n)]/80 text-[var(--nc)] shadow-sm sticky top-0 z-50 backdrop-blur-md transition-colors duration-300 lg:hidden">
+        <div className="navbar-start">
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => setMenuOpen(true)}
+            aria-label="open menu"
+            aria-expanded={menuOpen}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+            {t("menu") || "Menu"}
+          </button>
         </div>
-
-        <div className="max-w-screen-2xl mx-auto px-4 pb-2">
-          <div className="mt-4 flex items-center justify-between">
-              <LangSwitcher />
-              <SearchBar />
-              <ThemeToggle />
-            </div>       
-          
+        <div className="navbar-center">
+          <NavLink to="/" className="btn btn-ghost normal-case text-2xl font-serif tracking-wider">
+            Free Market
+          </NavLink>
+        </div>
+        <div className="navbar-end gap-2 pr-2">
+          <CartButton />
+          <AccountMenu />
         </div>
       </div>
 
-      {/* Full-screen panel */}
+      {/* under-bar controls */}
+      <div className="lg:hidden bg-[var(--n)]/80 text-[var(--nc)] border-b border-[var(--bc)]/40">
+        <div className="max-w-screen-2xl mx-auto px-4 py-2 flex items-center gap-2">
+          <ThemeToggle />
+          <LangSwitcher />
+          <div className="flex-1"><SearchBar /></div>
+        </div>
+      </div>
+
+      {/* Slide-in panel */}
       {menuOpen && (
-        <div className="fixed inset-0 z-50">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/30"
-            onClick={() => setMenuOpen(false)}
-          />
-          {/* Panel */}
-          <div
-            ref={panelRef}
-            className="absolute inset-y-0 left-0 w-[88%] max-w-sm bg-base-100 shadow-xl border-r p-3 overflow-y-auto"
-            role="dialog"
-            aria-modal="true"
-          >
-            <div className="flex items-center justify-between mb-2">
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setMenuOpen(false)} />
+          <div className="absolute inset-y-0 left-0 w-[88%] max-w-sm bg-[var(--n)] text-[var(--nc)] shadow-xl border-r border-[var(--bc)]/40 p-4 overflow-y-auto">
+            <div className="flex items-center justify-between mb-3">
               <span className="font-semibold text-lg">Menu</span>
-              <button className="btn btn-ghost btn-sm" onClick={() => setMenuOpen(false)} aria-label="close">
-                ✕
-              </button>
+              <button className="btn btn-ghost btn-sm" onClick={() => setMenuOpen(false)} aria-label="close">✕</button>
             </div>
 
-            <ul className="menu">
-              <li><Link to="/" onClick={() => setMenuOpen(false)}>{t("home")}</Link></li>
-              <li><Link to="/deals" onClick={() => setMenuOpen(false)}>{t("Deals") || "Deals"}</Link></li>
-              <li><Link to="/collections" onClick={() => setMenuOpen(false)}>{t("Collections") || "Collections"}</Link></li>
-              <li><Link to="/stores" onClick={() => setMenuOpen(false)}>{t("stores")}</Link></li>
+            <ul className="menu space-y-1">
+              <li><NavLink to="/" className="nav-link" onClick={() => setMenuOpen(false)}>{t("home")}</NavLink></li>
+              <li><NavLink to="/deals" className="nav-link" onClick={() => setMenuOpen(false)}>{t("Deals") || "Deals"}</NavLink></li>
+              <li><NavLink to="/collections" className="nav-link" onClick={() => setMenuOpen(false)}>{t("Collections") || "Collections"}</NavLink></li>
+              <li><NavLink to="/stores" className="nav-link" onClick={() => setMenuOpen(false)}>{t("stores")}</NavLink></li>
 
-              {/* Categories toggle */}
+              {/* Categories collapsible */}
               <li>
                 <button
                   type="button"
-                  className="justify-between"
+                  className="nav-link justify-between"
                   onClick={() => setCatsOpen(v => !v)}
                   aria-expanded={catsOpen}
                   aria-controls="mobile-cats"
@@ -300,13 +290,13 @@ function MobileBar() {
                 </button>
 
                 {catsOpen && (
-                  <ul id="mobile-cats" className="p-2 max-h-96 overflow-auto border rounded-box mt-2">
+                  <ul id="mobile-cats" className="p-2 max-h-96 overflow-auto border border-[var(--bc)]/40 rounded-box mt-2">
                     {roots.map((rc) => {
                       const tr = pickCatTr(catTr, rc.id, lang);
                       const children = byParent.get(rc.id) || [];
                       return (
                         <li key={rc.id} className="py-1">
-                          <Link to={`/c/${tr?.slug || rc.id}`} onClick={() => setMenuOpen(false)}>
+                          <Link to={`/c/${tr?.slug || rc.id}`} onClick={() => setMenuOpen(false)} className="nav-link">
                             {tr?.name || `#${rc.id}`}
                           </Link>
                           {children.length > 0 && (
@@ -315,7 +305,7 @@ function MobileBar() {
                                 const tr2 = pickCatTr(catTr, sc.id, lang);
                                 return (
                                   <li key={sc.id}>
-                                    <Link to={`/c/${tr2?.slug || sc.id}`} onClick={() => setMenuOpen(false)}>
+                                    <Link to={`/c/${tr2?.slug || sc.id}`} onClick={() => setMenuOpen(false)} className="nav-link">
                                       {tr2?.name || `#${sc.id}`}
                                     </Link>
                                   </li>
@@ -330,9 +320,9 @@ function MobileBar() {
                 )}
               </li>
 
-              <li><Link to="/listings" onClick={() => setMenuOpen(false)}>{t("listings")}</Link></li>
-              <li><Link to="/account/listings/new" onClick={() => setMenuOpen(false)}>{t("sell")}</Link></li>
-            </ul>            
+              <li><NavLink to="/listings" className="nav-link" onClick={() => setMenuOpen(false)}>{t("listings")}</NavLink></li>
+              <li><NavLink to="/account/listings/new" className="nav-link" onClick={() => setMenuOpen(false)}>{t("sell")}</NavLink></li>
+            </ul>
           </div>
         </div>
       )}

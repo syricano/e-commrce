@@ -1,88 +1,179 @@
 /* ================================
-   0) Base reset
-================================ */
-*,*::before,*::after{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-   margin:0;
-   font-family:'Inter',system-ui,Arial,sans-serif;
-   height: calc(100vh-164px)
+   UNIVERSAL RESET & BASE
+================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
 }
 
 /* ================================
-   1) Dynamic theme tokens
-   Used by body and components
-================================ */
-:root{
-  --p:#d97706;  /* primary */
-  --pc:#ffffff;
+   LIGHT THEME COLORS
+================================= */
+[data-theme="light"] {
+  --p: #d97706;
+  --pc: #ffffff;
 
-  --b1:#FFF9E5; /* bg */
-  --bc:#004030; /* text */
+  --b1: #FFF9E5;          /* Main background */
+  --bc: #004030;          /* Main text */
 
-  --n:#DCD0A8;  /* navbar bg */
-  --nc:#004030; /* navbar text */
+  --n: #DCD0A8;           /* Navbar background */
+  --nc: #004030;          /* Navbar text */
 
-  --a:#004030;  /* footer bg */
-  --ac:#FFF9E5; /* footer text */
+  --a: #004030;           /* Footer background */
+  --ac: #FFF9E5;          /* Footer text */
 }
-[data-theme="dark"]{
-  --p:#d97706;
-  --pc:#ffffff;
+/* ================================
+   DARK THEME COLORS
+================================= */
+[data-theme="dark"] {
+  --p: #d97706;           /* Button primary */
+  --pc: #ffffff;
 
-  --b1:#000000;
-  --bc:#FFF9E5;
+  --b1: #000000;          /* Main gray background */
+  --bc: #FFF9E5;          /* Main text */
 
-  --n:#004030;
-  --nc:#FFF9E5;
+  --n: #004030;           /* Navbar */
+  --nc: #FFF9E5;
 
-  --a:#DCD0A8;
-  --ac:#004030;
+  --a: #DCD0A8;           /* Footer */
+  --ac: #004030;
 }
-
-/* Apply dynamic colors */
-body{background:var(--b1);color:var(--bc)}
-main{min-height:60vh}
 
 /* ================================
-   2) Navbar sizing and cleanup
-================================ */
-.navbar{min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;border-bottom:1px solid #e5e7eb;background-color:var(--b1);color:var(--bc)}
-.navbar-start,.navbar-end{display:flex;align-items:center;gap:.75rem}
-.menu.menu-horizontal>li>a{padding:.5rem .75rem;border-radius:.375rem}
-.menu.menu-horizontal>li>a:hover{background-color:rgba(0,0,0,.05)}
+   SECTION HELPERS (Optional)
+================================= */
 
-/* Controls sizing to prevent huge icons */
-.btn-circle,.theme-toggle-shell{width:40px;height:40px;min-width:40px;min-height:40px;display:flex;align-items:center;justify-content:center;padding:0}
-.navbar .btn svg,.theme-toggle-shell svg{width:18px!important;height:18px!important}
+/* Navbar */
+.navbar-section {
+  background-color: var(--n);
+  color: var(--nc);
+}
 
-/* Mobile categories strip */
-.navbar-categories{background:var(--b1);border-top:1px solid #e5e7eb;display:flex;justify-content:center;gap:.5rem;padding:.25rem .5rem;overflow-x:auto}
-.navbar-categories a{white-space:nowrap;font-size:.9rem;padding:.25rem .5rem;border-radius:.375rem}
-.navbar-categories a:hover{background-color:rgba(0,0,0,.05)}
+/* Nav link animation */
+.nav-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 1rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--bc);
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  background-color: var(--p);
+  color: var(--pc);
+  transform: translateY(-1px);
+}
+
+.nav-link.active {
+  background-color: var(--p);
+  color: var(--pc);
+  font-weight: 600;
+}
+
+
+/* Main section */
+
+.main-section {
+  background-color: var(--b1);
+  color: var(--bc);
+}
+
+.footer-section {
+  background-color: var(--a);
+  color: var(--ac);
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+}
 
 /* ================================
-   3) Extra Navbar styles (from second file)
-================================ */
-/* Navbar shell */
-.nav-shell{position:sticky;top:0;z-index:40;border-bottom:1px solid rgba(0,0,0,.06);background-color:rgba(255,255,255,.7);backdrop-filter:saturate(120%) blur(6px)}
-@media (prefers-color-scheme: dark){.nav-shell{background-color:rgba(31,31,31,.6);border-bottom-color:rgba(255,255,255,.08)}}
+   BUTTON STYLE
+================================= */
+.btn-primary {
+  background-color: var(--p) !important;
+  color: var(--pc) !important;
+  border: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+}
 
-/* Row width and spacing */
-.nav-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding-block:.5rem;max-width:80rem;margin-inline:auto;padding-inline:1rem}
-@media (min-width:1024px){.nav-row{padding-block:.75rem}}
+/* Settings to hide time input spinner */
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
 
-/* Menu cleanup */
-nav ul,.menu{list-style:none;margin:0;padding:0} 
-nav li::marker{content:none}
+input[type="time"] {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
 
-/* Items */
-.nav-item{padding:.5rem .75rem;border-radius:.75rem;font-weight:600}
-.nav-item:hover{background:color-mix(in oklab,currentColor 10%,transparent)}
-.nav-item-active{background:color-mix(in oklab,currentColor 12%,transparent)}
+.btn-primary:hover {
+  background-color: #b45309 !important;
+}
 
-/* Controls sizing extra */
-.btn,.btn-square,.input{min-height:2.5rem;height:2.5rem}
+/* Optional DaisyUI override */
+.btn {
+  font-weight: 500;
+}
 
-/* Focus */
-:focus-visible{outline:2px solid oklch(65% .2 70);outline-offset:2px}
+/* ================================
+   LAYOUT UTILITIES
+================================= */
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.rounded-xl {
+  border-radius: 1rem;
+}
+
+.card {
+  border-radius: 1rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+
+
+/* ================================
+   ANIMATION UTILITIES
+================================== */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out both;
+}
