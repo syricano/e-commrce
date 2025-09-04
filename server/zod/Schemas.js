@@ -5,7 +5,7 @@ import { z } from 'zod';
 export const id = z.coerce.number().int().positive();
 export const bigId = id;
 export const locale = z.enum(['ar','en','de']);
-export const currency = z.enum(['EUR', 'USD', 'SAR', 'AED', 'GBP']);
+export const currency = z.enum(['SYP', 'EUR', 'USD', 'SAR', 'AED', 'GBP']);
 
 const stringOpt = (max = 255) => z.string().min(1).max(max);
 const stringNullable = (max = 255) => z.string().max(max).nullable().optional();
@@ -397,10 +397,14 @@ export const listingSearchSchema = z.object({
 
 // Threads
 export const threadCreateSchema = z.object({
-  listingId: bigId,
+  // Allow listing, store, order, or direct (user-to-user)
+  listingId: bigId.optional(),
+  storeId: bigId.optional(),
+  orderId: bigId.optional(),
+  recipientUserId: bigId.optional(),
   buyerUserId: bigId.optional(), // server will override from auth
   message: z.string().min(1).max(5000).optional()
-});
+}).refine((v) => !!(v.listingId || v.storeId || v.orderId || v.recipientUserId), { message: 'One of listingId, storeId, orderId, recipientUserId is required' });
 
 export const messageCreateSchema = z.object({
   body: z.string().min(1).max(5000),

@@ -1,18 +1,26 @@
 import express from 'express';
 import { auth } from '../middleware/auth.js';
-import { ensureSellerAuto } from '../middleware/roleAuth.js';
-import { list, create, updateOne, removeOne, listPublic, stats } from '../controllers/storeOfferController.js';
+import {
+  stats,
+  publicIndex,
+  publicShow,
+  list,
+  create,
+  updateOne,
+  removeOne,
+} from '../controllers/storeOfferController.js';
 
-const router = express.Router();
+const storeOfferRouter = express.Router();
 
-// public reads
-router.get('/public', listPublic);
-router.get('/stats', stats);
+/* -------- Public -------- */
+storeOfferRouter.get('/public', publicIndex);
+storeOfferRouter.get('/public/:id', publicShow);
+storeOfferRouter.get('/stats', stats);
 
-router.get('/', auth, list);
-router.post('/', auth, ensureSellerAuto, create);
-router.put('/:id', auth, ensureSellerAuto, updateOne);
-router.delete('/:id', auth, ensureSellerAuto, removeOne);
+/* -------- Auth (seller/admin) -------- */
+storeOfferRouter.get('/', auth, list);
+storeOfferRouter.post('/', auth, create);
+storeOfferRouter.put('/:id', auth, updateOne);
+storeOfferRouter.delete('/:id', auth, removeOne);
 
-export default router;
-
+export default storeOfferRouter;

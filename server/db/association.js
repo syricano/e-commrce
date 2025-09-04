@@ -54,6 +54,9 @@ import StoreProduct from '../models/StoreProduct.js';
 import StoreProductMedia from '../models/StoreProductMedia.js';
 import StoreOffer from '../models/StoreOffer.js';
 
+// Collections: manual items
+import CollectionItem from '../models/CollectionItem.js';
+
 export function applyAssociations() {
   // ------- B2C -------
   User.hasOne(Profile, { foreignKey:'user_id', as:'profile' });
@@ -112,6 +115,8 @@ export function applyAssociations() {
 
   Cart.hasMany(CartItem, { foreignKey:'cart_id', as:'items', onDelete:'CASCADE' });
   CartItem.belongsTo(Cart, { foreignKey:'cart_id', as:'cart' });
+
+  // B2C offers in cart
   Offer.hasMany(CartItem, { foreignKey:'offer_id', as:'cartItems', onDelete:'CASCADE' });
   CartItem.belongsTo(Offer, { foreignKey:'offer_id', as:'offer' });
 
@@ -164,6 +169,10 @@ export function applyAssociations() {
   CollectionRule.belongsTo(Collection, { foreignKey:'collection_id', as:'collection' });
   Collection.hasMany(Placement, { foreignKey:'collection_id', as:'placements', onDelete:'CASCADE' });
   Placement.belongsTo(Collection, { foreignKey:'collection_id', as:'collection' });
+
+  // Manual collection items
+  Collection.hasMany(CollectionItem, { foreignKey: 'collection_id', as: 'items', onDelete: 'CASCADE' });
+  CollectionItem.belongsTo(Collection, { foreignKey: 'collection_id', as: 'collection' });
 
   User.hasMany(AuditLog, { foreignKey:'actor_user_id', as:'auditLogs' });
   AuditLog.belongsTo(User, { foreignKey:'actor_user_id', as:'actor' });
@@ -252,7 +261,7 @@ export function applyAssociations() {
   StoreCategory.hasMany(StoreProduct, { foreignKey: 'store_category_id', as: 'products' });
   StoreProduct.belongsTo(StoreCategory, { foreignKey: 'store_category_id', as: 'storeCategory' });
 
-  // Link to global Category as well (for listing-like filters)
+  // Link to global Category as well
   Category.hasMany(StoreProduct, { foreignKey: 'category_id', as: 'storeProducts' });
   StoreProduct.belongsTo(Category, { foreignKey: 'category_id', as: 'category' });
 
@@ -261,11 +270,15 @@ export function applyAssociations() {
   StoreProduct.hasMany(StoreOffer, { foreignKey: 'store_product_id', as: 'offers', onDelete: 'CASCADE' });
   StoreOffer.belongsTo(StoreProduct, { foreignKey: 'store_product_id', as: 'product' });
 
+  // Merchant offers in cart
+  StoreOffer.hasMany(CartItem, { foreignKey: 'store_offer_id', as: 'cartItems', onDelete: 'CASCADE' });
+  CartItem.belongsTo(StoreOffer, { foreignKey: 'store_offer_id', as: 'storeOffer' });
+
   return {
     User, Profile, Address, Store, StoreUser, Category, CategoryTranslation, Brand, BrandTranslation,
     Product, ProductTranslation, ProductVariant, Media, Offer, Inventory, Cart, CartItem, Order, OrderItem,
     Shipment, Payment, Refund, ReturnRequest, Review, CommissionScheme, Payout, Collection, CollectionTranslation,
-    CollectionRule, Placement, ReviewVote, AuditLog,
+    CollectionRule, Placement, ReviewVote, AuditLog, CollectionItem,
     Listing, ListingTranslation, ListingMedia, ListingOffer, MessageThread, Message, Favorite, Report,
     C2CTransaction, UserRating, ListingPromotion, SavedSearch, Notification, BlockedUser,
     StoreCategory, StoreProduct, StoreProductMedia, StoreOffer

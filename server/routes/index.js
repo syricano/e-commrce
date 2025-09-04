@@ -58,6 +58,10 @@ import storeMerchantRouter from './storeMerchantRouter.js';
 import supportRouter from './supportRouter.js';
 import storeOfferRouter from './storeOfferRouter.js';
 
+// Public items resolver for collections
+import collectionPublicRouter from './collectionPublicRouter.js';
+// Admin CRUD for manual picks
+import collectionItemRouter from './collectionItemRouter.js';
 
 export const routeMap = [
   { path: '/api/auth', handler: authRouter },
@@ -90,9 +94,14 @@ export const routeMap = [
   { path: '/api/review-votes', handler: reviewVoteRouter },
   { path: '/api/commission-schemes', handler: commissionSchemeRouter },
   { path: '/api/payouts', handler: payoutRouter },
+
+  // Public collection items endpoint
+  { path: '/api/collections', handler: collectionPublicRouter },
+
   { path: '/api/collections', handler: collectionRouter },
   { path: '/api/collection-translations', handler: collectionTranslationRouter },
   { path: '/api/collection-rules', handler: collectionRuleRouter },
+  { path: '/api/collection-items', handler: collectionItemRouter },
   { path: '/api/placements', handler: placementRouter },
   { path: '/api/audit-logs', handler: auditLogRouter },
   { path: '/api/password-resets', handler: passwordResetRouter },

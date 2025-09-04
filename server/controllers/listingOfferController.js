@@ -1,7 +1,10 @@
+// server/controllers/listingOfferController.js
 import { Op } from 'sequelize';
 import sequelize from '../db/index.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ErrorResponse from '../utils/errorResponse.js';
+import { parsePageLimit } from '../utils/paging.js';
+
 import ListingOffer from '../models/ListingOffer.js';
 import Listing from '../models/Listing.js';
 import C2CTransaction from '../models/C2CTransaction.js';
@@ -28,18 +31,20 @@ export const createListingOffer = asyncHandler(async (req, res) => {
 });
 
 export const listListingOffers = asyncHandler(async (req, res) => {
-  const { page = '1', limit = '50', status, listingId, buyerUserId } = req.query;
+  const { status, listingId, buyerUserId } = req.query;
+  const { page, limit } = parsePageLimit(req.query, 50, 200);
   const where = {};
   if (status) where.status = status;
   if (listingId) where.listingId = Number(listingId);
   if (buyerUserId) where.buyerUserId = Number(buyerUserId);
+
   const rows = await ListingOffer.findAndCountAll({
     where,
     order: [['id', 'DESC']],
-    limit: +limit,
-    offset: (+page - 1) * (+limit),
+    limit,
+    offset: (page - 1) * limit,
   });
-  res.json({ total: rows.count, items: rows.rows });
+  res.json({ total: rows.count, items: rows.rows, page, limit });
 });
 
 export const getListingOfferById = asyncHandler(async (req, res) => {

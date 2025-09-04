@@ -209,6 +209,14 @@ Admin frontend should consume the /api/* endpoints with JWT auth.
 - Profiles: added `displayName` to `Profile` model.
 - Categories seed: rich metadata filters per root/subcategory for dynamic UI (see Seeding).
 
+### Collections
+
+- Public resolver: `GET /api/collections/:key/items?locale=ar|en&limit=12&page=1`
+- Admin manual picks: `GET/POST/PUT/DELETE /api/collection-items` (auth + admin)
+- Models: `Collection`, `CollectionTranslation`, `CollectionRule`, `CollectionItem`
+- Item kinds: `storeOffer`, `product`, `listing`
+- Arabic-first fallback in resolver: requested locale → `ar` → `en` → first available
+
 ## ✅ TODO
 Auth controllers: register, login, logout with bcrypt + jwt.
 

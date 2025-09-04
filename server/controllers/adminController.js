@@ -13,6 +13,11 @@ import Report from '../models/Report.js';
 import CommissionScheme from '../models/CommissionScheme.js';
 import AuditLog from '../models/AuditLog.js';
 
+// Added for dashboard stats
+import StoreOffer from '../models/StoreOffer.js';
+import Collection from '../models/Collection.js';
+import CollectionItem from '../models/CollectionItem.js';
+
 /* helpers */
 const audit = (req, { entity, entityId, action, before = null, after = null }) =>
   AuditLog.create({
@@ -25,15 +30,49 @@ export const getDashboardStats = asyncHandler(async (_req, res) => {
   const safeCount = async (Model, where = undefined) => {
     try { return await Model.count(where ? { where } : undefined); } catch { return 0; }
   };
-  const [users, stores, products, listings, reportsOpen, payoutsPending] = await Promise.all([
+
+  const [
+    users,
+    stores,
+    products,
+    listings,
+    reportsOpen,
+    payoutsPending,
+    offers,
+    collections,
+    collectionItems,
+  ] = await Promise.all([
     safeCount(User),
     safeCount(Store),
     safeCount(Product),
     safeCount(Listing),
     safeCount(Report, { status: 'open' }),
     safeCount(Payout, { status: 'pending' }),
+    safeCount(StoreOffer),
+    safeCount(Collection),
+    safeCount(CollectionItem),
   ]);
-  res.json({ users, stores, products, listings, reportsOpen, payoutsPending });
+
+  // Keep old keys for compatibility AND add capitalized keys for the new dashboard UI
+  res.json({
+    // legacy keys (keep)
+    users,
+    stores,
+    products,
+    listings,
+    reportsOpen,
+    payoutsPending,
+
+    // new UI keys (icons map by these)
+    Users: users,
+    Stores: stores,
+    Products: products,
+    Listings: listings,
+    Reports: reportsOpen,
+    Offers: offers,
+    Collections: collections,
+    CollectionItems: collectionItems,
+  });
 });
 
 /* ===== Users (admin) ===== */
@@ -63,7 +102,7 @@ export const searchUsers = asyncHandler(async (req, res) => {
 
 export const updateUserRoleStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { role, status } = req.body; // validate with Zod on route if you like
+  const { role, status } = req.body;
   const row = await User.findByPk(id);
   if (!row) return res.status(404).json({ error: 'User not found' });
 
@@ -144,8 +183,7 @@ export const listReports = asyncHandler(async (req, res) => {
       offset: (+page - 1) * (+limit),
     });
     return res.json({ total: rows.count, items: rows.rows });
-  } catch (e) {
-    // if table not ready, avoid crashing the admin screen
+  } catch {
     return res.json({ total: 0, items: [] });
   }
 });
@@ -187,7 +225,6 @@ export const impersonate = asyncHandler(async (req, res) => {
   if (!target) return res.status(404).json({ error: 'User not found' });
 
   const token = jwt.sign({ id: target.id }, process.env.JWT_SECRET, { expiresIn: '30m' });
-  // set httpOnly cookie for convenience (and return token too)
   res.cookie('token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -220,7 +257,7 @@ export const deleteUserByAdmin = asyncHandler(async (req, res) => {
   if (!row) return res.status(404).json({ error: 'User not found' });
 
   const before = row.toJSON();
-  await row.destroy(); // respects paranoid soft delete if enabled
+  await row.destroy();
   await audit(req, { entity: 'User', entityId: id, action: 'adminDelete', before, after: null });
   res.json({ ok: true });
 });

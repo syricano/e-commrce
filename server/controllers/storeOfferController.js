@@ -1,21 +1,40 @@
-// server/controllers/storeOfferController.js
+import { Op } from 'sequelize';
 import asyncHandler from '../utils/asyncHandler.js';
 import Store from '../models/Store.js';
 import StoreProduct from '../models/StoreProduct.js';
 import StoreOffer from '../models/StoreOffer.js';
-import Category from '../models/Category.js';
+import StoreProductMedia from '../models/StoreProductMedia.js';
 
-// ---------- PUBLIC ----------
+/* ----------------------------- PUBLIC ----------------------------- */
 
 // GET /api/store-offers/stats
-export const stats = asyncHandler(async (_req, res) => {
-  const total = await StoreOffer.count({ where: { isActive: true } });
+// Optional: ?storeId=&categoryId=
+export const stats = asyncHandler(async (req, res) => {
+  const { storeId, categoryId } = req.query;
+
+  const includeProduct = {
+    model: StoreProduct,
+    as: 'product',
+    required: true,
+    attributes: [],
+  };
+
+  if (storeId || categoryId) includeProduct.where = {};
+  if (storeId) includeProduct.where.storeId = Number(storeId);
+  if (categoryId) includeProduct.where.categoryId = Number(categoryId);
+
+  const total = await StoreOffer.count({
+    where: { isActive: true },
+    include: [includeProduct],
+  });
+
   res.json({ total });
 });
 
 // GET /api/store-offers/public
-export const listPublic = asyncHandler(async (req, res) => {
-  const { page = '1', limit = '50', storeId, categoryId } = req.query;
+// Supports: ?page=&limit=&storeId=&categoryId=&q=
+export const publicIndex = asyncHandler(async (req, res) => {
+  const { page = '1', limit = '50', storeId, categoryId, q } = req.query;
   const p = Math.max(parseInt(page, 10) || 1, 1);
   const l = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 200);
 
@@ -23,16 +42,22 @@ export const listPublic = asyncHandler(async (req, res) => {
     model: StoreProduct,
     as: 'product',
     required: true,
-    attributes: ['id', 'name', 'articleNumber', 'attributes', 'storeId', 'categoryId'],
+    attributes: ['id', 'name', 'articleNumber', 'storeId', 'categoryId'],
     include: [
-      // keep this include simple; no isActive filter to avoid schema mismatches
       { model: Store, as: 'store', required: true, attributes: ['id', 'name', 'slug'] },
-      { model: Category, as: 'category', required: false, attributes: ['id'] },
+      { model: StoreProductMedia, as: 'media', attributes: ['id', 'url', 'position', 'altText'] },
     ],
   };
 
-  if (storeId) includeProduct.where = { ...(includeProduct.where || {}), storeId: Number(storeId) };
-  if (categoryId) includeProduct.where = { ...(includeProduct.where || {}), categoryId: Number(categoryId) };
+  if (storeId || categoryId || q) includeProduct.where = {};
+  if (storeId) includeProduct.where.storeId = Number(storeId);
+  if (categoryId) includeProduct.where.categoryId = Number(categoryId);
+  if (q) {
+    includeProduct.where[Op.or] = [
+      { name: { [Op.iLike]: `%${q}%` } },
+      { articleNumber: { [Op.iLike]: `%${q}%` } },
+    ];
+  }
 
   const { count, rows } = await StoreOffer.findAndCountAll({
     where: { isActive: true },
@@ -45,14 +70,36 @@ export const listPublic = asyncHandler(async (req, res) => {
   res.json({ total: count, items: rows });
 });
 
-// ---------- AUTHENTICATED (seller/admin) ----------
+// GET /api/store-offers/public/:id
+export const publicShow = asyncHandler(async (req, res) => {
+  const row = await StoreOffer.findByPk(req.params.id, {
+    where: { isActive: true },
+    include: [
+      {
+        model: StoreProduct,
+        as: 'product',
+        required: true,
+        attributes: ['id', 'name', 'articleNumber', 'storeId', 'categoryId', 'attributes'],
+        include: [
+          { model: Store, as: 'store', required: true, attributes: ['id', 'name', 'slug'] },
+          { model: StoreProductMedia, as: 'media', attributes: ['id', 'url', 'position', 'altText'] },
+        ],
+      },
+    ],
+  });
+  if (!row || !row.isActive) return res.status(404).json({ error: 'Not found' });
+  res.json(row);
+});
+
+/* ------------------------- AUTH (seller/admin) ------------------------- */
 
 const ensureOwnerByProduct = async (req, productId) => {
   const product = await StoreProduct.findByPk(productId);
   if (!product) return { ok: false, code: 404, error: 'Product not found' };
   const store = await Store.findByPk(product.storeId);
   if (!store) return { ok: false, code: 404, error: 'Store not found' };
-  if (req.user?.role !== 'admin' && req.user?.role !== 'staff' && store.ownerUserId !== req.user?.id) {
+  const privileged = req.user?.role === 'admin' || req.user?.role === 'staff';
+  if (!privileged && store.ownerUserId !== req.user?.id) {
     return { ok: false, code: 403, error: 'Forbidden' };
   }
   return { ok: true, product };
@@ -67,8 +114,8 @@ export const list = asyncHandler(async (req, res) => {
   if (storeId) {
     includeProduct.where = { storeId: Number(storeId) };
   } else {
-    const isPrivileged = req.user?.role === 'admin' || req.user?.role === 'staff';
-    if (!isPrivileged) {
+    const privileged = req.user?.role === 'admin' || req.user?.role === 'staff';
+    if (!privileged) {
       includeProduct.include = [
         { model: Store, as: 'store', where: { ownerUserId: req.user.id }, required: true },
       ];
@@ -88,7 +135,7 @@ export const create = asyncHandler(async (req, res) => {
   const { storeProductId, priceAmount, currency, stockOnHand, compareAtAmount, isActive } = req.body || {};
   if (!storeProductId || priceAmount == null) {
     return res.status(400).json({ error: 'storeProductId and priceAmount required' });
-  }
+    }
   const chk = await ensureOwnerByProduct(req, storeProductId);
   if (!chk.ok) return res.status(chk.code).json({ error: chk.error });
 
@@ -132,4 +179,4 @@ export const removeOne = asyncHandler(async (req, res) => {
   res.status(204).end();
 });
 
-export default { stats, listPublic, list, create, updateOne, removeOne };
+export default { stats, publicIndex, publicShow, list, create, updateOne, removeOne };

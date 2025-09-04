@@ -1,12 +1,12 @@
 import express from 'express';
 import { auth } from '../middleware/auth.js';
 import { ensureSellerAuto } from '../middleware/roleAuth.js';
-import { listInventorys, getInventory, createInventory, updateInventory, deleteInventory } from '../controllers/inventoryController.js';
+import { listInventories, getInventory, createInventory, updateInventory, deleteInventory } from '../controllers/inventoryController.js';
 
 const inventoryRouter = express.Router();
 
 // Public reads
-inventoryRouter.get('/', listInventorys);
+inventoryRouter.get('/', listInventories);
 inventoryRouter.get('/:id', getInventory);
 
 // Protected writes

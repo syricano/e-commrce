@@ -1,17 +1,19 @@
+// server/routes/cartItemRouter.js
 import express from 'express';
-import { auth } from '../middleware/auth.js';
-import { requireAdmin } from '../middleware/roleAuth.js';
-import { listCartItems, getCartItem, createCartItem, updateCartItem, deleteCartItem } from '../controllers/cartItemController.js';
+import { ensureCart } from '../middleware/currentCart.js';
+import {
+  listMyCartItems,
+  addCartItem,
+  updateMyCartItem,
+  deleteMyCartItem,
+} from '../controllers/cartItemController.js';
 
 const cartItemRouter = express.Router();
 
-// Public reads
-cartItemRouter.get('/', listCartItems);
-cartItemRouter.get('/:id', getCartItem);
-
-// Protected writes
-cartItemRouter.post('/', auth, requireAdmin, createCartItem);
-cartItemRouter.put('/:id', auth, requireAdmin, updateCartItem);
-cartItemRouter.delete('/:id', auth, requireAdmin, deleteCartItem);
+// Guest or logged-in: all scoped to the current cart via ensureCart
+cartItemRouter.get('/', ensureCart, listMyCartItems);
+cartItemRouter.post('/', ensureCart, addCartItem);
+cartItemRouter.put('/:id', ensureCart, updateMyCartItem);
+cartItemRouter.delete('/:id', ensureCart, deleteMyCartItem);
 
 export default cartItemRouter;

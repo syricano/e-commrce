@@ -2,7 +2,7 @@ import express from 'express';
 import { auth } from '../middleware/auth.js';
 import validate from '../middleware/validateZod.js';
 import { threadCreateSchema, messageCreateSchema } from '../zod/index.js';
-import { startThread, listThreads, sendMessage, listMessages } from '../controllers/threadController.js';
+import { startThread, listThreads, sendMessage, listMessages } from '../controllers/messageController.js';
 
 const threadRouter = express.Router();
 

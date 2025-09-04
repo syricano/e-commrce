@@ -6,11 +6,15 @@
   "scripts": {
     "dev": "node --env-file=.env --watch index.js",
     "start": "node index.js",
+    "migrations": "node --env-file=.env scripts/runMigrations.js",
+    "migrations:up": "npm run migrations -- up",
+    "migrations:down": "npm run migrations -- down",
+    "migrations:pending": "npm run migrations -- pending",
+    "migrations:executed": "npm run migrations -- executed",
+    "migrations:status": "npm run migrations -- status",
+
     "seed:categories": "node --env-file=.env scripts/seed-categories.js",
-    "seed:partner-inquiries": "node --env-file=.env scripts/seed-partner-inquiries.js",
-    "fix:translations": "node --env-file=.env scripts/fix-translations.js",
-    "cleanup:partners": "node --env-file=.env scripts/cleanup-duplicate-partner-inquiries.js",
-    "repair:taxonomy": "node --env-file=.env scripts/repair-taxonomy.js"
+    "fix:translations": "node --env-file=.env scripts/fix-translations.js"
   },
   "keywords": [],
   "author": "",
