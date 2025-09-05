@@ -12,7 +12,7 @@ export default function ManageStoreSettings() {
       <div className="grid md:grid-cols-3 gap-3 items-end">
         <label className="form-control md:col-span-2">
           <span className="label-text">{t('Store ID') || 'Store ID'}</span>
-          <input className="input input-bordered" value={storeId} onChange={(e)=>setStoreId(e.target.value)} placeholder="e.g. 1" />
+          <input className="input input-bordered" value={storeId} onChange={(e)=>setStoreId(e.target.value)} placeholder={t('forms.store_id_placeholder') || 'e.g. 1'} />
         </label>
         <div className="flex gap-2">
           <a className={`btn ${!storeId?'btn-disabled':''}`} href={`${base}/shipping`}>{t('Shipping') || 'Shipping'}</a>
@@ -24,4 +24,3 @@ export default function ManageStoreSettings() {
     </section>
   );
 }
-

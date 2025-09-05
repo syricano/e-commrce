@@ -171,15 +171,15 @@ export default function Checkout() {
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <label className="form-control col-span-2">
                     <span className="label-text">{t('Card Number') || 'Card Number'}</span>
-                    <input className="input input-bordered" placeholder="4242 4242 4242 4242" value={paymentDetails.cardNumber} onChange={e=>setPaymentDetails(s=>({ ...s, cardNumber:e.target.value }))} />
+                    <input className="input input-bordered" placeholder={t('forms.card_number_placeholder') || '4242 4242 4242 4242'} value={paymentDetails.cardNumber} onChange={e=>setPaymentDetails(s=>({ ...s, cardNumber:e.target.value }))} />
                   </label>
                   <label className="form-control">
                     <span className="label-text">{t('Expiry') || 'Expiry'}</span>
-                    <input className="input input-bordered" placeholder="MM/YY" value={paymentDetails.cardExp} onChange={e=>setPaymentDetails(s=>({ ...s, cardExp:e.target.value }))} />
+                    <input className="input input-bordered" placeholder={t('forms.expiry_placeholder') || 'MM/YY'} value={paymentDetails.cardExp} onChange={e=>setPaymentDetails(s=>({ ...s, cardExp:e.target.value }))} />
                   </label>
                   <label className="form-control">
-                    <span className="label-text">CVC</span>
-                    <input className="input input-bordered" placeholder="CVC" value={paymentDetails.cardCvc} onChange={e=>setPaymentDetails(s=>({ ...s, cardCvc:e.target.value }))} />
+                    <span className="label-text">{t('CVC') || 'CVC'}</span>
+                    <input className="input input-bordered" placeholder={t('forms.cvc_placeholder') || 'CVC'} value={paymentDetails.cardCvc} onChange={e=>setPaymentDetails(s=>({ ...s, cardCvc:e.target.value }))} />
                   </label>
                   <div className="col-span-2 opacity-70 text-sm">{t('Card entry is simulated for demo') || 'Card entry is simulated for demo'}</div>
                 </div>

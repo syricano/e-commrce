@@ -16,6 +16,7 @@ root/
 - Auth: JWT (Bearer + cookie), Google OAuth. Auth middleware now prefers Bearer over cookie.
 - B2C: Stores, products, variants, media, offers, inventory, orders, shipments, payments, refunds.
 - C2C: Listings (+translations/media), listing offers, favorites, messaging (threads + messages).
+- i18n: React i18next with Arabic default (RTL); language persists via localStorage and reflects in `Accept-Language` header.
 - Categories: rich tree with per‑category filter metadata (JSONB) used by the web filters.
 - Search: results page with listings/products; Navbar SearchBar routes to `/search?q=...`.
 - Listings (web):
@@ -24,6 +25,7 @@ root/
   - Detail page with media, quick Favorite, Message Seller
   - “My Listings” shows only the signed‑in user’s items; edit supports category‑specific attributes
 - Messages (web): threads list + chat; “Message Seller” opens Messages with a localized (AR/EN) prefilled template; template picker inserts automatically on selection.
+- Offers → Messages: Making an offer automatically creates/links a thread and posts an initial message to notify the seller.
 - Navigation: single “Categories” item opens a hover mega‑menu (roots left, children right) with proper overlay.
 
 ## Getting Started
@@ -114,6 +116,7 @@ npm run dev            # http://localhost:5173
 - Notifications (email/web) for messages/offers/orders
 - Payments placeholders (online/COD/third‑party) and transitions
 - Click‑outside to close Categories mega‑menu (desktop)
+ - Admin: further controls on listings/offers/promotions (bulk actions, richer filters)
 
 ## Contributing
 

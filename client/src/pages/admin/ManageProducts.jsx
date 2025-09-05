@@ -46,7 +46,7 @@ export default function ManageProducts() {
       <div className="flex items-end gap-2">
         <label className="form-control">
           <span className="label-text">{t('Search') || 'Search'}</span>
-          <input className="input input-bordered" value={q} onChange={(e)=>setQ(e.target.value)} placeholder="sku, id…" />
+          <input className="input input-bordered" value={q} onChange={(e)=>setQ(e.target.value)} placeholder={t('forms.sku_or_id_placeholder') || 'sku, id…'} />
         </label>
         <button className="btn" onClick={load} disabled={loading}>{loading?'…':t('refresh')}</button>
       </div>

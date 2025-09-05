@@ -34,7 +34,7 @@ export default function Stores() {
       </div>
 
       <CrudPage
-        title="Stores"
+        title={t('Stores') || 'Stores'}
         base="/stores"
         hideCreate={true}
         inputSize="sm"

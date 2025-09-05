@@ -100,7 +100,7 @@ export default function ManageSellerSettings() {
       <div className="flex items-end gap-2">
         <label className="form-control">
           <span className="label-text">{t('User ID') || 'User ID'}</span>
-          <input className="input input-bordered" value={userId} onChange={e=>setUserId(e.target.value)} placeholder="e.g. 123" />
+          <input className="input input-bordered" value={userId} onChange={e=>setUserId(e.target.value)} placeholder={t('forms.user_id_placeholder') || 'e.g. 123'} />
         </label>
         <button className="btn" onClick={load} disabled={!userId || loading}>{t('Load') || 'Load'}</button>
       </div>

@@ -1,3 +1,4 @@
+// StoreProducts.jsx
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '@/config/axiosConfig';
@@ -169,7 +170,7 @@ export default function StoreProducts() {
   return (
     <section className="p-4 space-y-4 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold">
-        {t('Store')} {storeId} — {t('Products')}
+        {t('Store')} {storeId} — {t('Store Products') || t('Products')}
       </h1>
       <StoreNav />
 

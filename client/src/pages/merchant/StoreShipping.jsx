@@ -1,3 +1,4 @@
+// StoreShipping.jsx
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '@/config/axiosConfig';
@@ -5,7 +6,7 @@ import usePageTitle from '@/hooks/usePageTitle';
 import StoreNav from '@/components/merchant/StoreNav.jsx';
 import { errorHandler } from '@/utils';
 import { useLang } from '@/context/LangProvider';
-import { COUNTRIES, CITIES_BY_COUNTRY } from '@/services/geo';
+import { CITIES_BY_COUNTRY } from '@/services/geo';
 
 const pretty = (obj) => {
   try { return JSON.stringify(obj ?? {}, null, 2); } catch { return ''; }
@@ -32,7 +33,7 @@ export default function StoreShipping() {
     const rec = COUNTRY_CHOICES.find(c => c.code === newZone.country);
     return CITIES_BY_COUNTRY[rec?.name || 'Syria'] || [];
   }, [newZone.country]);
-  const [methodForms, setMethodForms] = useState({}); // by zone index: { id, nameAr, flatAmount, perItemAmount, currency }
+  const [methodForms, setMethodForms] = useState({}); // by zone index
 
   // Packaging presets
   const [pkgForm, setPkgForm] = useState({ id: 'box1', nameAr: '', lengthMm: 0, widthMm: 0, heightMm: 0, maxWeightGrams: 0, extraAmount: 0, currency: 'EUR' });
@@ -70,7 +71,7 @@ export default function StoreShipping() {
 
   return (
     <section className="p-4 max-w-4xl mx-auto space-y-4">
-      <h1 className="text-2xl font-bold">{t('Store')} {id} — {t('Shipping')}</h1>
+      <h1 className="text-2xl font-bold">{t('Store')} {id} — {t('Store Shipping') || t('Shipping')}</h1>
       <StoreNav />
       {loading ? (
         <div className="opacity-70">{t('Loading…') || 'Loading…'}</div>
@@ -97,14 +98,22 @@ export default function StoreShipping() {
               </label>
               <label className="form-control">
                 <span className="label-text">{t('Country') || 'Country'}</span>
-                <select className="select select-bordered" value={newZone.country} onChange={(e)=>{ const code=e.target.value; const rec=COUNTRY_CHOICES.find(c=>c.code===code); const list=CITIES_BY_COUNTRY[rec?.name||'Syria']||[]; setNewZone(z=>({...z, country:code, city:list[0]||''})); }}>
-                  {COUNTRY_CHOICES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+                <select
+                  className="select select-bordered"
+                  value={newZone.country}
+                  onChange={(e)=>{
+                    const code=e.target.value;
+                    const rec=COUNTRY_CHOICES.find(c=>c.code===code);
+                    const list=CITIES_BY_COUNTRY[rec?.name||'Syria']||[];
+                    setNewZone(z=>({...z, country:code, city:list[0]||''}));
+                  }}>
+                  {COUNTRY_CHOICES.map(c => <option key={c.code} value={c.code}>{t(c.name) || c.name}</option>)}
                 </select>
               </label>
               <label className="form-control">
                 <span className="label-text">{t('City') || 'City'}</span>
                 <select className="select select-bordered" value={newZone.city} onChange={e=>setNewZone(z=>({...z, city:e.target.value}))}>
-                  {citiesForNewZone.map(c => <option key={c} value={c}>{c}</option>)}
+                  {citiesForNewZone.map(c => <option key={c} value={c}>{t(c) || c}</option>)}
                 </select>
               </label>
             </div>
@@ -161,7 +170,7 @@ export default function StoreShipping() {
                 <div className="text-right mt-2">
                   <button className="btn btn-xs" onClick={() => {
                     const f = methodForms[zi] || {};
-                    const method = { id: f.id || `m-${Date.now()}`, name: { ar: f.nameAr || f.id || 'طريقة' }, flatAmount: Number(f.flatAmount||0), perItemAmount: Number(f.perItemAmount||0), currency: f.currency || 'EUR' };
+                    const method = { id: f.id || `m-${Date.now()}`, name: { ar: f.nameAr || f.id || t('Method') || 'Method' }, flatAmount: Number(f.flatAmount||0), perItemAmount: Number(f.perItemAmount||0), currency: f.currency || 'EUR' };
                     setOpts(o => {
                       const next = [...(o.zones||[])];
                       next[zi] = { ...(next[zi]||{}), methods: [...(next[zi]?.methods||[]), method] };
@@ -175,7 +184,7 @@ export default function StoreShipping() {
                   <ul className="mt-2 space-y-1">
                     {z.methods.map((m, mi) => (
                       <li key={mi} className="flex items-center justify-between border rounded px-2 py-1 text-sm">
-                        <div>{m.name?.ar || m.id} — {m.flatAmount}+{m.perItemAmount}/item {m.currency}</div>
+                        <div>{m.name?.ar || m.id} — {m.flatAmount}+{m.perItemAmount}/{t('item') || 'item'} {m.currency}</div>
                         <button className="btn btn-ghost btn-xs" onClick={()=> setOpts(o=>{
                           const next=[...(o.zones||[])];
                           next[zi] = { ...(next[zi]||{}), methods: (next[zi]?.methods||[]).filter((_,i)=>i!==mi) };
@@ -194,7 +203,7 @@ export default function StoreShipping() {
             <div className="font-semibold mb-2">{t('Add package preset') || 'Add package preset'}</div>
             <div className="grid md:grid-cols-7 gap-2 items-end">
               <label className="form-control">
-                <span className="label-text">ID</span>
+                <span className="label-text">{t('ID') || 'ID'}</span>
                 <input className="input input-bordered" value={pkgForm.id} onChange={e=>setPkgForm(p=>({...p, id:e.target.value}))} />
               </label>
               <label className="form-control">
@@ -203,7 +212,7 @@ export default function StoreShipping() {
               </label>
               {['lengthMm','widthMm','heightMm','maxWeightGrams','extraAmount'].map(k => (
                 <label key={k} className="form-control">
-                  <span className="label-text">{k}</span>
+                  <span className="label-text">{t(k) || k}</span>
                   <input className="input input-bordered" inputMode="numeric" value={pkgForm[k]} onChange={e=>setPkgForm(p=>({...p, [k]: Number(e.target.value||0)}))} />
                 </label>
               ))}
@@ -232,8 +241,6 @@ export default function StoreShipping() {
               </ul>
             )}
           </div>
-
-          {/* legacy JSON editor removed in favor of presets above */}
 
           <div className="text-right"><button className="btn btn-primary" onClick={save}>{t('save') || 'Save'}</button></div>
         </div></div>

@@ -29,7 +29,7 @@ export default function ManagePartnerRequests() {
   ]), []);
   return (
     <CrudPage
-      title="Partner Requests"
+      title={t('Partner Requests') || 'Partner Requests'}
       base="/partners/inquiries"
       inputSize="sm"
       reloadSignal={reload}

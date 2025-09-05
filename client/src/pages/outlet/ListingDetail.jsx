@@ -139,7 +139,7 @@ export default function ListingDetail() {
                       alt={tr?.title || `#${item.id}`}
                       className="w-full aspect-square object-cover rounded"
                     />
-                    <button className={`btn btn-circle btn-sm absolute right-2 top-2 ${fav?'btn-error':'btn-ghost'}`} onClick={onToggleFav} title="Favorite">
+                    <button className={`btn btn-circle btn-sm absolute right-2 top-2 ${fav?'btn-error':'btn-ghost'}`} onClick={onToggleFav} title={t('Favorite') || 'Favorite'}>
                       {fav ? '♥' : '♡'}
                     </button>
                   {media.length > 1 && (

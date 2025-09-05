@@ -30,7 +30,7 @@ export default function Stores() {
       <h1 className="text-2xl font-bold mb-4">{t('Stores') || 'Stores'}</h1>
       {loading && <Spinner size={32} />}
       {!loading && items.length === 0 && (
-        <div className="opacity-60">No stores</div>
+        <div className="opacity-60">{t('No stores') || 'No stores'}</div>
       )}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((s) => (

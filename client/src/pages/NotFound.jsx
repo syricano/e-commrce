@@ -1,8 +1,10 @@
 import React from 'react'
+import { useLang } from '@/context/LangProvider';
 
 const NotFound = () => {
+  const { t } = useLang();
   return (
-    <div>NotFound</div>
+    <div>{t('Not found') || 'Not found'}</div>
   )
 }
 

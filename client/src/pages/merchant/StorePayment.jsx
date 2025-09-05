@@ -83,7 +83,7 @@ export default function StorePayment() {
               {[{k:'cod', label:'COD'},{k:'bank_transfer',label:'Bank Transfer'},{k:'card',label:'Card'},{k:'paypal',label:'PayPal'}].map(({k,label}) => (
                 <label key={k} className="flex items-center gap-2 mb-2">
                   <input type="checkbox" className="toggle" checked={form.methods.includes(k)} onChange={(e)=>toggleMethod(k, e.target.checked)} />
-                  <span>{label}</span>
+                  <span>{t(label) || label}</span>
                 </label>
               ))}
             </div>
@@ -117,7 +117,7 @@ export default function StorePayment() {
               <div className="grid gap-2">
                 {['bankName','accountHolder','iban','swift'].map(k => (
                   <label key={k} className="form-control">
-                    <span className="label-text">{k}</span>
+                    <span className="label-text">{t(k) || k}</span>
                     <input className="input input-bordered" value={form.bankTransfer[k]} onChange={e=>setForm(f=>({ ...f, bankTransfer:{ ...f.bankTransfer, [k]: e.target.value } }))} />
                   </label>
                 ))}
@@ -138,7 +138,7 @@ export default function StorePayment() {
                 <label className="form-control">
                   <span className="label-text">{t('Provider') || 'Provider'}</span>
                   <select className="select select-bordered" value={form.card.provider} onChange={e=>setForm(f=>({ ...f, card:{ ...f.card, provider:e.target.value } }))}>
-                    {['manual','stripe','adyen'].map(p => <option key={p} value={p}>{p}</option>)}
+                    {['manual','stripe','adyen'].map(p => <option key={p} value={p}>{t(p) || p}</option>)}
                   </select>
                 </label>
                 <label className="form-control">
@@ -154,22 +154,22 @@ export default function StorePayment() {
           </div>
 
           <div>
-            <div className="font-semibold mb-2">PayPal</div>
+            <div className="font-semibold mb-2">{t('PayPal') || 'PayPal'}</div>
             <label className="flex items-center gap-2 mb-2">
               <input type="checkbox" className="toggle" checked={form.paypal.enabled} onChange={(e)=>setForm(f=>({ ...f, paypal:{ ...f.paypal, enabled:e.target.checked } }))} />
               <span>{t('Enable') || 'Enable'}</span>
             </label>
             <div className="grid md:grid-cols-3 gap-2">
               <label className="form-control">
-                <span className="label-text">merchantId</span>
+                <span className="label-text">{t('merchantId') || 'merchantId'}</span>
                 <input className="input input-bordered" value={form.paypal.merchantId} onChange={e=>setForm(f=>({ ...f, paypal:{ ...f.paypal, merchantId:e.target.value } }))} />
               </label>
               <label className="form-control">
-                <span className="label-text">email</span>
+                <span className="label-text">{t('email') || 'email'}</span>
                 <input className="input input-bordered" value={form.paypal.email} onChange={e=>setForm(f=>({ ...f, paypal:{ ...f.paypal, email:e.target.value } }))} />
               </label>
               <label className="form-control">
-                <span className="label-text">sandbox</span>
+                <span className="label-text">{t('sandbox') || 'sandbox'}</span>
                 <input type="checkbox" className="toggle" checked={form.paypal.sandbox} onChange={e=>setForm(f=>({ ...f, paypal:{ ...f.paypal, sandbox:e.target.checked } }))} />
               </label>
             </div>

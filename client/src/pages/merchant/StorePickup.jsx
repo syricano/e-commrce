@@ -79,13 +79,13 @@ export default function StorePickup() {
               <label className="form-control">
                 <span className="label-text">{t('Country') || 'Country'}</span>
                 <select className="select select-bordered" value={form.country} onChange={(e)=>{ const c=e.target.value; const list=CITIES_BY_COUNTRY[c]||[]; setForm(f=>({...f, country:c, city:list[0]||''})); }}>
-                  {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  {COUNTRIES.map(c => <option key={c} value={c}>{t(c) || c}</option>)}
                 </select>
               </label>
               <label className="form-control">
                 <span className="label-text">{t('City') || 'City'}</span>
                 <select className="select select-bordered" value={form.city} onChange={(e)=>setForm(f=>({...f, city:e.target.value}))}>
-                  {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                  {cities.map(c => <option key={c} value={c}>{t(c) || c}</option>)}
                 </select>
               </label>
             </div>
@@ -130,7 +130,7 @@ export default function StorePickup() {
             <ul className="space-y-1">
               {times.map((tw, i) => (
                 <li key={i} className="flex items-center justify-between border rounded px-2 py-1">
-                  <div>day {tw.day}: {tw.start}–{tw.end}</div>
+                  <div>{t('Day') || 'Day'} {tw.day}: {tw.start}–{tw.end}</div>
                   <button className="btn btn-ghost btn-xs" onClick={()=>removeTime(i)}>{t('Remove') || 'Remove'}</button>
                 </li>
               ))}
@@ -143,4 +143,3 @@ export default function StorePickup() {
     </section>
   );
 }
-

@@ -159,14 +159,14 @@ export default function MyListings() {
   /* ---------------- Actions ---------------- */
 
   const onDelete = async (l) => {
-    if (!confirm(`Delete listing #${l.id}? This cannot be undone.`)) return;
+    if (!confirm(`${t('Delete listing') || 'Delete listing'} #${l.id}? ${t('This cannot be undone.') || 'This cannot be undone.'}`)) return;
     try {
       await axiosInstance.delete(`/listings/${l.id}`);
-      toast.success("Listing deleted");
+      toast.success(t('Listing deleted') || 'Listing deleted');
       setItems((s) => s.filter((x) => x.id !== l.id));
       if (openId === l.id) setOpenId(null);
     } catch (e) {
-      errorHandler(e, "Delete failed");
+      errorHandler(e, t('Delete failed') || 'Delete failed');
     }
   };
 
@@ -260,37 +260,37 @@ export default function MyListings() {
         <h1 className="text-2xl font-bold">{t('ManageListings')}</h1>
         <div className="flex gap-2">
           <button className="btn btn-ghost btn-sm" onClick={load} disabled={loading}>
-            {loading ? "…" : "Refresh"}
+            {loading ? "…" : (t('refresh') || 'Refresh')}
           </button>
           <a className="btn btn-primary btn-sm" href="/account/listings/new">
-            Create
+            {t('Create') || 'Create'}
           </a>
         </div>
       </div>
 
       <div className="flex items-end gap-2 flex-wrap">
         <label className="form-control min-w-64">
-          <span className="label-text">Search</span>
+          <span className="label-text">{t('Search') || 'Search'}</span>
           <input
             className="input input-bordered"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="title, slug, id…"
+            placeholder={t('listings.search_placeholder') || 'title, slug, id…'}
           />
         </label>
 
         <div className="join">
-          {["all", ...ALL_STATUSES].map((s) => (
-            <button
-              key={s}
-              type="button"
-              className={`btn btn-sm join-item ${statusFilter === s ? "btn-active" : ""}`}
-              onClick={() => setStatusFilter(s)}
-              title={s === "all" ? "All statuses" : s}
-            >
-              {s === "all" ? "All" : s}
-            </button>
-          ))}
+            {["all", ...ALL_STATUSES].map((s) => (
+              <button
+                key={s}
+                type="button"
+                className={`btn btn-sm join-item ${statusFilter === s ? "btn-active" : ""}`}
+                onClick={() => setStatusFilter(s)}
+                title={s === "all" ? (t('All') || 'All') : (t(s) || s)}
+              >
+                {s === "all" ? (t('All') || 'All') : (t(s) || s)}
+              </button>
+            ))}
         </div>
       </div>
 
@@ -298,12 +298,12 @@ export default function MyListings() {
         <table className="table table-zebra">
           <thead>
             <tr>
-              <th className="w-16">ID</th>
-              <th className="min-w-64">Title</th>
-              <th className="min-w-40">Category</th>
-              <th className="min-w-32">Price</th>
-              <th className="min-w-28">Status</th>
-              <th className="text-right w-40">Actions</th>
+              <th className="w-16">{t('ID') || 'ID'}</th>
+              <th className="min-w-64">{t('Title') || 'Title'}</th>
+              <th className="min-w-40">{t('Category') || 'Category'}</th>
+              <th className="min-w-32">{t('Price') || 'Price'}</th>
+              <th className="min-w-28">{t('Status') || 'Status'}</th>
+              <th className="text-right w-40">{t('Actions') || 'Actions'}</th>
             </tr>
           </thead>
           <tbody>
@@ -329,10 +329,10 @@ export default function MyListings() {
                       setEdit(null);
                     }}
                   >
-                    {openId === l.id ? "Hide" : "View details"}
+                    {openId === l.id ? (t('Hide') || 'Hide') : (t('View details') || 'View details')}
                   </button>
                   <button className="btn btn-error btn-xs" onClick={() => onDelete(l)}>
-                    Delete
+                    {t('Delete') || 'Delete'}
                   </button>
                 </td>
               </tr>
@@ -342,9 +342,9 @@ export default function MyListings() {
               <tr>
                 <td colSpan={6} className="py-10">
                   <div className="flex flex-col items-center justify-center gap-2 opacity-70">
-                    <div className="text-lg font-semibold">No listings</div>
+                    <div className="text-lg font-semibold">{t('No listings') || 'No listings'}</div>
                     <a className="btn btn-primary btn-sm" href="/account/listings/new">
-                      Create your first listing
+                      {t('Create your first listing') || 'Create your first listing'}
                     </a>
                   </div>
                 </td>
@@ -356,7 +356,7 @@ export default function MyListings() {
                 <td colSpan={6} className="py-8">
                   <div className="flex items-center justify-center gap-2">
                     <span className="loading loading-spinner" />
-                    <span>Loading…</span>
+                    <span>{t('Loading…') || 'Loading…'}</span>
                   </div>
                 </td>
               </tr>
@@ -374,15 +374,15 @@ export default function MyListings() {
               </h2>
               {!isEditing ? (
                 <button className="btn btn-sm" onClick={() => beginEdit(openItem)}>
-                  Update
+                  {t('Update') || 'Update'}
                 </button>
               ) : (
                 <div className="flex gap-2">
                   <button className="btn btn-primary btn-sm" onClick={saveEdit}>
-                    Save
+                    {t('save') || 'Save'}
                   </button>
                   <button className="btn btn-ghost btn-sm" onClick={() => setEdit(null)}>
-                    Cancel
+                    {t('cancel') || 'Cancel'}
                   </button>
                 </div>
               )}
@@ -391,11 +391,11 @@ export default function MyListings() {
             {!isEditing ? (
               <div className="grid md:grid-cols-2 gap-3">
                 <div>
-                  <div className="text-sm opacity-60">Category</div>
+                  <div className="text-sm opacity-60">{t('Category') || 'Category'}</div>
                   <div>{catLabel(openItem.categoryId)}</div>
                 </div>
                 <div>
-                  <div className="text-sm opacity-60">Status</div>
+                  <div className="text-sm opacity-60">{t('Status') || 'Status'}</div>
                   <div>
                     <span className={statusBadge(openItem.status)}>
                       {openItem.status || "active"}
@@ -403,7 +403,7 @@ export default function MyListings() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm opacity-60">Price</div>
+                  <div className="text-sm opacity-60">{t('Price') || 'Price'}</div>
                   <div>
                     {formatPrice(
                       openItem.priceAmount ?? openItem.price,
@@ -413,18 +413,18 @@ export default function MyListings() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm opacity-60">Condition</div>
+                  <div className="text-sm opacity-60">{t('Condition') || 'Condition'}</div>
                   <div>{openItem.condition || "used"}</div>
                 </div>
                 <div>
-                  <div className="text-sm opacity-60">Location</div>
+                  <div className="text-sm opacity-60">{t('Location') || 'Location'}</div>
                   <div>
                     {(openItem.country ? `${openItem.country} • ` : "") +
                       (openItem.locationCity || "—")}
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm opacity-60">Dates</div>
+                  <div className="text-sm opacity-60">{t('Dates') || 'Dates'}</div>
                   <div>
                     Created:{" "}
                     {openItem.createdAt
@@ -454,7 +454,7 @@ export default function MyListings() {
                       setEdit((s) => ({ ...s, categoryId: e.target.value }))
                     }
                   >
-                    <option value="">— none —</option>
+                    <option value="">— {t('None') || 'None'} —</option>
                     {catOptions.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
@@ -464,7 +464,7 @@ export default function MyListings() {
                 </label>
 
                 <label className="form-control">
-                  <span className="label-text">Status</span>
+                  <span className="label-text">{t('Status') || 'Status'}</span>
                   <select
                     className="select select-bordered"
                     value={edit.status}
@@ -481,7 +481,7 @@ export default function MyListings() {
                 </label>
 
                 <label className="form-control">
-                  <span className="label-text">Price</span>
+                  <span className="label-text">{t('Price') || 'Price'}</span>
                   <input
                     className="input input-bordered"
                     type="number"
@@ -494,7 +494,7 @@ export default function MyListings() {
                 </label>
 
                 <label className="form-control">
-                  <span className="label-text">Currency</span>
+                  <span className="label-text">{t('Currency') || 'Currency'}</span>
                   <input
                     className="input input-bordered"
                     value={edit.currency}
@@ -505,7 +505,7 @@ export default function MyListings() {
                 </label>
 
                 <label className="form-control">
-                  <span className="label-text">Condition</span>
+                  <span className="label-text">{t('Condition') || 'Condition'}</span>
                   <select
                     className="select select-bordered"
                     value={edit.condition}
@@ -522,7 +522,7 @@ export default function MyListings() {
                 </label>
 
                 <label className="form-control">
-                  <span className="label-text">Negotiable</span>
+                  <span className="label-text">{t('Negotiable') || 'Negotiable'}</span>
                   <input
                     type="checkbox"
                     className="toggle"
@@ -534,26 +534,26 @@ export default function MyListings() {
                 </label>
 
                 <label className="form-control">
-                  <span className="label-text">Country</span>
+                  <span className="label-text">{t('Country') || 'Country'}</span>
                   <input
                     className="input input-bordered"
                     value={edit.country}
                     onChange={(e) =>
                       setEdit((s) => ({ ...s, country: e.target.value }))
                     }
-                    placeholder="optional"
+                    placeholder={t('common.optional') || 'optional'}
                   />
                 </label>
 
                 <label className="form-control">
-                  <span className="label-text">City</span>
+                  <span className="label-text">{t('City') || 'City'}</span>
                   <input
                     className="input input-bordered"
                     value={edit.city}
                     onChange={(e) =>
                       setEdit((s) => ({ ...s, city: e.target.value }))
                     }
-                    placeholder="optional"
+                    placeholder={t('common.optional') || 'optional'}
                   />
                 </label>
                 {editFilterFields.length > 0 && (

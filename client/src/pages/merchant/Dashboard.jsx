@@ -39,8 +39,8 @@ export default function MerchantDashboard() {
       {!loading && stores.length === 0 && (
         <div className="card bg-base-200">
           <div className="card-body">
-            <div className="font-semibold">No stores yet</div>
-            <div className="opacity-70 text-sm">Once your account is approved as a seller, an admin can create your store. After it goes live, it will appear here.</div>
+            <div className="font-semibold">{t('No stores yet') || 'No stores yet'}</div>
+            <div className="opacity-70 text-sm">{t('Once your account is approved as a seller, an admin can create your store. After it goes live, it will appear here.') || 'Once your account is approved as a seller, an admin can create your store. After it goes live, it will appear here.'}</div>
           </div>
         </div>
       )}

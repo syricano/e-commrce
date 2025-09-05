@@ -3,8 +3,9 @@ import axiosInstance from '@/config/axiosConfig';
 import { errorHandler } from '@/utils';
 import { useLang } from '@/context/LangProvider';
 
-const fmtMoney = (currency, minor) => {
-  const val = Number(minor || 0) / 100;
+const fmtMoney = (currency, amount) => {
+  // Treat incoming value as major units (per user feedback)
+  const val = Number(amount || 0);
   try { return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(val); }
   catch { return `${val.toFixed(2)} ${currency}`; }
 };
@@ -72,9 +73,9 @@ export default function ManageOrders() {
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">{t('Orders') || 'Orders'}</h1>
+        <h1 className="text-xl font-semibold">{t('Manage Orders') || 'Manage Orders'}</h1>
         <div className="flex items-center gap-2">
-          <button className="btn btn-sm" onClick={()=>load(page)} disabled={loading}>{t('Reload') || 'Reload'}</button>
+          <button className="btn btn-sm" onClick={()=>load(page)} disabled={loading}>{t('Refresh') || 'Refresh'}</button>
         </div>
       </div>
 

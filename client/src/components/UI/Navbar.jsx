@@ -91,7 +91,7 @@ function DesktopBar() {
           {/* Row 1 */}
           <div className="navbar py-2">
             <div className="navbar-start">
-              <Link to="/" className="btn btn-ghost text-xl normal-case tracking-tight">Free Market</Link>
+              <Link to="/" className="btn btn-ghost text-xl normal-case tracking-tight">{t('brand')}</Link>
             </div>
             <div className="navbar-center w-full max-w-2xl">
               <SearchBar wide />
@@ -242,7 +242,7 @@ function MobileBar() {
             <button
               className="btn btn-ghost btn-sm"
               onClick={() => { setMenuOpen(true); }}
-              aria-label="open menu"
+              aria-label={t('nav.open_menu') || 'open menu'}
               aria-expanded={menuOpen}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -252,7 +252,7 @@ function MobileBar() {
             </button>
           </div>
           <div className="navbar-center">
-            <Link to="/" className="btn btn-ghost text-lg p-0">Free Market</Link>
+            <Link to="/" className="btn btn-ghost text-lg p-0">{t('brand')}</Link>
           </div>
           <div className="navbar-end gap-2">
             <button
@@ -290,8 +290,8 @@ function MobileBar() {
             aria-modal="true"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="font-semibold text-lg">Menu</span>
-              <button className="btn btn-ghost btn-sm" onClick={() => setMenuOpen(false)} aria-label="close">✕</button>
+              <span className="font-semibold text-lg">{t('menu') || 'Menu'}</span>
+              <button className="btn btn-ghost btn-sm" onClick={() => setMenuOpen(false)} aria-label={t('common.close') || 'close'}>✕</button>
             </div>
 
             <ul className="menu">

@@ -209,7 +209,7 @@ export default function ProductEditModal({ open, itemId, onClose, onUpdated }) {
         </div>
       </div>
       <form method="dialog" className="modal-backdrop">
-        <button onClick={onClose}>close</button>
+        <button onClick={onClose}>{t('Close') || 'Close'}</button>
       </form>
     </dialog>
   );

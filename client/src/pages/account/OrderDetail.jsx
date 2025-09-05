@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getMyOrder, createThread } from '@/services';
 import { useNavigate } from 'react-router-dom';
 import { errorHandler } from '@/utils';
+import { useLang } from '@/context/LangProvider';
 
 const fmtMoney = (currency, amount) => {
   const val = Number(amount || 0);
@@ -14,6 +15,7 @@ const fmtMoney = (currency, amount) => {
 export default function OrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLang();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
@@ -35,17 +37,17 @@ export default function OrderDetail() {
           setItems(Array.isArray(b?.items) ? b.items : Array.isArray(b) ? b : []);
         } catch { setItems([]); }
       })
-      .catch((e) => errorHandler(e, 'Failed to load order'))
+      .catch((e) => errorHandler(e, t('Failed to load order') || 'Failed to load order'))
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <section className="p-4">Loading…</section>;
-  if (!order) return <section className="p-4">Not found</section>;
+  if (loading) return <section className="p-4">{t('Loading…') || 'Loading…'}</section>;
+  if (!order) return <section className="p-4">{t('Not found') || 'Not found'}</section>;
 
   return (
     <section className="p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Order #{order.id}</h1>
+        <h1 className="text-xl font-semibold">{t('Order') || 'Order'} #{order.id}</h1>
         <div className="flex items-center gap-2">
           <button
             className="btn btn-primary btn-sm"
@@ -66,28 +68,28 @@ export default function OrderDetail() {
                   const res = await createThread(payload);
                   const th = res?.data || res || {};
                   if (th?.id) navigate(`/account/messages?threadId=${th.id}`);
-                } catch (e) {
-                  errorHandler(e, 'Failed to start thread');
+                  } catch (e) {
+                  errorHandler(e, t('Failed to start thread') || 'Failed to start thread');
                 } finally { setMessaging(false); }
               } else {
                 setPickerOpen(true);
               }
             }}
-            title="Message the seller about this order"
+            title={t('Message the seller about this order') || 'Message the seller about this order'}
           >
-            {messaging ? '…' : 'Message Seller'}
+            {messaging ? '…' : (t('Message Seller') || 'Message Seller')}
           </button>
-          <Link to="/account/orders" className="btn btn-sm">Back to orders</Link>
+          <Link to="/account/orders" className="btn btn-sm">{t('Back to orders') || 'Back to orders'}</Link>
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
         <div className="card bg-base-200">
           <div className="card-body">
-            <div><span className="opacity-60">Payment:</span> {order.paymentStatus || '—'}</div>
-            <div><span className="opacity-60">Confirmed:</span> {order.fulfillmentStatus === 'fulfilled' ? 'confirmed' : (order.fulfillmentStatus || '—')}</div>
-            <div><span className="opacity-60">Total:</span> {fmtMoney(order.currency || 'EUR', order.grandTotalAmount)}</div>
-            <div><span className="opacity-60">Placed:</span> {order.placedAt ? new Date(order.placedAt).toLocaleString() : '—'}</div>
+            <div><span className="opacity-60">{t('Payment') || 'Payment'}:</span> {order.paymentStatus || '—'}</div>
+            <div><span className="opacity-60">{t('Confirmed') || 'Confirmed'}:</span> {order.fulfillmentStatus === 'fulfilled' ? 'confirmed' : (order.fulfillmentStatus || '—')}</div>
+            <div><span className="opacity-60">{t('Total') || 'Total'}:</span> {fmtMoney(order.currency || 'EUR', order.grandTotalAmount)}</div>
+            <div><span className="opacity-60">{t('Placed') || 'Placed'}:</span> {order.placedAt ? new Date(order.placedAt).toLocaleString() : '—'}</div>
             {order.paymentStatus !== 'paid' && (
               <div className="mt-2">
                 <button className="btn btn-primary btn-sm" disabled={paying}
@@ -99,27 +101,27 @@ export default function OrderDetail() {
                       if (r.ok) setOrder(b);
                     } finally { setPaying(false); }
                   }}
-                >{paying ? '…' : 'Pay Now'}</button>
+                >{paying ? '…' : (t('Pay Now') || 'Pay Now')}</button>
               </div>
             )}
           </div>
         </div>
         <div className="card bg-base-200">
           <div className="card-body">
-            <div className="font-semibold mb-2">Summary</div>
-            <div>Items subtotal: {fmtMoney(order.currency || 'EUR', order.itemsSubtotalAmount)}</div>
-            <div>Shipping: {fmtMoney(order.currency || 'EUR', order.shippingAmount)}</div>
-            <div>Tax: {fmtMoney(order.currency || 'EUR', order.taxAmount)}</div>
-            <div>Discount: {fmtMoney(order.currency || 'EUR', order.discountAmount || 0)}</div>
+            <div className="font-semibold mb-2">{t('Summary') || 'Summary'}</div>
+            <div>{t('Items subtotal') || 'Items subtotal'}: {fmtMoney(order.currency || 'EUR', order.itemsSubtotalAmount)}</div>
+            <div>{t('Shipping') || 'Shipping'}: {fmtMoney(order.currency || 'EUR', order.shippingAmount)}</div>
+            <div>{t('Tax') || 'Tax'}: {fmtMoney(order.currency || 'EUR', order.taxAmount)}</div>
+            <div>{t('Discount') || 'Discount'}: {fmtMoney(order.currency || 'EUR', order.discountAmount || 0)}</div>
           </div>
         </div>
       </div>
 
       <div className="card bg-base-200">
         <div className="card-body">
-          <div className="font-semibold">Items</div>
+          <div className="font-semibold">{t('Items') || 'Items'}</div>
           {items.length === 0 ? (
-            <div className="opacity-60 text-sm">No line items to display.</div>
+            <div className="opacity-60 text-sm">{t('No line items to display.') || 'No line items to display.'}</div>
           ) : (
             <ul className="text-sm divide-y">
               {items.map((it) => (
@@ -139,7 +141,7 @@ export default function OrderDetail() {
       {pickerOpen && (
         <div className="modal modal-open">
           <div className="modal-box">
-            <h3 className="font-bold text-lg mb-3">Choose seller to message</h3>
+            <h3 className="font-bold text-lg mb-3">{t('Choose seller to message') || 'Choose seller to message'}</h3>
             <div className="space-y-2">
               {Array.from(new Set(items.map((it) => it.storeId).filter((v) => v != null))).map((sid) => (
                 <button key={`s-${sid}`} className="btn btn-outline w-full" onClick={async () => {
@@ -148,9 +150,9 @@ export default function OrderDetail() {
                     const res = await createThread({ orderId: Number(id), storeId: sid });
                     const th = res?.data || res || {};
                     if (th?.id) navigate(`/account/messages?threadId=${th.id}`);
-                  } catch (e) { errorHandler(e, 'Failed to start thread'); }
+                  } catch (e) { errorHandler(e, t('Failed to start thread') || 'Failed to start thread'); }
                   finally { setMessaging(false); setPickerOpen(false); }
-                }}>Store #{sid}</button>
+                }}>{(t('Store') || 'Store')} #{sid}</button>
               ))}
               {Array.from(new Set(items.map((it) => it.listingId).filter((v) => v != null))).map((lid) => (
                 <button key={`l-${lid}`} className="btn btn-outline w-full" onClick={async () => {
@@ -159,13 +161,13 @@ export default function OrderDetail() {
                     const res = await createThread({ orderId: Number(id), listingId: lid });
                     const th = res?.data || res || {};
                     if (th?.id) navigate(`/account/messages?threadId=${th.id}`);
-                  } catch (e) { errorHandler(e, 'Failed to start thread'); }
+                  } catch (e) { errorHandler(e, t('Failed to start thread') || 'Failed to start thread'); }
                   finally { setMessaging(false); setPickerOpen(false); }
-                }}>Listing #{lid}</button>
+                }}>{(t('Listing') || 'Listing')} #{lid}</button>
               ))}
             </div>
             <div className="modal-action">
-              <button className="btn" onClick={() => setPickerOpen(false)}>Close</button>
+              <button className="btn" onClick={() => setPickerOpen(false)}>{t('Close') || 'Close'}</button>
             </div>
           </div>
         </div>

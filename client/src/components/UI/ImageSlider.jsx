@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axiosInstance from '@/config/axiosConfig';
+import { useLang } from '@/context/LangProvider';
 
 const ImageSlider = () => {
+  const { t } = useLang();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
 
@@ -28,7 +30,7 @@ const ImageSlider = () => {
     <section className="py-2 bg-[var(--main-bg-color)] text-[var(--main-text-color)]">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl font-serif text-center mb-6 text-[var(--bc)]">
-          Find the best deals
+          {t('Find the best deals')}
         </h2>
 
         {loading ? (
@@ -49,11 +51,11 @@ const ImageSlider = () => {
                   {s.img ? (
                     <img src={s.img} alt={`listing-${s.id}`} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-base-200 flex items-center justify-center">No Image</div>
+                    <div className="w-full h-full bg-base-200 flex items-center justify-center">{t('No Image')}</div>
                   )}
                   <div className="absolute inset-0 flex flex-col items-center justify-end gap-2 pb-4">
                     <div className="badge badge-sm md:badge-md opacity-95">{s.price} {s.currency}</div>
-                    <a className="btn btn-primary" href={`/listings/${s.id}`}>View Listing</a>
+                    <a className="btn btn-primary" href={`/listings/${s.id}`}>{t('View Listing')}</a>
                   </div>
                   <div className="absolute left-2 right-2 top-1/2 flex -translate-y-1/2 transform justify-between">
                     <a href={`#slide${prevIndex + 1}`} className="btn btn-circle">❮</a>
@@ -64,7 +66,7 @@ const ImageSlider = () => {
             })}
           </div>
         ) : (
-          <div className="w-full h-64 bg-base-200 rounded-2xl flex items-center justify-center">No listings</div>
+          <div className="w-full h-64 bg-base-200 rounded-2xl flex items-center justify-center">{t('No listings')}</div>
         )}
       </div>
     </section>

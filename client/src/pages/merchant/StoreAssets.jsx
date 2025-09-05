@@ -39,12 +39,12 @@ export default function StoreAssets() {
       <div className="card bg-base-100 border"><div className="card-body grid md:grid-cols-2 gap-3">
         <div>
           <div className="font-semibold mb-2">{t('Logo') || 'Logo'}</div>
-          {logoUrl ? <img src={resolve(logoUrl)} alt="logo" className="w-32 h-32 object-cover rounded mb-2" /> : <div className="w-32 h-32 bg-base-200 rounded mb-2" />}
+          {logoUrl ? <img src={resolve(logoUrl)} alt={t('Logo') || 'logo'} className="w-32 h-32 object-cover rounded mb-2" /> : <div className="w-32 h-32 bg-base-200 rounded mb-2" />}
           <label className="btn btn-sm">{uploading?(t('Uploading…') || 'Uploading…'):(t('Upload Logo') || 'Upload Logo')}<input hidden type="file" accept="image/*" onChange={e=>{ const f=e.target.files?.[0]; if (f) up(f, setLogoUrl); }} /></label>
         </div>
         <div>
           <div className="font-semibold mb-2">{t('Cover') || 'Cover'}</div>
-          {coverUrl ? <img src={resolve(coverUrl)} alt="cover" className="w-full h-32 object-cover rounded mb-2" /> : <div className="w-full h-32 bg-base-200 rounded mb-2" />}
+          {coverUrl ? <img src={resolve(coverUrl)} alt={t('Cover') || 'cover'} className="w-full h-32 object-cover rounded mb-2" /> : <div className="w-full h-32 bg-base-200 rounded mb-2" />}
           <label className="btn btn-sm">{uploading?(t('Uploading…') || 'Uploading…'):(t('Upload Cover') || 'Upload Cover')}<input hidden type="file" accept="image/*" onChange={e=>{ const f=e.target.files?.[0]; if (f) up(f, setCoverUrl); }} /></label>
         </div>
         <div className="md:col-span-2 text-right">

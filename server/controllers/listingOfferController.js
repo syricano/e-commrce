@@ -7,6 +7,8 @@ import { parsePageLimit } from '../utils/paging.js';
 
 import ListingOffer from '../models/ListingOffer.js';
 import Listing from '../models/Listing.js';
+import MessageThread from '../models/MessageThread.js';
+import Message from '../models/Message.js';
 import C2CTransaction from '../models/C2CTransaction.js';
 import BlockedUser from '../models/BlockedUser.js';
 
@@ -27,6 +29,29 @@ export const createListingOffer = asyncHandler(async (req, res) => {
   if (blocked) throw new ErrorResponse('Interaction blocked', 403);
 
   const row = await ListingOffer.create({ listingId, buyerUserId: req.user.id, amount, message, status: 'open' });
+
+  // Link the offer to a messaging thread so the seller gets notified
+  try {
+    const [thread] = await MessageThread.findOrCreate({
+      where: { listingId, buyerUserId: req.user.id, sellerUserId: listing.ownerUserId },
+      defaults: {
+        listingId,
+        buyerUserId: req.user.id,
+        sellerUserId: listing.ownerUserId,
+        contextType: 'listing',
+        contextId: listingId,
+        lastMessageAt: new Date(),
+      },
+    });
+    const currency = listing.currency || 'EUR';
+    const intro = (message || '').trim();
+    const body = intro
+      ? `New offer: ${amount} ${currency}\n\n${intro}`
+      : `New offer: ${amount} ${currency}`;
+    await Message.create({ threadId: thread.id, senderUserId: req.user.id, body });
+    await thread.update({ lastMessageAt: new Date() });
+  } catch {}
+
   res.status(201).json(row);
 });
 

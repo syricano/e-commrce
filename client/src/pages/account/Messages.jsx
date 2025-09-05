@@ -77,26 +77,26 @@ export default function Messages() {
               <ul className="menu menu-sm">
                 {threads.map(th => {
                   const ctx = th.contextType === 'order'
-                    ? (th.orderNumber ? `Order ${th.orderNumber}` : `Order #${th.contextId}`)
+                    ? (th.orderNumber ? `${t('Order') || 'Order'} ${th.orderNumber}` : `${t('Order') || 'Order'} #${th.contextId}`)
                     : th.contextType === 'store'
-                      ? `Store #${th.contextId}`
+                      ? `${t('Store') || 'Store'} #${th.contextId}`
                       : th.contextType === 'direct'
-                        ? (lang==='ar'?'مباشر':'Direct')
+                        ? (t('Direct') || 'Direct')
                         : th.listingId
-                          ? (th.listingTitle ? th.listingTitle : `Listing #${th.listingId}`)
-                          : (lang==='ar'?'عام':'General');
+                          ? (th.listingTitle ? th.listingTitle : `${t('Listing') || 'Listing'} #${th.listingId}`)
+                          : (t('General') || 'General');
                   return (
                     <li key={th.id}>
                       <button className={activeId===th.id?'active':''} onClick={()=>setActiveId(th.id)}>
                         <div className="flex flex-col text-left">
-                          <span>Thread #{th.id}</span>
+                          <span>{t('Thread') || 'Thread'} #{th.id}</span>
                           <span className="opacity-70 text-xs truncate">{ctx}</span>
                         </div>
                       </button>
                     </li>
                   );
                 })}
-                {threads.length===0 && !loading && (<li className="px-2 py-1 opacity-60">No threads</li>)}
+                {threads.length===0 && !loading && (<li className="px-2 py-1 opacity-60">{t('No threads') || 'No threads'}</li>)}
               </ul>
             </div>
           </div>
@@ -112,12 +112,12 @@ export default function Messages() {
                     <div className="chat-footer opacity-60 text-xs">{new Date(m.createdAt).toLocaleString()}</div>
                   </div>
                 ))}
-                {msgs.length===0 && (<div className="opacity-60">Select a thread</div>)}
+                {msgs.length===0 && (<div className="opacity-60">{t('Select a thread') || 'Select a thread'}</div>)}
               </div>
               <div className="mt-2 space-y-2">
                 <div className="flex items-center gap-2">
                   <label className="form-control">
-                    <span className="label-text">{lang==='ar'?'قوالب':'Templates'}</span>
+                    <span className="label-text">{t('Templates') || 'Templates'}</span>
                     <select
                       className="select select-bordered"
                       value={templateKey}
@@ -139,12 +139,12 @@ export default function Messages() {
                     rows={5}
                     value={text}
                     onChange={(e)=>setText(e.target.value)}
-                    placeholder={lang==='ar'?'اكتب رسالة':'Type a message'}
+                    placeholder={t('Type a message') || 'Type a message'}
                     onKeyDown={(e)=>{ if((e.ctrlKey||e.metaKey) && e.key==='Enter') onSend(); }}
                   />
-                  <button className="btn btn-primary self-stretch" onClick={onSend} disabled={sending || !activeId || !text.trim()}>{sending?'…':(lang==='ar'?'إرسال':'Send')}</button>
+                  <button className="btn btn-primary self-stretch" onClick={onSend} disabled={sending || !activeId || !text.trim()}>{sending?'…':(t('Send') || 'Send')}</button>
                 </div>
-                <div className="text-xs opacity-70">{lang==='ar'?'Ctrl+Enter للإرسال':'Press Ctrl+Enter to send'}</div>
+                <div className="text-xs opacity-70">{t('Press Ctrl+Enter to send') || 'Press Ctrl+Enter to send'}</div>
               </div>
             </div>
           </div>

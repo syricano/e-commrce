@@ -78,10 +78,16 @@ export const searchListings = asyncHandler(async (req, res) => {
     status,
     sort,
     attrs,
+    id,
+    ownerUserId,
+    title,
   } = q;
 
   const where = {};
   const ownerKey = detectOwnerAttr(Listing) || 'ownerUserId';
+
+  if (id) where.id = Number(id);
+  if (ownerUserId) where[ownerKey] = Number(ownerUserId);
 
   if (status) {
     where.status = status;
@@ -123,12 +129,23 @@ export const searchListings = asyncHandler(async (req, res) => {
       ? [['views', 'DESC']]
       : [['createdAt', 'DESC']];
 
+  const include = [
+    { model: ListingMedia, as: 'media', required: false },
+  ];
+  if (title) {
+    include.unshift({
+      model: ListingTranslation,
+      as: 'translations',
+      required: true,
+      where: { title: { [Op.iLike]: `%${String(title).trim()}%` } },
+    });
+  } else {
+    include.unshift({ model: ListingTranslation, as: 'translations', required: false });
+  }
+
   const rows = await Listing.findAndCountAll({
     where,
-    include: [
-      { model: ListingTranslation, as: 'translations', required: false },
-      { model: ListingMedia, as: 'media', required: false },
-    ],
+    include,
     order,
     limit: Number(limit),
     offset: (Number(page) - 1) * Number(limit),

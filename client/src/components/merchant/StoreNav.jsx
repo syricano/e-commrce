@@ -1,9 +1,10 @@
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useLang } from '@/context/LangProvider';
 
 export default function StoreNav() {
   const { id } = useParams();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { t } = useLang();
   const base = `/merchant/store/${id}`;
   const items = [
@@ -18,7 +19,7 @@ export default function StoreNav() {
   ];
   return (
     <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
-      <Link to="/merchant" className="btn btn-ghost btn-xs">← {t('Back') || 'Back'}</Link>
+      <button type="button" onClick={()=>navigate(-1)} className="btn btn-ghost btn-xs">← {t('Back') || 'Back'}</button>
       <div className="tabs tabs-boxed">
         {items.map(i => (
           <Link key={i.to} to={i.to} className={`tab ${pathname.startsWith(i.to) ? 'tab-active' : ''}`}>{i.label}</Link>

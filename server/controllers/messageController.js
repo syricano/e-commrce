@@ -157,8 +157,26 @@ export const listMessages = asyncHandler(async (req, res) => {
   if (!thread) throw new ErrorResponse('Thread not found', 404);
   if (![thread.buyerUserId, thread.sellerUserId].includes(req.user.id)) throw new ErrorResponse('Forbidden', 403);
 
+  // Mark messages not sent by the current user as read
+  await Message.update(
+    { readAt: new Date() },
+    { where: { threadId: thread.id, senderUserId: { [Op.ne]: req.user.id }, readAt: null } }
+  );
+
   const rows = await Message.findAll({ where: { threadId: thread.id }, order: [['id', 'ASC']] });
   res.json(rows);
 });
 
-export default { startThread, listThreads, sendMessage, listMessages };
+export const getUnreadCount = asyncHandler(async (req, res) => {
+  // Count messages in threads where the user is a participant, not authored by the user, with null readAt
+  const threads = await MessageThread.findAll({
+    where: { [Op.or]: [{ buyerUserId: req.user.id }, { sellerUserId: req.user.id }] },
+    attributes: ['id'],
+  });
+  const threadIds = threads.map((t) => t.id);
+  if (threadIds.length === 0) return res.json({ count: 0 });
+  const count = await Message.count({ where: { threadId: { [Op.in]: threadIds }, senderUserId: { [Op.ne]: req.user.id }, readAt: null } });
+  res.json({ count });
+});
+
+export default { startThread, listThreads, sendMessage, listMessages, getUnreadCount };
