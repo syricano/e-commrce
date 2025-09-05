@@ -110,6 +110,13 @@ authRouter.post('/logout', (req, res) => {
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   });
+  // Also clear guest cart token so next session starts with a fresh cart
+  res.clearCookie('guest_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    path: '/',
+  });
   res.json({ ok: true });
 });
 

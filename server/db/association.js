@@ -274,6 +274,17 @@ export function applyAssociations() {
   StoreOffer.hasMany(CartItem, { foreignKey: 'store_offer_id', as: 'cartItems', onDelete: 'CASCADE' });
   CartItem.belongsTo(StoreOffer, { foreignKey: 'store_offer_id', as: 'storeOffer' });
 
+  // C2C listings in cart/order items
+  Listing.hasMany(CartItem, { foreignKey: 'listing_id', as: 'cartItems', onDelete: 'CASCADE' });
+  CartItem.belongsTo(Listing, { foreignKey: 'listing_id', as: 'listing' });
+  Listing.hasMany(OrderItem, { foreignKey: 'listing_id', as: 'orderItems' });
+  OrderItem.belongsTo(Listing, { foreignKey: 'listing_id', as: 'listing' });
+
+  // Order items may reference either B2C Offer or StoreOffer
+  // Link OrderItem to StoreOffer as well (do not duplicate Offer/orderItems alias)
+  StoreOffer.hasMany(OrderItem, { foreignKey: 'store_offer_id', as: 'storeOrderItems' });
+  OrderItem.belongsTo(StoreOffer, { foreignKey: 'store_offer_id', as: 'storeOffer' });
+
   return {
     User, Profile, Address, Store, StoreUser, Category, CategoryTranslation, Brand, BrandTranslation,
     Product, ProductTranslation, ProductVariant, Media, Offer, Inventory, Cart, CartItem, Order, OrderItem,

@@ -37,7 +37,14 @@ cd server
 cp .env.example .env   # fill DB_URL (or DATABASE_URL), JWT_SECRET, BACKEND_URL, CLIENT_URL, GOOGLE_*
 ```
 
-2) Install & run
+2) Run DB migrations (always)
+
+```
+cd server
+npm run migrations   # applies base__* then alter__* with Umzug
+```
+
+3) Install & run
 
 ```
 npm i
@@ -53,6 +60,11 @@ npm run seed:categories
 Notes:
 - Seeds wipe `categories`/`category_translations` before inserting.
 - Filter definitions live under `categories.metadata.filters.fields`.
+
+Migrations behavior:
+- By default, the API no longer runs migrations on startup. Use `npm run migrations` explicitly.
+- To run migrations automatically on boot, set `RUN_MIGRATIONS_ON_START=1` in `server/.env`.
+- To use `sequelize.sync({ alter: true })` in dev instead, set `SYNC_ALTER=1` (not recommended for shared DBs).
 
 ### Web Client
 
@@ -109,4 +121,3 @@ npm run dev            # http://localhost:5173
 - Web: favor SPA navigation (`Link`) and keep filters declarative.
 
 MIT © Free Market
-

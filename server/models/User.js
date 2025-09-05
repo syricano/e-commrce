@@ -12,7 +12,10 @@ const User = sequelize.define('User', {
   oauthSubject: { type: DataTypes.STRING(191) },
   role: { type: DataTypes.ENUM('customer','seller','staff','admin'), allowNull: false, defaultValue: 'customer' },
   status: { type: DataTypes.ENUM('active','suspended','pending'), allowNull: false, defaultValue: 'active' },
-  metadata: { type: DataTypes.JSONB }
+  metadata: { type: DataTypes.JSONB },
+  // Seller (C2C) checkout settings managed by admin
+  sellerShippingOptions: { type: DataTypes.JSONB },
+  sellerPreferredPayments: { type: DataTypes.JSONB },
 }, {
   tableName: 'users',
   underscored: true,

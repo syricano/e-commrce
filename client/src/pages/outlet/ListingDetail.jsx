@@ -7,7 +7,8 @@ import { useAuth } from '@/context';
 import { errorHandler } from '@/utils';
 import { toast } from 'react-hot-toast';
 import Spinner from '@/components/UI/Spinner.jsx';
-import { toggleFavorite as apiToggleFavorite } from '@/services';
+import { formatMoneyMajor } from '@/utils/money';
+import { toggleFavorite as apiToggleFavorite, addCartItem } from '@/services';
 
 const pickTr = (row, lang) => {
   const trs = Array.isArray(row?.translations) ? row.translations : [];
@@ -86,9 +87,12 @@ export default function ListingDetail() {
       const template = lang==='ar'
         ? `مرحباً،\nأنا مهتم بهذا العرض.\nهل ما زال متاحاً؟\nشكراً،\n${name}`
         : `Hi,\nI'm interested in this offer.\nIs it still available?\nThanks,\n${name}`;
-      const url = `/account/messages?threadId=${encodeURIComponent(thread?.id || '')}&prefill=${encodeURIComponent(template)}`;
+      // Auto-send the initial template so the thread has a first message
+      if (thread?.id && template) {
+        try { await axiosInstance.post(`/threads/${thread.id}/messages`, { body: template }); } catch {}
+      }
       toast.success(t('Thread started') || 'Thread started');
-      nav(url);
+      nav(`/account/messages?threadId=${encodeURIComponent(thread?.id || '')}`);
     } catch (e) { errorHandler(e, t('Failed to start chat') || 'Failed to start chat'); }
   };
 
@@ -112,10 +116,10 @@ export default function ListingDetail() {
     if (isOwner) return toast.error(t('This is your listing') || 'This is your listing');
     if (item.status !== 'active') return toast.error(t('Listing not available') || 'Listing not available');
     try {
-      const res = await axiosInstance.post(`/listings/${item.id}/buy`, { method: 'online' });
-      toast.success(t('Purchase initiated') || 'Purchase initiated');
-      // In a real app, redirect to payment page or transaction detail
-      // nav(`/transactions/${res?.data?.id || ''}`)
+      await addCartItem({ listingId: item.id, quantity: 1 });
+      window.dispatchEvent(new CustomEvent('cart:updated'));
+      toast.success(t('Added to cart') || 'Added to cart');
+      nav('/checkout');
     } catch (e) { errorHandler(e, t('Failed to start checkout') || 'Failed to start checkout'); }
   };
 
@@ -164,7 +168,7 @@ export default function ListingDetail() {
             </div>
             <div className="flex-1 space-y-3 w-full">
               <h1 className="text-2xl font-bold break-words">{tr?.title || `#${item.id}`}</h1>
-              <div className="text-xl font-semibold">{item.priceAmount} {item.currency}</div>
+              <div className="text-xl font-semibold">{formatMoneyMajor(item.currency, item.priceAmount)}</div>
               <div className="opacity-70 text-sm space-x-2">
                 <span>#{item.id}</span>
                 <span>•</span>

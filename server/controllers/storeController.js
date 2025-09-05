@@ -26,7 +26,9 @@ export const updateMerchantSettings = asyncHandler(async (req, res) => {
   }
   const allowed = ['shippingOptions','preferredPayments','logoUrl','coverUrl'];
   const patch = {};
-  for (const k of allowed) if (Object.prototype.hasOwnProperty.call(req.body, k)) patch[k] = req.body[k];
+  // prefer sanitized payload if present from Zod validator
+  const src = req.sanitized?.body || req.body || {};
+  for (const k of allowed) if (Object.prototype.hasOwnProperty.call(src, k)) patch[k] = src[k];
   await row.update(patch);
   res.json(row);
 });

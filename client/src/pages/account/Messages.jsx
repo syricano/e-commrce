@@ -75,16 +75,27 @@ export default function Messages() {
             <div className="card-body p-3">
               {loading && <Spinner size={24} />}
               <ul className="menu menu-sm">
-                {threads.map(th => (
-                  <li key={th.id}>
-                    <button className={activeId===th.id?'active':''} onClick={()=>setActiveId(th.id)}>
-                      <div className="flex flex-col text-left">
-                        <span>Thread #{th.id}</span>
-                        <span className="opacity-70 text-xs">Listing #{th.listingId}</span>
-                      </div>
-                    </button>
-                  </li>
-                ))}
+                {threads.map(th => {
+                  const ctx = th.contextType === 'order'
+                    ? (th.orderNumber ? `Order ${th.orderNumber}` : `Order #${th.contextId}`)
+                    : th.contextType === 'store'
+                      ? `Store #${th.contextId}`
+                      : th.contextType === 'direct'
+                        ? (lang==='ar'?'مباشر':'Direct')
+                        : th.listingId
+                          ? (th.listingTitle ? th.listingTitle : `Listing #${th.listingId}`)
+                          : (lang==='ar'?'عام':'General');
+                  return (
+                    <li key={th.id}>
+                      <button className={activeId===th.id?'active':''} onClick={()=>setActiveId(th.id)}>
+                        <div className="flex flex-col text-left">
+                          <span>Thread #{th.id}</span>
+                          <span className="opacity-70 text-xs truncate">{ctx}</span>
+                        </div>
+                      </button>
+                    </li>
+                  );
+                })}
                 {threads.length===0 && !loading && (<li className="px-2 py-1 opacity-60">No threads</li>)}
               </ul>
             </div>
@@ -103,25 +114,37 @@ export default function Messages() {
                 ))}
                 {msgs.length===0 && (<div className="opacity-60">Select a thread</div>)}
               </div>
-              <div className="mt-2 flex gap-2 items-stretch flex-wrap">
-                <label className="form-control w-full sm:w-auto">
-                  <span className="label-text">{lang==='ar'?'قوالب':'Templates'}</span>
-                  <select
-                    className="select select-bordered"
-                    value={templateKey}
-                    onChange={(e)=>{
-                      const val = e.target.value;
-                      setTemplateKey(val);
-                      const found = templates.find(t=>t.key===val) || templates[0];
-                      setText(found.text);
-                    }}
-                  >
-                    {templates.map(tpl => <option key={tpl.key} value={tpl.key}>{tpl.label}</option>)}
-                  </select>
-                </label>
-                <div className="flex-1 min-w-[240px]" />
-                <input className="input input-bordered flex-1 min-w-[240px]" value={text} onChange={(e)=>setText(e.target.value)} placeholder={lang==='ar'?'اكتب رسالة':'Type a message'} onKeyDown={(e)=>{ if(e.key==='Enter') onSend(); }} />
-                <button className="btn btn-primary" onClick={onSend} disabled={sending || !activeId || !text.trim()}>{sending?'…':(lang==='ar'?'إرسال':'Send')}</button>
+              <div className="mt-2 space-y-2">
+                <div className="flex items-center gap-2">
+                  <label className="form-control">
+                    <span className="label-text">{lang==='ar'?'قوالب':'Templates'}</span>
+                    <select
+                      className="select select-bordered"
+                      value={templateKey}
+                      onChange={(e)=>{
+                        const val = e.target.value;
+                        setTemplateKey(val);
+                        const found = templates.find(t=>t.key===val) || templates[0];
+                        setText(found.text);
+                      }}
+                    >
+                      {templates.map(tpl => <option key={tpl.key} value={tpl.key}>{tpl.label}</option>)}
+                    </select>
+                  </label>
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <textarea
+                    className="textarea textarea-bordered w-full min-h-[120px]"
+                    rows={5}
+                    value={text}
+                    onChange={(e)=>setText(e.target.value)}
+                    placeholder={lang==='ar'?'اكتب رسالة':'Type a message'}
+                    onKeyDown={(e)=>{ if((e.ctrlKey||e.metaKey) && e.key==='Enter') onSend(); }}
+                  />
+                  <button className="btn btn-primary self-stretch" onClick={onSend} disabled={sending || !activeId || !text.trim()}>{sending?'…':(lang==='ar'?'إرسال':'Send')}</button>
+                </div>
+                <div className="text-xs opacity-70">{lang==='ar'?'Ctrl+Enter للإرسال':'Press Ctrl+Enter to send'}</div>
               </div>
             </div>
           </div>

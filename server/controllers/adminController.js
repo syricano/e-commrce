@@ -12,6 +12,8 @@ import Payout from '../models/Payout.js';
 import Report from '../models/Report.js';
 import CommissionScheme from '../models/CommissionScheme.js';
 import AuditLog from '../models/AuditLog.js';
+import { z } from 'zod';
+import { adminSellerSettingsSchema } from '../zod/Schemas.js';
 
 // Added for dashboard stats
 import StoreOffer from '../models/StoreOffer.js';
@@ -259,5 +261,36 @@ export const deleteUserByAdmin = asyncHandler(async (req, res) => {
   const before = row.toJSON();
   await row.destroy();
   await audit(req, { entity: 'User', entityId: id, action: 'adminDelete', before, after: null });
+  res.json({ ok: true });
+});
+
+// === Admin: seller (C2C) checkout settings ===
+export const getSellerSettings = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const row = await User.findByPk(id);
+  if (!row) return res.status(404).json({ error: 'User not found' });
+  res.json({
+    shippingOptions: row.sellerShippingOptions || {},
+    preferredPayments: row.sellerPreferredPayments || {},
+  });
+});
+
+export const updateSellerSettings = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const row = await User.findByPk(id);
+  if (!row) return res.status(404).json({ error: 'User not found' });
+
+  const parsed = adminSellerSettingsSchema.safeParse(req.body || {});
+  if (!parsed.success) {
+    const msg = parsed.error?.issues?.[0]?.message || 'Validation failed';
+    return res.status(400).json({ error: msg, details: parsed.error.format?.() });
+  }
+  const { shippingOptions, preferredPayments } = parsed.data;
+  const before = row.toJSON();
+  await row.update({
+    sellerShippingOptions: shippingOptions ?? null,
+    sellerPreferredPayments: preferredPayments ?? null,
+  });
+  await audit(req, { entity: 'User', entityId: row.id, action: 'updateSellerSettings', before, after: row.toJSON() });
   res.json({ ok: true });
 });

@@ -6,8 +6,9 @@ import Offer from '../models/Offer.js';
 import StoreOffer from '../models/StoreOffer.js';
 import StoreProduct from '../models/StoreProduct.js';
 import StoreProductMedia from '../models/StoreProductMedia.js';
-import { convertMinor } from '../utils/fx.js';
+import { convertAmount } from '../utils/fx.js';
 import { clampQuantity, priceAndStockFor, displayAmounts } from '../utils/pricing.js';
+import Listing from '../models/Listing.js';
 
 
 
@@ -15,14 +16,18 @@ async function recalcCartTotals(cart) {
   // compute totals in cart.currency using conversion per line
   const items = await CartItem.findAll({
     where: { cartId: cart.id },
-    include: [{ model: Offer, as: 'offer' }, { model: StoreOffer, as: 'storeOffer' }],
+    include: [
+      { model: Offer, as: 'offer' },
+      { model: StoreOffer, as: 'storeOffer' },
+      { model: Listing, as: 'listing' },
+    ],
   });
 
   let itemsSubtotalAmount = 0;
   for (const r of items) {
-    const baseAmount = r.unitPriceAmount || 0; // stored in the offer's native currency
-    const baseCurrency = r.offer?.currency || r.storeOffer?.currency || cart.currency || 'EUR';
-    const unitInCartCur = convertMinor(baseAmount, baseCurrency, cart.currency || 'EUR');
+    const baseAmount = r.unitPriceAmount || 0; // stored in the item native currency (major units)
+    const baseCurrency = r.offer?.currency || r.storeOffer?.currency || r.listing?.currency || cart.currency || 'EUR';
+    const unitInCartCur = convertAmount(baseAmount, baseCurrency, cart.currency || 'EUR');
     itemsSubtotalAmount += unitInCartCur * (r.quantity || 0);
   }
 
@@ -65,15 +70,16 @@ export const listMyCartItems = asyncHandler(async (req, res) => {
           },
         ],
       },
+      { model: Listing, as: 'listing' },
     ],
   });
 
   // attach display prices in cart currency (reuse shared util)
   const currency = req.cart.currency || 'EUR';
   const items = rows.map((r) => {
-    const baseCurrency = r.offer?.currency || r.storeOffer?.currency || currency;
+    const baseCurrency = r.offer?.currency || r.storeOffer?.currency || r.listing?.currency || currency;
     const disp = displayAmounts({
-      unitMinor: r.unitPriceAmount || 0,
+      unitAmount: r.unitPriceAmount || 0,
       baseCurrency,
       targetCurrency: currency,
       qty: r.quantity || 0,
@@ -87,21 +93,22 @@ export const listMyCartItems = asyncHandler(async (req, res) => {
 // price and stock lookups are handled in utils/pricing.js
 
 export const addCartItem = asyncHandler(async (req, res) => {
-  const { offerId, storeOfferId } = req.body || {};
+  const { offerId, storeOfferId, listingId } = req.body || {};
   const addQty = clampQuantity(req.body?.quantity ?? 1, 1, 99);
 
-  const price = await priceAndStockFor({ offerId, storeOfferId });
+  const price = await priceAndStockFor({ offerId, storeOfferId, listingId, buyerUserId: req.user?.id || null });
   if (!price.ok) return res.status(price.code).json({ error: price.error });
 
-  const where =
-    offerId != null
+  const where = offerId != null
       ? { cartId: req.cart.id, offerId }
-      : { cartId: req.cart.id, storeOfferId };
+      : storeOfferId != null
+      ? { cartId: req.cart.id, storeOfferId }
+      : { cartId: req.cart.id, listingId };
 
   const defaults = {
     ...where,
-    quantity: addQty,
-    unitPriceAmount: Math.max(0, Math.round(price.amount)), // stored in offer's native currency
+    quantity: price.kind === 'listing' ? 1 : addQty,
+    unitPriceAmount: Math.max(0, Math.round(price.amount)),
   };
 
   // Manual upsert with paranoid: false to handle soft-deleted rows gracefully
@@ -116,7 +123,7 @@ export const addCartItem = asyncHandler(async (req, res) => {
       if (err?.name === 'SequelizeUniqueConstraintError') {
         row = await CartItem.findOne({ where });
         if (!row) throw err;
-        const desiredQty = clampQuantity(row.quantity + addQty, 1, 99);
+        const desiredQty = price.kind === 'listing' ? 1 : clampQuantity(row.quantity + addQty, 1, 99);
         if (Number.isFinite(price.maxStock) && desiredQty > price.maxStock) {
           return res.status(400).json({ error: 'Insufficient stock' });
         }
@@ -131,11 +138,11 @@ export const addCartItem = asyncHandler(async (req, res) => {
     // If soft-deleted, restore and treat as a fresh add
     if (row.deletedAt) {
       await row.restore();
-      row.quantity = addQty;
+      row.quantity = price.kind === 'listing' ? 1 : addQty;
       row.unitPriceAmount = Math.max(0, Math.round(price.amount));
       await row.save();
     } else {
-      const desiredQty = clampQuantity(row.quantity + addQty, 1, 99);
+      const desiredQty = price.kind === 'listing' ? 1 : clampQuantity(row.quantity + addQty, 1, 99);
       if (Number.isFinite(price.maxStock) && desiredQty > price.maxStock) {
         return res.status(400).json({ error: 'Insufficient stock' });
       }
@@ -162,10 +169,12 @@ export const updateMyCartItem = asyncHandler(async (req, res) => {
   const price = await priceAndStockFor({
     offerId: row.offerId ?? undefined,
     storeOfferId: row.storeOfferId ?? undefined,
+    listingId: row.listingId ?? undefined,
+    buyerUserId: req.user?.id || null,
   });
   if (!price.ok) return res.status(price.code).json({ error: price.error });
 
-  const nextQty = clampQuantity(quantity ?? row.quantity, 1, 99);
+  const nextQty = price.kind === 'listing' ? 1 : clampQuantity(quantity ?? row.quantity, 1, 99);
   if (Number.isFinite(price.maxStock) && nextQty > price.maxStock) {
     return res.status(400).json({ error: 'Insufficient stock' });
   }

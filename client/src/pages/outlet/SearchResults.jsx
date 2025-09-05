@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import usePageTitle from '@/hooks/usePageTitle';
 import { useLang } from '@/context/LangProvider';
 import { searchAll } from '@/services';
+import { formatMoneyMajor } from '@/utils/money';
 import Spinner from '@/components/UI/Spinner.jsx';
 
 export default function SearchResults() {
@@ -42,7 +43,7 @@ export default function SearchResults() {
         <Link key={`l-${id}-${tr?.id || ''}`} to={`/listings/${id}`} className="card bg-base-100 border hover:shadow">
           <div className="card-body p-3">
             <div className="font-semibold truncate">{title}</div>
-            <div className="opacity-70 text-sm">{l?.priceAmount} {l?.currency}</div>
+            <div className="opacity-70 text-sm">{formatMoneyMajor(l?.currency, l?.priceAmount)}</div>
           </div>
         </Link>
       );

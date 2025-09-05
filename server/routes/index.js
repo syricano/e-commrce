@@ -57,6 +57,7 @@ import uploadRouter from './uploadRouter.js';
 import storeMerchantRouter from './storeMerchantRouter.js';
 import supportRouter from './supportRouter.js';
 import storeOfferRouter from './storeOfferRouter.js';
+import checkoutRouter from './checkoutRouter.js';
 
 // Public items resolver for collections
 import collectionPublicRouter from './collectionPublicRouter.js';
@@ -85,6 +86,7 @@ export const routeMap = [
   { path: '/api/carts', handler: cartRouter },
   { path: '/api/cart-items', handler: cartItemRouter },
   { path: '/api/orders', handler: orderRouter },
+  { path: '/api/checkout', handler: checkoutRouter },
   { path: '/api/order-items', handler: orderItemRouter },
   { path: '/api/shipments', handler: shipmentRouter },
   { path: '/api/payments', handler: paymentRouter },

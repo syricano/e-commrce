@@ -5,22 +5,34 @@ import { errorHandler } from '@/utils';
 import { useLang } from '@/context/LangProvider';
 import usePageTitle from '@/hooks/usePageTitle';
 
-const cards = [
-  { to: "/admin/users",               labelKey: "Users" },
-  { to: "/admin/stores",              labelKey: "Stores" },
-  { to: "/admin/products",            labelKey: "ManageProducts" },
-  { to: "/admin/categories",          labelKey: "ManageCategories" },
-  { to: "/admin/collections",         labelKey: "ManageCollections" },
-  { to: "/admin/media",               labelKey: "ManageMedia" },
-  { to: "/admin/listings",            labelKey: "ManageListings" },
-  { to: "/admin/listing-offers",      labelKey: "ManageListingOffers" },
-  { to: "/admin/listing-promotions",  labelKey: "ManageListingPromotions" },
-  { to: "/admin/reports",             labelKey: "ManageReports" },
+const metricOrder = [
+  { key: 'Users',            icon: '👤' },
+  { key: 'Stores',           icon: '🏬' },
+  { key: 'Products',         icon: '📦' },
+  { key: 'Listings',         icon: '📋' },
+  { key: 'Offers',           icon: '🏷️' },
+  { key: 'Reports',          icon: '🛎️' },
+  { key: 'Collections',      icon: '🗂️' },
+  { key: 'CollectionItems',  icon: '✅' },
+];
+
+const manageCards = [
+  { to: '/admin/users',                 labelKey: 'Users' },
+  { to: '/admin/stores',                labelKey: 'Stores' },
+  { to: '/admin/products',              labelKey: 'ManageProducts' },
+  { to: '/admin/categories',            labelKey: 'ManageCategories' },
+  { to: '/admin/collections',           labelKey: 'ManageCollections' },
+  { to: '/admin/collection-items',      labelKey: 'ManageCollectionItems' }, // added
+  { to: '/admin/media',                 labelKey: 'ManageMedia' },
+  { to: '/admin/listings',              labelKey: 'ManageListings' },
+  { to: '/admin/listing-offers',        labelKey: 'ManageListingOffers' },
+  { to: '/admin/listing-promotions',    labelKey: 'ManageListingPromotions' },
+  { to: '/admin/reports',               labelKey: 'ManageReports' },
 ];
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
-  const { t } = useLang();
+  const { t, lang } = useLang();
   usePageTitle('dashboard');
 
   useEffect(() => {
@@ -30,28 +42,50 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <section className="space-y-4">
-      <h1 className="text-2xl font-bold">{t('dashboard')}</h1>
-
-      {/* KPI */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {stats ? Object.entries(stats).map(([k,v])=>(
-          <div key={k} className="card bg-base-200">
-            <div className="card-body">
-              <h3 className="card-title capitalize">{t(k) || k}</h3>
-              <p className="text-3xl font-bold">{v}</p>
-            </div>
-          </div>
-        )) : <div className="opacity-60">Loading…</div>}
+    <section className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">{t('dashboard')}</h1>
       </div>
 
-      {/* Manage tiles */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {cards.map(c=>(
-          <Link key={c.to} to={c.to} className="card bg-base-100 border hover:shadow-md transition">
+      {/* KPI grid: fully responsive */}
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        {(stats ? metricOrder : Array.from({ length: 6 })).map((m, idx) => {
+          if (!stats) {
+            return (
+              <div key={`skeleton-${idx}`} className="card bg-base-200 animate-pulse">
+                <div className="card-body">
+                  <div className="h-6 w-12 bg-base-300 rounded mb-2" />
+                  <div className="h-4 w-24 bg-base-300 rounded" />
+                </div>
+              </div>
+            );
+          }
+          const value = Number(stats[m.key] ?? 0);
+          return (
+            <div key={m.key} className="card bg-base-100 border">
+              <div className="card-body">
+                <div className="flex items-start justify-between">
+                  <div className="text-3xl">{m.icon}</div>
+                  <div className="text-3xl font-bold">{value.toLocaleString(lang || 'en')}</div>
+                </div>
+                <div className="opacity-70 mt-1">{t(m.key) || m.key}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Manage tiles: responsive cards */}
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {manageCards.map((c) => (
+          <Link
+            key={c.to}
+            to={c.to}
+            className="card bg-base-100 border hover:shadow-md focus:outline-none focus:ring transition"
+          >
             <div className="card-body">
-              <h3 className="card-title">{t(c.labelKey)}</h3>
-              <p className="opacity-70">{t('Manage')} {t(c.labelKey)}</p>
+              <h3 className="card-title">{t(c.labelKey) || c.labelKey}</h3>
+              <p className="opacity-70">{t('Manage')} {t(c.labelKey) || c.labelKey}</p>
             </div>
           </Link>
         ))}

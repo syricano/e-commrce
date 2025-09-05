@@ -12,9 +12,11 @@ export const deleteProfile= deleteById(Profile);
 
 // Self service (/profiles/me)
 export const getMyProfile = asyncHandler(async (req, res) => {
-  const row = await Profile.findOne({ where: { userId: req.user.id } });
-  if (!row) throw new ErrorResponse('Not found', 404);
-  res.json(row);
+  const [row, created] = await Profile.findOrCreate({
+    where: { userId: req.user.id },
+    defaults: { userId: req.user.id },
+  });
+  res.status(created ? 201 : 200).json(row);
 });
 
 export const upsertMyProfile = asyncHandler(async (req, res) => {

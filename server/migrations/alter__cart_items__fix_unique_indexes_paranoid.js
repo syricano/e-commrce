@@ -4,6 +4,7 @@ export const up = async ({ context: q }) => {
   await q.sequelize.query(`
   DO $$
   DECLARE has_cart_items boolean;
+  DECLARE rec record;
   BEGIN
     SELECT EXISTS (
       SELECT 1 FROM information_schema.tables
@@ -21,25 +22,25 @@ export const up = async ({ context: q }) => {
     END IF;
 
     -- Drop any non-paranoid unique indexes on (cart_id, store_offer_id)
-    FOR DECLARE idxname text IN
+    FOR rec IN
       SELECT indexname FROM pg_indexes
       WHERE schemaname='public' AND tablename='cart_items'
         AND indexdef ILIKE '%UNIQUE INDEX%'
         AND indexdef ILIKE '%(cart_id, store_offer_id)%'
         AND indexdef NOT ILIKE '%deleted_at%'
     LOOP
-      EXECUTE format('DROP INDEX IF EXISTS public.%I;', idxname);
+      EXECUTE format('DROP INDEX IF EXISTS public.%I;', rec.indexname);
     END LOOP;
 
     -- Drop any non-paranoid unique indexes on (cart_id, offer_id)
-    FOR DECLARE idxname2 text IN
+    FOR rec IN
       SELECT indexname FROM pg_indexes
       WHERE schemaname='public' AND tablename='cart_items'
         AND indexdef ILIKE '%UNIQUE INDEX%'
         AND indexdef ILIKE '%(cart_id, offer_id)%'
         AND indexdef NOT ILIKE '%deleted_at%'
     LOOP
-      EXECUTE format('DROP INDEX IF EXISTS public.%I;', idxname2);
+      EXECUTE format('DROP INDEX IF EXISTS public.%I;', rec.indexname);
     END LOOP;
 
     -- Create paranoid-aware unique indexes (active rows only)
@@ -80,4 +81,3 @@ export const down = async ({ context: q }) => {
   END
   $$;`);
 };
-

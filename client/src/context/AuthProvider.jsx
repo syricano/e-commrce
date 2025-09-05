@@ -25,10 +25,10 @@ function AuthProvider({ children }) {
   // Accept ?token=... from /api/auth/google/callback redirect
   useEffect(() => {
     const usp = new URLSearchParams(window.location.search);
-    const t = usp.get("token");
-    if (t) {
-      localStorage.setItem("token", t);
-      setToken(t);
+    const urlToken = usp.get("token");
+    if (urlToken) {
+      localStorage.setItem("token", urlToken);
+      setToken(urlToken);
       usp.delete("token");
       const clean = `${window.location.pathname}${usp.toString() ? `?${usp}` : ""}${window.location.hash}`;
       window.history.replaceState({}, "", clean);
@@ -46,35 +46,36 @@ function AuthProvider({ children }) {
 
   // Bootstrap session from /api/auth/me (returns the user object directly)
   useEffect(() => {
-    let live = true;
-    getMe()
-      .then((me) => {
-        if (live) setUser(me ?? null);
-      })
-      .catch(() => {
-        if (live) setUser(null);
-      })
-      .finally(() => {
-        if (live) setLoading(false);
-      });
-    return () => {
-      live = false;
+    let cancelled = false;
+    const bootstrap = async () => {
+      setLoading(true);
+      try {
+        const me = await getMe();
+        if (!cancelled) setUser(me ?? null);
+      } catch (_e) {
+        if (!cancelled) setUser(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     };
+    bootstrap();
+    return () => { cancelled = true; };
   }, [token]);
 
   const loginWithCredentials = ({ email, password }) =>
     apiLogin({ email, password })
-      .then(({ token: t, user: u }) => {
-        if (t) {
-          localStorage.setItem("token", t);
-          setToken(t);
+      .then(({ token: jwt, user: u }) => {
+        if (jwt) {
+          localStorage.setItem("token", jwt);
+          setToken(jwt);
         }
         setUser(u ?? null);
-        toast.success(t('Signed in') || 'Signed in');
+        setLoading(false);
+        toast.success(t("Signed in") || "Signed in");
         return true;
       })
       .catch((e) => {
-        errorHandler(e, t('Login failed') || 'Login failed');
+        errorHandler(e, t("Login failed") || "Login failed");
         return false;
       });
 
@@ -85,7 +86,7 @@ function AuthProvider({ children }) {
         localStorage.removeItem("token");
         setToken(null);
         setUser(null);
-        toast.success(t('Logged out') || 'Logged out');
+        toast.success(t("Logged out") || "Logged out");
       });
 
   const value = useMemo(

@@ -29,8 +29,9 @@ body {
   --n: #DCD0A8;           /* Navbar background */
   --nc: #004030;          /* Navbar text */
 
-  --a: #004030;           /* Footer background */
-  --ac: #FFF9E5;          /* Footer text */
+  /* Footer: match navbar */
+  --a: var(--n);          /* Footer background */
+  --ac: var(--nc);        /* Footer text */
 }
 /* ================================
    DARK THEME COLORS
@@ -43,10 +44,11 @@ body {
   --bc: #FFF9E5;          /* Main text */
 
   --n: #004030;           /* Navbar */
-  --nc: #FFF9E5;
+  --nc: #FFF9E5;          /* Navbar text */
 
-  --a: #DCD0A8;           /* Footer */
-  --ac: #004030;
+  /* Footer: match navbar */
+  --a: var(--n);          /* Footer */
+  --ac: var(--nc);
 }
 
 /* ================================

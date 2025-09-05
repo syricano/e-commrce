@@ -204,10 +204,11 @@ const start = async () => {
     await sequelize.authenticate();
     console.log('✅ DB connection OK.');
 
+    // Always register model associations regardless of migration strategy
+    applyAssociations();
+
     if (process.env.SYNC_ALTER === '1' && process.env.NODE_ENV !== 'production') {
       console.warn('⚠ SYNC_ALTER enabled. Running sequelize.sync({ alter: true }) for development.');
-
-      applyAssociations();
 
       // REPLACED: ensure sync emits SQL loudly
       await sequelize.sync({
@@ -222,8 +223,11 @@ const start = async () => {
         console.log(tables);
       } catch {}
       console.log('✅ sync(alter) completed.');
-    } else {
+    } else if (process.env.RUN_MIGRATIONS_ON_START === '1') {
+      console.log('▶ RUN_MIGRATIONS_ON_START=1 → applying migrations at startup');
       await runMigrations();
+    } else {
+      console.log('⚠ Skipping migrations on start. Use `npm run migrations` to apply schema changes.');
     }
 
     startExpireReservedJob();

@@ -37,6 +37,12 @@ export const adminReviewReport = (id, payload) =>
 export const adminAssignCommission = (storeId, payload) =>
   asyncHandler(() => axiosInstance.put(`/admin/stores/${storeId}/commission`, payload), 'Failed to set commission')();
 
+// Seller (C2C) checkout settings
+export const adminGetSellerSettings = (userId) =>
+  asyncHandler(() => axiosInstance.get(`/admin/users/${userId}/seller-settings`), 'Failed to load seller settings')();
+export const adminUpdateSellerSettings = (userId, payload) =>
+  asyncHandler(() => axiosInstance.put(`/admin/users/${userId}/seller-settings`, payload), 'Failed to update seller settings')();
+
 // Payouts
 export const adminUpdatePayoutStatus = (id, payload) =>
   asyncHandler(() => axiosInstance.put(`/admin/payouts/${id}/status`, payload), 'Failed to update payout')();

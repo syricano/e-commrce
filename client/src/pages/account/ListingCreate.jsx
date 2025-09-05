@@ -9,7 +9,7 @@ import { COUNTRIES, CITIES_BY_COUNTRY } from '@/services/geo';
 import usePageTitle from '@/hooks/usePageTitle';
 import { slugify } from '@/utils/strings';
 
-const CURRENCIES = ['EUR','USD','GBP','AED','SAR'];
+const CURRENCIES = ['SYP','EUR','USD','GBP','AED','SAR'];
 const CONDITIONS = ['new','used','refurbished'];
 
 

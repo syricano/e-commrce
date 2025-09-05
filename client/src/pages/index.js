@@ -13,6 +13,7 @@ import Stores from './outlet/Stores.jsx'
 import StoreDetail from './outlet/StoreDetail.jsx'
 import ListingDetail from './outlet/ListingDetail.jsx'
 import Collections from './outlet/Collections.jsx'
+import ManageCollectionItems from './admin/ManageCollectionItems.jsx'
 import DealsPage from './outlet/DealsPage.jsx'
 import SearchResults from './outlet/SearchResults.jsx'
 
@@ -30,15 +31,21 @@ import ManageListingPromotions from './admin/ManageListingPromotions.jsx';
 import ManageReports from './admin/ManageReports.jsx';
 import ManagePartnerRequests from './admin/ManagePartnerRequests.jsx';
 import ManageInvoices from './admin/ManageInvoices.jsx';
+import ManageSellerSettings from './admin/ManageSellerSettings.jsx';
+import ManageStoreSettings from './admin/ManageStoreSettings.jsx';
+import ManageOrders from './admin/ManageOrders.jsx';
 import MerchantDashboard from './merchant/Dashboard.jsx';
 import StoreCategories from './merchant/StoreCategories.jsx';
 import StoreProducts from './merchant/StoreProducts.jsx';
 import StoreOffers from './merchant/StoreOffers.jsx';
 import StoreShipping from './merchant/StoreShipping.jsx';
 import StorePayment from './merchant/StorePayment.jsx';
+import StorePickup from './merchant/StorePickup.jsx';
 import StoreAssets from './merchant/StoreAssets.jsx';
 import StoreInvoices from './merchant/StoreInvoices.jsx';
 import StoreHelp from './merchant/StoreHelp.jsx';
+import StoreOfferDetail from './offers/StoreOfferDetail'
+import OfferDetail from './outlet/OfferDetail'
 
 import Profile from './account/Profile.jsx';
 import MyOrders from './account/MyOrders.jsx';
@@ -46,6 +53,11 @@ import OrderDetail from './account/OrderDetail.jsx';
 import MyListings from './account/MyListings.jsx';
 import ListingCreate from './account/ListingCreate.jsx';
 import Messages from './account/Messages.jsx';
+
+// Cart
+import CartPage from './cart/CartPage.jsx';
+import Checkout from './cart/Checkout.jsx';
+import CheckoutSuccess from './cart/CheckoutSuccess.jsx';
 
 export {
   // Public
@@ -62,6 +74,7 @@ export {
   StoreDetail,
   ListingDetail,
   Collections,
+  ManageCollectionItems ,
   DealsPage,
   SearchResults,
 
@@ -89,13 +102,24 @@ export {
   ManageReports,
   ManagePartnerRequests,
   ManageInvoices,
+  ManageSellerSettings,
+  ManageStoreSettings,
+  ManageOrders,
   MerchantDashboard,
   StoreCategories,
   StoreProducts,
   StoreOffers,
   StoreShipping,
   StorePayment,
+  StorePickup,
   StoreAssets,
   StoreInvoices,
   StoreHelp,
+  StoreOfferDetail,
+  OfferDetail,
+
+  //cart
+  CartPage,
+  Checkout,
+  CheckoutSuccess
 };

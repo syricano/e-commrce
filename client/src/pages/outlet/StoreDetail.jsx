@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '@/config/axiosConfig';
 import usePageTitle from '@/hooks/usePageTitle';
+import { formatMoneyMajor } from '@/utils/money';
 import { useLang } from '@/context/LangProvider';
 import Spinner from '@/components/UI/Spinner.jsx';
 
@@ -34,6 +35,8 @@ export default function StoreDetail() {
     return () => { alive = false; };
   }, [id]);
 
+  const toMoney = (amount, cur) => formatMoneyMajor(cur, amount);
+
   return (
     <section className="p-4 max-w-screen-2xl mx-auto">
       {loading && <Spinner size={32} />}
@@ -56,11 +59,11 @@ export default function StoreDetail() {
                   <div className="opacity-70 text-sm">
                     {o.compareAtAmount ? (
                       <>
-                        <span className="line-through opacity-60 mr-1">{o.compareAtAmount} {o.currency}</span>
-                        <span>{o.priceAmount} {o.currency}</span>
+                        <span className="line-through opacity-60 mr-1">{toMoney(o.compareAtAmount, o.currency)}</span>
+                        <span>{toMoney(o.priceAmount, o.currency)}</span>
                       </>
                     ) : (
-                      <span>{o.priceAmount} {o.currency}</span>
+                      <span>{toMoney(o.priceAmount, o.currency)}</span>
                     )}
                   </div>
                 </div>

@@ -2,33 +2,36 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context";
 import { useLang } from "@/context/LangProvider";
+import useIsMobile from "@/hooks/useIsMobile";
 
 function AccountMenu() {
   const nav = useNavigate();
-  const { isAuthenticated, user, logout } = useAuth() || {};
-  const { t } = useLang();
+  const { isAuthenticated, user, logout, loading } = useAuth() || {};
+  const { t, lang } = useLang();
   const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile(1024);
 
-  if (!isAuthenticated) {
-    return (
-      <button className="btn btn-ghost btn-circle btn-sm" aria-label="profile" onClick={() => nav("/signin")}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeWidth="2" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm7 9a7 7 0 0 0-14 0Z"/></svg>
-      </button>
-    );
-  }
+  const handleClick = () => {
+    if (loading) return; // avoid redirect while auth is bootstrapping
+    if (!isAuthenticated) return nav('/signin');
+    setOpen(v => !v);
+  };
 
   const go = (path) => { setOpen(false); nav(path); };
   const isAdmin = user?.role === "admin" || user?.role === "staff";
   const isMerchant = user?.role === 'seller' || user?.role === 'staff';
 
+  // Alignment: desktop only
+  const alignClass = !isMobile ? (lang === 'ar' ? 'left-0' : 'right-0') : '';
+
   return (
-    <div className="dropdown dropdown-end">
-      <button className="btn btn-ghost btn-circle btn-sm" aria-label="profile" onClick={() => setOpen(v => !v)}>
+    <div className="dropdown">
+      <button className="btn btn-ghost btn-circle btn-sm" aria-label="profile" onClick={handleClick} aria-busy={loading}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeWidth="2" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm7 9a7 7 0 0 0-14 0Z"/></svg>
       </button>
 
-      {open && (
-        <ul className="menu dropdown-content mt-2 w-60 bg-base-100 p-2 shadow rounded-box z-50">
+      {isAuthenticated && open && (
+        <ul className={`menu dropdown-content mt-2 w-60 bg-base-100 p-2 shadow rounded-box z-50 ${alignClass}`}>
           <li className="px-3 py-2 text-sm opacity-70 truncate">{user?.email || t("profile")}</li>
 
           <li><button onClick={() => go("/account/profile")}>{t("profile") || "Profile"}</button></li>

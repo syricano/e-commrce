@@ -9,6 +9,8 @@ const CartItem = sequelize.define('CartItem', {
   offerId: { type: DataTypes.BIGINT, allowNull: true },
   // Merchant store offer (nullable when using offerId)
   storeOfferId: { type: DataTypes.BIGINT, allowNull: true },
+  // C2C listing (nullable when using offerId/storeOfferId)
+  listingId: { type: DataTypes.BIGINT, allowNull: true },
   quantity: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
   unitPriceAmount: { type: DataTypes.INTEGER, allowNull: false },
 }, {
@@ -27,6 +29,11 @@ const CartItem = sequelize.define('CartItem', {
       unique: true,
       fields: ['cartId', 'storeOfferId'],
       where: { deleted_at: null, store_offer_id: { [Op.ne]: null } },
+    },
+    {
+      unique: true,
+      fields: ['cartId', 'listingId'],
+      where: { deleted_at: null, listing_id: { [Op.ne]: null } },
     },
   ],
 });

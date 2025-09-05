@@ -14,6 +14,7 @@
     "migrations:status": "npm run migrations -- status",
 
     "seed:categories": "node --env-file=.env scripts/seed-categories.js",
+    "seed:collections": "node --env-file=.env scripts/seed-collections.js",
     "fix:translations": "node --env-file=.env scripts/fix-translations.js"
   },
   "keywords": [],

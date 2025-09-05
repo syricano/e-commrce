@@ -174,6 +174,68 @@ export const inventorySchema = z.object({
   backorderPolicy: z.enum(['deny','allow']).default('deny')
 });
 
+// ===== Merchant Settings: Shipping & Payments =====
+const timeWindow = z.object({ day: z.number().int().min(0).max(6), start: z.string().regex(/^\d{2}:\d{2}$/), end: z.string().regex(/^\d{2}:\d{2}$/) });
+const pickupAddress = z.object({
+  id: z.string().max(40).optional(),
+  label: z.record(z.string()).optional(),
+  name: z.string().max(120).optional(),
+  address1: z.string().max(255),
+  address2: z.string().max(255).optional(),
+  city: z.string().max(120),
+  country: z.string().length(2),
+  lat: z.number().optional(),
+  lng: z.number().optional(),
+  notes: z.record(z.string()).optional(),
+});
+const pickupPoint = z.object({ id: z.string().max(80), name: z.string().max(160), provider: z.string().max(40).optional(), notes: z.record(z.string()).optional() });
+const shippingMethod = z.object({
+  id: z.string().max(40),
+  name: z.record(z.string()),
+  flatAmount: minorAmount.default(0),
+  perItemAmount: minorAmount.default(0),
+  freeThresholdAmount: minorAmount.optional(),
+  currency: currency.default('EUR'),
+  etaDaysMin: z.number().int().nonnegative().optional(),
+  etaDaysMax: z.number().int().nonnegative().optional(),
+});
+const shippingZone = z.object({
+  id: z.string().max(40),
+  name: z.record(z.string()),
+  countries: z.array(z.string().length(2)).default([]),
+  cities: z.array(z.string().max(120)).default([]),
+  methods: z.array(shippingMethod).default([]),
+});
+
+export const shippingOptionsSchema = z.object({
+  pickupEnabled: bool.default(true),
+  shippingEnabled: bool.default(true),
+  pickupAddresses: z.array(pickupAddress).default([]),
+  pickupPoints: z.array(pickupPoint).default([]),
+  pickupTimes: z.array(timeWindow).default([]),
+  boxes: z.array(z.object({ id: z.string().max(40), name: z.record(z.string()), lengthMm: intPos.optional(), widthMm: intPos.optional(), heightMm: intPos.optional(), maxWeightGrams: intPos.optional(), extraAmount: minorAmount.default(0) })).default([]),
+  zones: z.array(shippingZone).default([]),
+});
+
+export const preferredPaymentsSchema = z.object({
+  methods: z.array(z.enum(['cod','bank_transfer','card','paypal'])).default(['cod','bank_transfer']),
+  cod: z.object({ enabled: bool.default(true), feeAmount: minorAmount.default(0), currency: currency.default('EUR') }).default({}),
+  bankTransfer: z.object({ enabled: bool.default(false), bankName: z.string().max(120).optional(), accountHolder: z.string().max(160).optional(), iban: z.string().max(64).optional(), swift: z.string().max(64).optional(), instructions: z.record(z.string()).optional() }).default({}),
+  card: z.object({ enabled: bool.default(false), provider: z.enum(['stripe','adyen','manual']).default('manual'), publicKey: z.string().max(256).optional(), instructions: z.record(z.string()).optional() }).default({}),
+  paypal: z.object({ enabled: bool.default(false), merchantId: z.string().max(64).optional(), email: z.string().email().max(320).optional(), sandbox: bool.default(true) }).default({}),
+});
+
+export const merchantSettingsSchema = z.object({
+  shippingOptions: shippingOptionsSchema.optional(),
+  preferredPayments: preferredPaymentsSchema.optional(),
+});
+
+// Admin: update seller (C2C) settings
+export const adminSellerSettingsSchema = z.object({
+  shippingOptions: shippingOptionsSchema.optional(),
+  preferredPayments: preferredPaymentsSchema.optional(),
+});
+
 // ===== Cart + CartItem =====
 export const cartSchema = z.object({
   userId: bigId.optional(),
@@ -189,10 +251,15 @@ export const cartSchema = z.object({
 
 export const cartItemSchema = z.object({
   cartId: bigId,
-  offerId: bigId,
+  offerId: bigId.optional(),
+  storeOfferId: bigId.optional(),
+  listingId: bigId.optional(),
   quantity: intPos.min(1),
   unitPriceAmount: minorAmount
-});
+}).refine((d) => {
+  const keys = [d.offerId, d.storeOfferId, d.listingId].filter((v) => v != null);
+  return keys.length === 1;
+}, { message: 'Exactly one of offerId, storeOfferId, listingId is required' });
 
 // ===== Order + OrderItem =====
 export const paymentStatusEnum = z.enum(['unpaid','paid','refunded','partial_refund']);
@@ -214,14 +281,19 @@ export const orderSchema = z.object({
 
 export const orderItemSchema = z.object({
   orderId: bigId,
-  offerId: bigId,
-  storeId: bigId,
+  offerId: bigId.optional(),
+  storeOfferId: bigId.optional(),
+  listingId: bigId.optional(),
+  storeId: bigId.optional(),
   productSnapshotName: stringOpt(255),
   snapshotLocale: locale.default('ar'),
   unitPriceAmount: minorAmount,
   quantity: intPos.min(1),
   taxRatePct: z.number().min(0).max(100).default(0)
-});
+}).refine(d => {
+  const keys = [d.offerId, d.storeOfferId, d.listingId].filter((v) => v != null);
+  return keys.length === 1;
+}, { message: 'Exactly one of offerId, storeOfferId, listingId is required' });
 
 // ===== Shipment =====
 export const shipmentStatus = z.enum(['pending','shipped','delivered','lost','returned']);

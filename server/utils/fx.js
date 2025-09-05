@@ -12,12 +12,12 @@ const fxRates = {
   AED: 3.67,
 };
 
-export function convertMinor(amountMinor, from = 'EUR', to = 'EUR') {
-  const amt = Math.max(0, Math.round(Number(amountMinor) || 0));
+export function convertAmount(amountMajor, from = 'EUR', to = 'EUR') {
+  const amt = Math.max(0, Math.round(Number(amountMajor) || 0));
   const f = fxRates[from] ?? 1.0;
   const t = fxRates[to] ?? 1.0;
   if (from === to) return amt;
-  // convert to base (EUR), then to target; keep integer minor units
+  // convert to base (EUR), then to target; keep integer major units (no cents)
   const inEur = amt / (f || 1);
   return Math.max(0, Math.round(inEur * (t || 1)));
 }
@@ -56,4 +56,4 @@ export function getRequestCurrency(req) {
   return 'EUR';
 }
 
-export default { allowedCurrencies, convertMinor, defaultCurrencyForLocale, getRequestCurrency };
+export default { allowedCurrencies, convertAmount, defaultCurrencyForLocale, getRequestCurrency };

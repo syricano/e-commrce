@@ -10,7 +10,7 @@ const toNum = (v) => {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
 };
-const money = (v) => Math.max(0, Math.round(toNum(v)));
+const money = (v) => Math.max(0, Math.round(toNum(v))); // integer major units (no cents)
 
 export default function StoreOffers() {
   const { id } = useParams();
@@ -22,9 +22,9 @@ export default function StoreOffers() {
   const [offers, setOffers] = useState([]);
   const [f, setF] = useState({
     storeProductId: '',
-    compareAtAmount: '',
+    compareAtAmount: '', // major units in the form (e.g. "150")
     discountPct: 10,
-    priceAmount: '',
+    priceAmount: '',     // major units in the form (e.g. "135")
     currency: 'EUR',
     stockOnHand: 0,
   });
@@ -58,7 +58,7 @@ export default function StoreOffers() {
       const pid = o?.product?.id ?? o?.storeProductId;
       if (!pid) continue;
       const cur = by.get(pid);
-      if (!cur || o.id > cur.id) by.set(pid, o);
+      if (!cur || Number(o.id) > Number(cur.id)) by.set(pid, o);
     }
     return by;
   }, [offers]);
@@ -67,6 +67,7 @@ export default function StoreOffers() {
   const baseFromProduct = (pid) => {
     const p = products.find((x) => Number(x.id) === Number(pid));
     if (!p) return 0;
+    // this attribute is assumed to be in MAJOR units in your data model
     const cand = toNum(p?.attributes?.base_price ?? p?.attributes?.price ?? 0);
     return cand > 0 ? cand : 0;
   };
@@ -75,22 +76,26 @@ export default function StoreOffers() {
     return Number.isFinite(Number(p?.stockOnHand)) ? toNum(p?.stockOnHand) : 0;
   };
 
-  const calcPrice = (base, pct) => {
-    const b = toNum(base);
+  const calcPrice = (baseMajor, pct) => {
+    const b = toNum(baseMajor);
     const d = Number(pct) || 0;
     if (b <= 0) return '';
-    return String(money(b * (1 - d / 100)));
+    return String(money(b * (1 - d / 100))); // keep MAJOR in the form
   };
 
-  // Autofill original price and stock whenever product changes or data refreshes
+  // Autofill original price (MAJOR) and stock whenever product changes or data refreshes
   useEffect(() => {
     const pid = Number(f.storeProductId);
     if (!pid) return;
 
     const last = lastByProduct.get(pid) || null;
-    const base =
-      toNum(last?.compareAtAmount) ||
-      toNum(last?.priceAmount) ||
+    // last.* amounts in DB are MINOR; convert to MAJOR for the form
+    const lastCompareMajor = toNum(last?.compareAtAmount);
+    const lastPriceMajor   = toNum(last?.priceAmount);
+
+    const baseMajor =
+      (lastCompareMajor > 0 ? lastCompareMajor : 0) ||
+      (lastPriceMajor > 0 ? lastPriceMajor : 0) ||
       baseFromProduct(pid) ||
       0;
 
@@ -100,13 +105,12 @@ export default function StoreOffers() {
 
     const next = {
       ...f,
-      compareAtAmount: base > 0 ? String(base) : '',
+      compareAtAmount: baseMajor > 0 ? String(baseMajor) : '',
       stockOnHand: stock,
     };
 
-    if (!priceTouched) next.priceAmount = calcPrice(base, f.discountPct);
+    if (!priceTouched) next.priceAmount = calcPrice(baseMajor, f.discountPct);
 
-    // Avoid noise updates
     const changed =
       next.compareAtAmount !== f.compareAtAmount ||
       next.stockOnHand !== f.stockOnHand ||
@@ -116,11 +120,11 @@ export default function StoreOffers() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [f.storeProductId, offers, products]);
 
-  // If discount changes and user did not touch price, recompute final price
+  // If discount changes and user did not touch price, recompute final price (MAJOR)
   useEffect(() => {
     if (priceTouched) return;
-    const base = toNum(f.compareAtAmount);
-    const recomputed = calcPrice(base, f.discountPct);
+    const baseMajor = toNum(f.compareAtAmount);
+    const recomputed = calcPrice(baseMajor, f.discountPct);
     if (recomputed !== f.priceAmount) {
       setF((s) => ({ ...s, priceAmount: recomputed }));
     }
@@ -128,15 +132,16 @@ export default function StoreOffers() {
   }, [f.discountPct, f.compareAtAmount, priceTouched]);
 
   const onCreate = async () => {
-    const base = toNum(f.compareAtAmount);
-    const price = toNum(f.priceAmount);
+    const baseMajor = toNum(f.compareAtAmount);
+    const priceMajor = toNum(f.priceAmount);
     const pid = Number(f.storeProductId);
-    if (!pid || base <= 0 || price < 0) return;
+    if (!pid || baseMajor <= 0 || priceMajor < 0) return;
 
     const payload = {
       storeProductId: pid,
-      compareAtAmount: money(base),
-      priceAmount: money(price),
+      // Save MAJOR units to API/DB
+      compareAtAmount: money(baseMajor),
+      priceAmount: money(priceMajor),
       currency: f.currency || 'EUR',
       stockOnHand: toNum(f.stockOnHand),
     };
@@ -191,7 +196,7 @@ export default function StoreOffers() {
           </label>
 
           {/* Product */}
-          <label className="form-control md:col-span-2">
+          <label className="form-control md:grid-cols-subgrid md:col-span-2">
             <span className="label-text">{t('Product') || 'Product'}</span>
             <select
               className="select select-bordered"
@@ -212,7 +217,7 @@ export default function StoreOffers() {
             </select>
           </label>
 
-          {/* Original Price */}
+          {/* Original Price (MAJOR) */}
           <label className="form-control">
             <span className="label-text">
               {t('Original Price') || 'Original Price'}
@@ -221,6 +226,7 @@ export default function StoreOffers() {
               className="input input-bordered"
               type="number"
               min="0"
+              step="0.01"
               value={f.compareAtAmount}
               onChange={(e) =>
                 setF((s) => ({ ...s, compareAtAmount: e.target.value }))
@@ -228,13 +234,14 @@ export default function StoreOffers() {
             />
           </label>
 
-          {/* Final Price */}
+          {/* Final Price (MAJOR) */}
           <label className="form-control">
             <span className="label-text">{t('Final Price') || 'Final Price'}</span>
             <input
               className="input input-bordered"
               type="number"
               min="0"
+              step="0.01"
               value={f.priceAmount}
               onChange={(e) => {
                 setPriceTouched(true);
@@ -251,7 +258,7 @@ export default function StoreOffers() {
               value={f.currency}
               onChange={(e) => setF((s) => ({ ...s, currency: e.target.value }))}
             >
-              {['EUR', 'USD', 'GBP', 'AED', 'SAR'].map((c) => (
+              {['SYP', 'EUR', 'USD', 'GBP', 'AED', 'SAR'].map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -306,8 +313,8 @@ export default function StoreOffers() {
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="opacity-70 text-sm">
-                      {o.priceAmount} {o.currency} • {t('Stock') || 'Stock'}{' '}
-                      {o.stockOnHand}
+                      {/* show MAJOR units */}
+                      {Number(o.priceAmount || 0).toFixed(2)} {o.currency} • {t('Stock') || 'Stock'} {o.stockOnHand}
                     </div>
                     <button
                       type="button"

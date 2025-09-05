@@ -4,9 +4,10 @@ import Cart from '../models/Cart.js';
 import CartItem from '../models/CartItem.js';
 import Offer from '../models/Offer.js';
 import StoreOffer from '../models/StoreOffer.js';
+import Listing from '../models/Listing.js';
 import StoreProduct from '../models/StoreProduct.js';
 import StoreProductMedia from '../models/StoreProductMedia.js';
-import { allowedCurrencies, convertMinor } from '../utils/fx.js';
+import { allowedCurrencies, convertAmount } from '../utils/fx.js';
 import { displayAmounts } from '../utils/pricing.js';
 
 // legacy admin CRUD remains exported from crudFactory via default import file
@@ -21,8 +22,8 @@ export const deleteCart = deleteById(Cart);
 // Helpers
 function mapItemsForDisplay(cartCurrency, rows) {
   return rows.map((r) => {
-    const baseCurrency = r.offer?.currency || r.storeOffer?.currency || cartCurrency;
-    const disp = displayAmounts({ unitMinor: r.unitPriceAmount || 0, baseCurrency, targetCurrency: cartCurrency, qty: r.quantity || 0 });
+    const baseCurrency = r.offer?.currency || r.storeOffer?.currency || r.listing?.currency || cartCurrency;
+    const disp = displayAmounts({ unitAmount: r.unitPriceAmount || 0, baseCurrency, targetCurrency: cartCurrency, qty: r.quantity || 0 });
     return { ...r.toJSON(), display: disp };
   });
 }
@@ -48,6 +49,7 @@ async function hydrate(cartId) {
           },
         ],
       },
+      { model: Listing, as: 'listing' },
     ],
   });
 
@@ -99,7 +101,7 @@ export const updateCurrentCart = asyncHandler(async (req, res) => {
   let itemsSubtotalAmount = 0;
   for (const r of rows) {
     const baseCurrency = r.offer?.currency || r.storeOffer?.currency || next;
-    const unitInCart = convertMinor(r.unitPriceAmount || 0, baseCurrency, next);
+    const unitInCart = convertAmount(r.unitPriceAmount || 0, baseCurrency, next);
     itemsSubtotalAmount += unitInCart * (r.quantity || 0);
   }
 

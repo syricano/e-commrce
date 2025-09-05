@@ -25,7 +25,9 @@ async function mergeCarts(fromId, toId) {
     const where =
       it.offerId != null
         ? { cartId: toId, offerId: it.offerId }
-        : { cartId: toId, storeOfferId: it.storeOfferId };
+        : it.storeOfferId != null
+        ? { cartId: toId, storeOfferId: it.storeOfferId }
+        : { cartId: toId, listingId: it.listingId };
     // Manual upsert with paranoid: false to avoid unique conflicts with soft-deleted rows
     let row = await CartItem.findOne({ where, paranoid: false });
     if (!row) {

@@ -1,4 +1,3 @@
-// client/src/App.jsx
 import { Routes, Route ,Navigate  } from 'react-router-dom'
 import {
   // Public
@@ -10,13 +9,15 @@ import {
   // Admin
   Dashboard,
   ManageUsers, ManageStores, ManageProducts, ManageCategories,
-  ManageCollections, ManageMedia, ManageListings, ManageListingOffers,
+  ManageCollections, ManageCollectionItems ,ManageMedia, ManageListings, ManageListingOffers,
   ManageListingPromotions, ManageReports, ManagePartnerRequests, ManageInvoices,
   MerchantDashboard,
   StoreCategories, StoreProducts, StoreOffers,
-  StoreShipping, StorePayment, StoreAssets, StoreInvoices, StoreHelp,
+  StoreShipping, StorePayment, StoreAssets, StoreInvoices, StoreHelp, CartPage, OfferDetail, StoreOfferDetail, Checkout, CheckoutSuccess, StorePickup,
+  ManageSellerSettings, ManageOrders, ManageStoreSettings
 } from '@/pages'
 import { ProtectedLayout, RootLayout, AccountLayout ,AdminLayout } from '@/layouts'
+
 
 function App() {
   return (
@@ -33,7 +34,14 @@ function App() {
         <Route path="stores/:id" element={<StoreDetail />} />
         <Route path="collections" element={<Collections />} />
         <Route path="deals" element={<DealsPage />} />
+        <Route path="cart" element={<CartPage />} />
+        <Route path="checkout" element={<Checkout />} />
+        <Route path="checkout/success" element={<CheckoutSuccess />} />
         <Route path="search" element={<SearchResults />} />
+
+        {/* NEW: offer detail routes */}
+        <Route path="offers/:id" element={<OfferDetail />} />            {/* B2C offer */}
+        <Route path="offers/store/:id" element={<StoreOfferDetail />} /> {/* Store offer */}
 
         {/* Auth */}
         <Route path="signin" element={<Signin />} />
@@ -51,7 +59,7 @@ function App() {
           <Route path="merchant/store/:id/products" element={<StoreProducts />} />
           <Route path="merchant/store/:id/offers" element={<StoreOffers />} />
           <Route path="merchant/store/:id/shipping" element={<StoreShipping />} />
-          <Route path="merchant/store/:id/pickup" element={<StoreShipping />} />
+          <Route path="merchant/store/:id/pickup" element={<StorePickup />} />
           <Route path="merchant/store/:id/payment" element={<StorePayment />} />
           <Route path="merchant/store/:id/invoices" element={<StoreInvoices />} />
           <Route path="merchant/store/:id/assets" element={<StoreAssets />} />
@@ -79,14 +87,18 @@ function App() {
             <Route path="products" element={<ManageProducts />} />
             <Route path="categories" element={<ManageCategories />} />
             <Route path="collections" element={<ManageCollections />} />
+            <Route path="collection-items" element={ <ManageCollectionItems /> } />
             <Route path="media" element={<ManageMedia />} />
             <Route path="listings" element={<ManageListings />} />
             <Route path="listing-offers" element={<ManageListingOffers />} />
             <Route path="listing-promotions" element={<ManageListingPromotions />} />
-          <Route path="reports" element={<ManageReports />} />
-          <Route path="partner-requests" element={<ManagePartnerRequests />} />
-          <Route path="invoices" element={<ManageInvoices />} />
-        </Route>
+            <Route path="reports" element={<ManageReports />} />
+            <Route path="partner-requests" element={<ManagePartnerRequests />} />
+            <Route path="invoices" element={<ManageInvoices />} />
+            <Route path="orders" element={<ManageOrders />} />
+            <Route path="seller-settings" element={<ManageSellerSettings />} />
+            <Route path="store-settings" element={<ManageStoreSettings />} />
+          </Route>
         </Route>
 
         {/* 404 */}

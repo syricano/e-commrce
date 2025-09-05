@@ -14,7 +14,10 @@ export default function useSignup() {
   const submit = (payload) => {
     setLoading(true);
     return apiRegister(payload)
-      .then(() => {
+      .then(({ token, user }) => {
+        if (token) {
+          try { localStorage.setItem('token', token); } catch {}
+        }
         toast.success(t('Account created') || 'Account created');
         nav("/", { replace: true });
       })

@@ -17,7 +17,9 @@ export default function MerchantDashboard() {
     const load = async () => {
       setLoading(true);
       try {
-        const res = await axiosInstance.get('/stores', { params: { ownerUserId: user?.id, limit: 100 } });
+        const isAdmin = user?.role === 'admin' || user?.role === 'staff';
+        const params = isAdmin ? { limit: 200 } : { ownerUserId: user?.id, limit: 100 };
+        const res = await axiosInstance.get('/stores', { params });
         const rows = res?.data?.items || res?.data || [];
         if (alive) setStores(Array.isArray(rows) ? rows : []);
       } catch {}

@@ -17,6 +17,8 @@ import {
   searchUsers,
   updateUserRoleStatus,
   suspendUser,
+  getSellerSettings,
+  updateSellerSettings,
 } from '../controllers/adminController.js';
 import {
   updateUserByAdmin,
@@ -43,6 +45,10 @@ adminRouter.put('/users/:id/role-status', validate.body(adminUserRoleStatusSchem
 adminRouter.post('/users/:id/suspend', suspendUser);
 adminRouter.put('/users/:id', validate.body(adminUserUpdateSchema), updateUserByAdmin);
 adminRouter.delete('/users/:id', deleteUserByAdmin);
+
+// Seller (C2C) checkout settings
+adminRouter.get('/users/:id/seller-settings', getSellerSettings);
+adminRouter.put('/users/:id/seller-settings', updateSellerSettings);
 
 // Products moderation
 adminRouter.post('/products/:id/moderate', validate.body(adminModerateProductSchema), moderateProduct);

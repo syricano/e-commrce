@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { formatMoneyMajor } from '@/utils/money';
 import { Link, useParams } from 'react-router-dom';
 import axiosInstance from '@/config/axiosConfig';
 import usePageTitle from '@/hooks/usePageTitle';
@@ -59,7 +60,7 @@ export default function CategoryBrowse() {
             <Link key={l.id} to={`/listings/${l.id}`} className="card bg-base-100 border hover:shadow">
               <div className="card-body p-3">
                 <div className="font-semibold truncate">{titleOf(l)}</div>
-                <div className="opacity-70 text-sm">{l.priceAmount} {l.currency}</div>
+                <div className="opacity-70 text-sm">{formatMoneyMajor(l.currency, l.priceAmount)}</div>
               </div>
             </Link>
           ))}
